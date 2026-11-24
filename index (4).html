@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wi-Fi 2.4 GHz bandwidth and band edges · RF Lab</title>
+<link rel="stylesheet" href="../../shared/theme.css">
+<script src="../../manifest.js"></script>
+<script src="../../shared/rfmath.js"></script>
+<script src="../../shared/limits.js"></script>
+<script src="../../shared/rfplot.js"></script>
+<script src="../../shared/rflab.js"></script>
+</head>
+<body>
+<header class="rl-header" id="rl-header"></header>
+<main class="rl-main">
+  <div class="card concept">
+    <h2>Concept</h2>
+    <p>2.4 GHz Wi-Fi is certified under the same §15.247 digital-modulation rules as HaLow: at least 500 kHz of 6 dB bandwidth, up to 1 W conducted, and 8 dBm in any 3 kHz. Every 802.11 mode passes the bandwidth test easily. The hard part is the <b>band edges</b>.</p>
+    <p>Below 2400 MHz, emissions only need to be 20 dB under the in-band peak, until 2390 MHz. Above <b>2483.5 MHz</b> (and below 2390 MHz) is a <b>restricted band</b>, where emissions must meet an absolute field-strength limit of about −41 dBm EIRP per MHz, however strong your signal is. That's why channels 1 and 11 usually ship with reduced power, and channels 12–13 are rarely used in the US.</p>
+  </div>
+
+  <div class="layout" style="margin-top:14px">
+    <section>
+      <div class="card">
+        <div class="tabs"><button id="tabSim" class="on">Simulate</button><button id="tabCsv">Load trace</button></div>
+        <div id="simPane">
+          <label for="mode">802.11 mode</label><select id="mode"></select>
+          <label for="ch">Channel</label><select id="ch"></select>
+          <label for="pwr">Conducted power (dBm)</label>
+          <div class="row"><input type="range" id="pwr" min="0" max="30" step="0.5" value="20"><span class="val" id="pwrV"></span></div>
+          <label for="lin">PA spectral regrowth (shoulder, dBc)</label>
+          <div class="row"><input type="range" id="lin" min="-50" max="-20" step="1" value="-35"><span class="val" id="linV"></span></div>
+          <label for="rbwSim">Analyzer RBW</label>
+          <select id="rbwSim"><option value="100000" selected>100 kHz (6 dB BW, band edge)</option><option value="1000000">1 MHz (restricted band)</option></select>
+          <div class="toolbar"><button id="resweep">Re-sweep</button></div>
+        </div>
+        <div id="csvPane" class="hidden">
+          <label for="file">Trace file (CSV / TXT: frequency, amplitude dBm)</label><input type="file" id="file" accept=".csv,.txt,.dat,.tsv">
+          <label for="paste">…or paste data</label><textarea id="paste" rows="5" placeholder="2462.00, -12.3&#10;2462.03, -12.1&#10;..."></textarea>
+          <label for="units">Frequency units</label>
+          <select id="units"><option value="auto">Auto-detect</option><option value="1">Hz</option><option value="1e3">kHz</option><option value="1e6">MHz</option><option value="1e9">GHz</option></select>
+          <label for="rbwCsv">RBW used for the trace (kHz)</label><input type="number" id="rbwCsv" value="100" step="1" min="0.1">
+          <label for="offset">Reference offset (dB, cable/attenuator loss)</label><input type="number" id="offset" value="0" step="0.1">
+          <div class="toolbar"><button class="primary" id="loadPaste">Load pasted data</button></div>
+          <div class="err" id="csvErr"></div>
+          <div class="hint">Conducted trace at the antenna port. Antenna gain below converts it to EIRP for the restricted-band check.</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Antenna and limits</h3>
+        <label for="gain">Antenna gain (dBi)</label><input type="number" id="gain" value="2" step="0.5">
+        <label for="beLim">Lower band-edge requirement (dBc)</label><select id="beLim"></select>
+        <div class="hint" id="gainNote"></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="card">
+        <div class="plotwrap"><canvas id="cv" role="img" aria-label="2.4 GHz spectrum with band edges, restricted bands and limit lines"></canvas><div class="readout" id="readout"></div></div>
+        <div class="metrics">
+          <div class="m"><div class="l">6 dB bandwidth</div><div class="v" id="mBw">–</div><div class="n" id="mBwN"></div></div>
+          <div class="m"><div class="l">Conducted power vs limit</div><div class="v" id="mPow">–</div><div class="n" id="mPowN"></div></div>
+          <div class="m"><div class="l">Peak PSD (scaled to 3 kHz)</div><div class="v" id="mPsd">–</div><div class="n" id="mPsdN"></div></div>
+          <div class="m"><div class="l">Lower band edge (2390–2400 MHz)</div><div class="v" id="mBe">–</div><div class="n" id="mBeN"></div></div>
+          <div class="m"><div class="l">Restricted band above 2483.5 MHz</div><div class="v" id="mRu">–</div><div class="n" id="mRuN"></div></div>
+          <div class="m"><div class="l">Restricted band below 2390 MHz</div><div class="v" id="mRl">–</div><div class="n" id="mRlN"></div></div>
+        </div>
+        <div class="toolbar"><button id="png">Save plot as PNG</button><button id="copy">Copy results</button><button id="csvOut">Export trace CSV</button><span class="hint" id="copied"></span></div>
+        <details><summary>Method notes</summary><ul class="notes">
+          <li>6 dB bandwidth and PSD follow KDB 558074 (RBW 100 kHz for bandwidth; PSD scaled to 3 kHz from the highest trace point).</li>
+          <li>Restricted-band check: trace level is converted to dBm per 1 MHz (+10·log10(1 MHz ÷ RBW), valid for noise-like emissions), plus antenna gain, giving EIRP. It's compared with 54 dBµV/m at 3 m ≈ −41.2 dBm EIRP (average). The peak limit is 20 dB higher; this tool treats the trace as an average measurement.</li>
+          <li>Labs usually measure band edges radiated with the real antenna, or conducted plus antenna gain as done here (KDB 558074 allows both).</li>
+          <li>Spectral shapes are idealized. The shoulder slider stands in for PA linearity; real margins depend on your PA, filter and power setting.</li>
+        </ul></details>
+      </div>
+      <div class="card" id="exercises"></div>
+    </section>
+  </div>
+  <div class="card" id="rl-regs" style="margin-top:14px"></div>
+</main>
+<footer class="rl-footer" id="rl-footer"></footer>
+
+<script>
+(function () {
+  'use strict';
+  const { $ } = RF.util, M = RF.math, L = RF.limits.fcc.wifi24, G = RF.limits.fcc.generalLimits15209;
+  RF.page.init({ id: 'wifi-24' });
+  const RESTRICT_EIRP = M.fieldDbuvToEirp(G.above960MHz.avgDbuvPerM, G.distanceM); // ≈ −41.2 dBm EIRP (average)
+  const VIEW = { lo: 2370, hi: 2505 };
+
+  const MODES = [
+    { k: '802.11b DSSS (22 MHz)', occ: 10, n: 6, ripple: 0, sw: 2.4, so: 2, shOff: -3, width: 20, chs: null },
+    { k: '802.11g/n/ax 20 MHz OFDM', occ: 17, n: 10, ripple: 1, sw: 1.45, so: 3, width: 20, chs: null },
+    { k: '802.11n/ax 40 MHz OFDM', occ: 36, n: 10, ripple: 1, sw: 1.45, so: 3, width: 40, chs: [3, 4, 5, 6, 7, 8, 9, 10, 11] }
+  ];
+  MODES.forEach((m, i) => $('mode').add(new Option(m.k, i))); $('mode').value = 1;
+  $('beLim').add(new Option(`${L.dts.bandEdgeDbc.peakMethod} dB (peak power method)`, L.dts.bandEdgeDbc.peakMethod));
+  $('beLim').add(new Option(`${L.dts.bandEdgeDbc.averageMethod} dB (average power method)`, L.dts.bandEdgeDbc.averageMethod));
+  const centerOf = (ch, mode) => L.channelsUS.f1MHz + L.channelsUS.stepMHz * (ch - 1);
+
+  function fillChannels() {
+    const m = MODES[+$('mode').value], prev = +$('ch').value || 6, list = m.chs || [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+    $('ch').innerHTML = ''; list.forEach((c) => $('ch').add(new Option(`${c} (${centerOf(c)} MHz${c > L.channelsUS.last ? ', outside US 1–11' : ''})`, c)));
+    $('ch').value = list.includes(prev) ? prev : list[Math.floor(list.length / 2)];
+  }
+  fillChannels();
+
+  const plot = RF.plot.create($('cv'), { readoutEl: $('readout') });
+  let mode = 'sim', seed = 5, trace = null, csvTrace = null, res = null;
+
+  function simulate() {
+    const m = MODES[+$('mode').value], ch = +$('ch').value;
+    const t = M.simulateSignal({ fcMHz: centerOf(ch), occMHz: m.occ, startMHz: VIEW.lo, stopMHz: VIEW.hi, points: 4501, powerDbm: +$('pwr').value,
+      order: m.n, rippleDb: m.ripple, rbwHz: +$('rbwSim').value, noiseDbm: -95 + 10 * Math.log10(+$('rbwSim').value / 1e5), seed: seed * 131 + ch,
+      shoulderDbc: +$('lin').value + (m.shOff || 0), shoulderWidth: m.sw, shoulderOrder: m.so });
+    t.source = `Simulated: ${m.k}, ch ${ch}, ${$('pwr').value} dBm, ${$('gain').value} dBi, RBW ${M.fmtHz(t.rbw)}`;
+    return t;
+  }
+
+  /** EIRP per MHz from a conducted trace point. */
+  const toEirpMHz = (lvl, rbw, gain) => lvl + 10 * Math.log10(1e6 / rbw) + gain;
+
+  function measure(t) {
+    const gain = +$('gain').value || 0, excess = Math.max(0, gain - L.dts.antennaGainRefDbi);
+    const bw = M.nDbBandwidth(t.f, t.a, 6), ob = M.obw(t.f, t.a, 0.99);
+    const inBand = M.maxInRange(t.f, t.a, L.band.loMHz, L.band.hiMHz) || { max: bw.pk };
+    const powLim = L.dts.maxConductedDbm - excess, psdLim = L.dts.psdDbmPer3kHz - excess;
+    const pow = M.channelPower(t.f, t.a, t.rbw, L.band.loMHz, L.band.hiMHz);
+    const be = M.maxInRange(t.f, t.a, L.restrictedBelow.hiMHz, L.band.loMHz);
+    const restrict = (lo, hi) => M.worstMargin(t.f, t.a, (f) => (f >= lo && f <= hi ? RESTRICT_EIRP : null), (v) => toEirpMHz(v, t.rbw, gain));
+    return { gain, excess, bw, ob, pk: inBand.max, powLim, psdLim, pow, psd: M.scaleToBw(inBand.max, t.rbw, 3000),
+      beDbc: be ? inBand.max - be.max : null, beAt: be && be.at,
+      ru: restrict(L.restrictedAbove.loMHz, L.restrictedAbove.hiMHz), rl: restrict(L.restrictedBelow.loMHz, L.restrictedBelow.hiMHz) };
+  }
+
+  const setCard = (id, ok, text, note) => { $(id).textContent = text; $(id).className = 'v ' + (ok === null ? '' : ok ? 'pass' : 'fail'); if (note !== undefined) $(id + 'N').textContent = note; };
+
+  function update() {
+    $('pwrV').textContent = $('pwr').value + ' dBm'; $('linV').textContent = $('lin').value + ' dBc';
+    trace = mode === 'sim' ? simulate() : csvTrace;
+    if (!trace) { res = null; plot.draw({ traces: [], empty: 'Load a trace to begin' }); return; }
+    const r = res = measure(trace), req = +$('beLim').value;
+    $('gainNote').textContent = r.excess > 0 ? `Gain is ${r.excess.toFixed(1)} dB over 6 dBi, so power and PSD limits drop by ${r.excess.toFixed(1)} dB.` : 'Gain at or below 6 dBi: no power reduction.';
+    setCard('mBw', r.bw.bwHz >= L.dts.min6dBBwKHz * 1e3, M.fmtHz(r.bw.bwHz), `99% OBW ${M.fmtHz(r.ob.bwHz)} · minimum ${L.dts.min6dBBwKHz} kHz`);
+    setCard('mPow', r.pow <= r.powLim, r.pow.toFixed(2) + ' dBm', `Limit ${r.powLim.toFixed(1)} dBm · margin ${(r.powLim - r.pow).toFixed(2)} dB`);
+    setCard('mPsd', r.psd <= r.psdLim, r.psd.toFixed(2) + ' dBm', `Limit ${r.psdLim.toFixed(1)} dBm/3 kHz · margin ${(r.psdLim - r.psd).toFixed(2)} dB`);
+    if (r.beDbc === null) setCard('mBe', null, 'n/a', 'Trace does not cover 2390–2400 MHz');
+    else setCard('mBe', r.beDbc >= req, r.beDbc.toFixed(1) + ' dBc', `Need ≥ ${req} dBc below the in-band peak`);
+    const rc = (id, w, name) => w ? setCard(id, w.margin >= 0, (w.margin >= 0 ? '+' : '') + w.margin.toFixed(1) + ' dB', `Worst ${w.level.toFixed(1)} dBm/MHz EIRP at ${w.at.toFixed(1)} MHz vs ${RESTRICT_EIRP.toFixed(1)}`) : setCard(id, null, 'n/a', `Trace does not cover ${name}`);
+    rc('mRu', r.ru, '2483.5–2500 MHz'); rc('mRl', r.rl, '2310–2390 MHz');
+
+    const toTrace = (eirp) => eirp - r.gain - 10 * Math.log10(1e6 / trace.rbw); // restricted limit in trace units
+    const f0 = trace.f[0], f1 = trace.f[trace.f.length - 1];
+    plot.draw({
+      traces: [{ f: trace.f, a: trace.a }], rbw: trace.rbw, xMin: f0, xMax: f1,
+      shades: [{ x0: Math.max(f0, L.restrictedBelow.loMHz), x1: L.restrictedBelow.hiMHz, color: 'limit', alpha: 0.08 }, { x0: L.restrictedAbove.loMHz, x1: Math.min(f1, L.restrictedAbove.hiMHz), color: 'limit', alpha: 0.08 }],
+      vLines: [{ x: L.band.loMHz, label: '2400', color: 'limit', dash: [2, 3] }, { x: L.band.hiMHz, label: '2483.5', color: 'limit', dash: [2, 3] }, { x: r.bw.fL, fromY: r.bw.th }, { x: r.bw.fR, fromY: r.bw.th }],
+      hLines: [{ y: r.pk, label: `Peak ${r.pk.toFixed(1)} dBm` }],
+      segments: [
+        { x0: L.restrictedBelow.hiMHz, x1: L.band.loMHz, y: r.pk - req, color: 'mark', dash: [4, 3], label: `−${req} dBc` },
+        { x0: L.restrictedAbove.loMHz, x1: L.restrictedAbove.hiMHz, y: toTrace(RESTRICT_EIRP), label: 'Restricted (§15.209)' },
+        { x0: Math.max(f0, L.restrictedBelow.loMHz), x1: L.restrictedBelow.hiMHz, y: toTrace(RESTRICT_EIRP), label: 'Restricted' }
+      ],
+      markers: [{ x: r.bw.fL, y: r.bw.th, label: 'M1' }, { x: r.bw.fR, y: r.bw.th, label: 'M2' }]
+    });
+  }
+
+  function setMode(m) { mode = m; $('tabSim').classList.toggle('on', m === 'sim'); $('tabCsv').classList.toggle('on', m === 'csv'); $('simPane').classList.toggle('hidden', m !== 'sim'); $('csvPane').classList.toggle('hidden', m !== 'csv'); update(); }
+  $('tabSim').onclick = () => setMode('sim'); $('tabCsv').onclick = () => setMode('csv');
+  function loadText(text, name) {
+    try { const t = M.parseTrace(text, $('units').value, +$('offset').value || 0); t.rbw = (+$('rbwCsv').value || 100) * 1e3; t.source = 'Trace: ' + name; csvTrace = t; $('csvErr').textContent = ''; update(); }
+    catch (e) { $('csvErr').textContent = e.message; }
+  }
+  const reload = () => { const fl = $('file').files[0]; if ($('paste').value.trim()) loadText($('paste').value, 'pasted data'); else if (fl) { const rd = new FileReader(); rd.onload = () => loadText(rd.result, fl.name); rd.readAsText(fl); } };
+  $('file').onchange = () => { $('paste').value = ''; reload(); };
+  $('loadPaste').onclick = () => loadText($('paste').value, 'pasted data');
+  ['units', 'rbwCsv', 'offset'].forEach((k) => $(k).addEventListener('change', () => { if (mode === 'csv') reload(); }));
+  $('mode').addEventListener('change', () => { fillChannels(); update(); });
+  ['ch', 'pwr', 'lin', 'rbwSim', 'gain', 'beLim'].forEach((k) => { $(k).addEventListener('input', update); $(k).addEventListener('change', update); });
+  $('resweep').onclick = () => { seed++; update(); };
+
+  const resultsText = () => !res ? '' : [trace.source,
+    `6 dB BW ${M.fmtHz(res.bw.bwHz)} · 99% OBW ${M.fmtHz(res.ob.bwHz)} · Power ${res.pow.toFixed(2)} dBm (limit ${res.powLim.toFixed(1)}) · PSD ${res.psd.toFixed(2)} dBm/3 kHz (limit ${res.psdLim.toFixed(1)})`,
+    `Lower edge ${$('mBe').textContent} · Restricted >2483.5 ${$('mRu').textContent} · Restricted <2390 ${$('mRl').textContent}`,
+    `Generated ${new Date().toLocaleString()} · RF Lab`].join('\n');
+  $('png').onclick = () => plot.exportPNG(`wifi24_${RF.util.stamp()}.png`, resultsText().split('\n').slice(0, 3).join('   |   '));
+  $('copy').onclick = async () => { await RF.util.copy(resultsText()); $('copied').textContent = 'Copied'; setTimeout(() => $('copied').textContent = '', 1500); };
+  $('csvOut').onclick = () => { if (!trace) return; let s = 'frequency_MHz,amplitude_dBm\n'; for (let i = 0; i < trace.f.length; i++) s += trace.f[i].toFixed(6) + ',' + trace.a[i].toFixed(3) + '\n'; RF.util.downloadText(`trace_${RF.util.stamp()}.csv`, s); };
+
+  /* ---------- exercises ---------- */
+  const st = () => ({ sim: mode === 'sim', mode: +$('mode').value, ch: +$('ch').value, pwr: +$('pwr').value, gain: +$('gain').value });
+  RF.ex.mount('exercises', 'wifi-24', [
+    { id: 'eirp-conv', type: 'number', title: 'Field strength to EIRP',
+      prompt: 'The restricted-band average limit is 54 dBµV/m measured at 3 m. What EIRP (dBm) does that correspond to?',
+      unit: 'dBm', tol: 0.3, hint: 'EIRP (dBm) = E (dBµV/m) − 104.77 + 20·log10(d). With d = 3 m, the offset is −95.2 dB.',
+      answer: () => M.fieldDbuvToEirp(54, 3), explain: 'About −41 dBm per MHz of EIRP, which is tiny compared with a 20 dBm transmitter only 20 MHz away.' },
+    { id: 'ch11-backoff', type: 'state', title: 'Back off channel 11',
+      prompt: 'Select <b>802.11g/n/ax 20 MHz</b>, <b>channel 11</b>, antenna gain <b>2 dBi</b>, RBW <b>1 MHz</b>, shoulder −35 dBc. Set the highest conducted power (within 1 dB) that still passes the 2483.5 MHz restricted band, then press Check.',
+      hint: 'Restricted-band margin moves dB for dB with power. Read the margin, then lower the power by that much.',
+      check: () => { const s = st(); if (!s.sim || s.mode !== 1 || s.ch !== 11) return { ok: false, msg: 'Select 20 MHz OFDM on channel 11 first.' };
+        if (s.gain !== 2 || +$('rbwSim').value !== 1e6 || +$('lin').value !== -35) return { ok: false, msg: 'Set gain 2 dBi, RBW 1 MHz and shoulder −35 dBc.' };
+        const m = res.ru.margin; if (m < 0) return { ok: false, msg: `Still failing by ${(-m).toFixed(1)} dB. Lower the power.` };
+        if (m > 1.5) return { ok: false, msg: `Passing with ${m.toFixed(1)} dB to spare. You can raise the power.` };
+        return { ok: true, msg: `Channel 11 tops out around ${s.pwr} dBm (margin ${m.toFixed(1)} dB).` }; },
+      explain: 'Edge channels get their own lower power in the certified power table, while middle channels run at full power.' },
+    { id: 'ch13', type: 'state', title: 'Why US products skip channel 13',
+      prompt: 'Keep 20 MHz OFDM at <b>20 dBm</b> and switch to <b>channel 13</b>. Press Check once the restricted-band card fails.',
+      hint: 'Channel 13 is centered at 2472 MHz, only 11.5 MHz from 2483.5 MHz.',
+      check: () => { const s = st(); if (!s.sim || s.ch !== 13) return { ok: false, msg: 'Select channel 13.' }; if (s.pwr !== 20) return { ok: false, msg: 'Set power to 20 dBm.' };
+        return res.ru.margin < 0 ? { ok: true, msg: `It fails by ${(-res.ru.margin).toFixed(1)} dB.` } : { ok: false, msg: 'It is passing; increase the shoulder toward −30 dBc.' }; },
+      explain: 'Channels 12 and 13 sit so close to the restricted band that they need large power back-off, so most US products simply disable them.' },
+    { id: 'edges', type: 'choice', title: 'Two different band edges',
+      prompt: 'Why is the 2483.5 MHz edge much harder to pass than the 2400 MHz edge?',
+      options: ['Above 2483.5 MHz is a restricted band with an absolute field-strength limit; below 2400 MHz only needs to be 20 dB under the in-band peak (down to 2390 MHz)', 'The upper edge is measured with a smaller RBW', 'Channel 11 always transmits at higher power than channel 1', 'The FCC limit is relative to the noise floor at 2483.5 MHz'],
+      answer: 0, explain: 'A relative limit scales with your power; an absolute one does not. Note that below 2390 MHz is restricted too, so channel 1 can also need back-off.' }
+  ]);
+
+  /* ---------- known-answer tests ---------- */
+  RF.test.add('54 dBµV/m at 3 m = −41.2 dBm EIRP', () => RF.test.near(RESTRICT_EIRP, -41.23, 0.05));
+  RF.test.add('Channel 6 center = 2437 MHz', () => RF.test.near(centerOf(6), 2437, 0));
+  RF.test.add('20 MHz OFDM 6 dB BW 15–19 MHz, passes 500 kHz', () => { setMode('sim'); $('mode').value = 1; fillChannels(); $('ch').value = 6; $('pwr').value = 20; $('rbwSim').value = 100000; $('gain').value = 2; $('lin').value = -35; update(); return { ok: res.bw.bwHz > 15e6 && res.bw.bwHz < 19e6, detail: M.fmtHz(res.bw.bwHz) }; });
+  RF.test.add('Conducted power recovers 20 dBm', () => RF.test.near(res.pow, 20, 0.3));
+  RF.test.add('Restricted margin moves 1 dB per dB of power (ch 11)', () => { $('ch').value = 11; $('rbwSim').value = 1e6; update(); const a = res.ru.margin; $('pwr').value = 15; update(); const b = res.ru.margin; $('pwr').value = 20; $('ch').value = 6; $('rbwSim').value = 100000; update(); return RF.test.near(b - a, 5, 0.3); });
+  RF.test.add('Channel 6 at 20 dBm passes both restricted bands', () => ({ ok: res.ru.margin > 0 && res.rl.margin > 0, detail: `${res.ru.margin.toFixed(1)} / ${res.rl.margin.toFixed(1)} dB` }));
+  RF.test.add('Channel 13 at 20 dBm fails 2483.5 MHz', () => { $('ch').value = 13; update(); const r = { ok: res.ru.margin < 0, detail: res.ru.margin.toFixed(1) + ' dB' }; $('ch').value = 6; update(); return r; });
+
+  update();
+})();
+</script>
+</body>
+</html>

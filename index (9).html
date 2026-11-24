@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CBRS power and emission mask · RF Lab</title>
+<link rel="stylesheet" href="../../shared/theme.css">
+<script src="../../manifest.js"></script>
+<script src="../../shared/rfmath.js"></script>
+<script src="../../shared/limits.js"></script>
+<script src="../../shared/rfplot.js"></script>
+<script src="../../shared/rflab.js"></script>
+</head>
+<body>
+<header class="rl-header" id="rl-header"></header>
+<main class="rl-main">
+  <div class="card concept">
+    <h2>Concept</h2>
+    <p>CBRS (3550–3700 MHz) is governed by Part 96, a shared-spectrum service. Devices are certified by <b>class</b>. End user devices (EUDs) are limited to 23 dBm EIRP per 10 MHz. Category A base stations (CBSDs) get 30 dBm per 10 MHz and Category B gets 47 dBm per 10 MHz. Because the limit is a density, a 20 MHz channel may radiate 3 dB more total power than a 10 MHz one.</p>
+    <p>CBSDs are also capped in density: Category A at 20 dBm/MHz and Category B at 37 dBm/MHz. Emissions outside the assigned channel follow a stepped conducted mask. The limit is <b>−13 dBm/MHz</b> within 10 MHz of the channel edge, or within one channel bandwidth for an EUD, and <b>−25 dBm/MHz</b> beyond that. Separately, emissions are capped at −25 dBm/MHz below 3540 and above 3710 MHz, and at <b>−40 dBm/MHz</b> below 3530 and above 3720 MHz. EUDs also need at least 30 dB adjacent channel leakage ratio. CBSDs may transmit only on channels a Spectrum Access System (SAS) grants them, and EUDs only under a CBSD's control.</p>
+  </div>
+
+  <div class="layout" style="margin-top:14px">
+    <section>
+      <div class="card">
+        <h3>Signal</h3>
+        <label for="cls">Device class</label><select id="cls"></select>
+        <label for="bw">Channel bandwidth</label><select id="bw"></select>
+        <label for="pos">Channel position</label>
+        <select id="pos"><option value="low">Lowest (3550 MHz edge)</option><option value="mid" selected>Middle of band</option><option value="high">Highest (3700 MHz edge)</option></select>
+        <label for="pwr">Conducted power (dBm)</label>
+        <div class="row"><input type="range" id="pwr" min="0" max="45" step="0.5" value="20"><span class="val" id="pwrV"></span></div>
+        <label for="lin">PA spectral regrowth (shoulder, dBc)</label>
+        <div class="row"><input type="range" id="lin" min="-55" max="-20" step="1" value="-40"><span class="val" id="linV"></span></div>
+        <label for="papr">Measured PAPR at 0.1% CCDF (dB)</label><input type="number" id="papr" value="8" step="0.1">
+      </div>
+      <div class="card">
+        <h3>Antenna path</h3>
+        <label for="gain">Antenna gain (dBi)</label><input type="number" id="gain" value="2" step="0.5">
+        <label for="loss">Cable and matching loss (dB)</label><input type="number" id="loss" value="0.5" step="0.1">
+        <div class="hint" id="clsNote"></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="card">
+        <div class="plotwrap"><canvas id="cv" role="img" aria-label="CBRS spectrum with channel edges and the three-step Part 96 emission mask"></canvas><div class="readout" id="readout"></div></div>
+        <div class="metrics">
+          <div class="m"><div class="l">Occupied bandwidth (99%)</div><div class="v" id="mObw">–</div><div class="n" id="mObwN"></div></div>
+          <div class="m"><div class="l">Conducted power</div><div class="v" id="mPow">–</div><div class="n" id="mPowN"></div></div>
+          <div class="m"><div class="l">Max EIRP in any 10 MHz</div><div class="v" id="mEirp">–</div><div class="n" id="mEirpN"></div></div>
+          <div class="m"><div class="l">Emission mask (§96.41(e))</div><div class="v" id="mMask">–</div><div class="n" id="mMaskN"></div></div>
+          <div class="m"><div class="l" id="mPaprL">Peak-to-average ratio</div><div class="v" id="mPapr">–</div><div class="n" id="mPaprN"></div></div>
+          <div class="m"><div class="l">SAS and control</div><div class="v" id="mSas">–</div><div class="n" id="mSasN"></div></div>
+        </div>
+        <div class="toolbar"><button id="png">Save plot as PNG</button><button id="copy">Copy results</button><span class="hint" id="copied"></span></div>
+        <details><summary>Method notes</summary><ul class="notes">
+          <li>EIRP density: power integrated over a sliding 10 MHz window, plus antenna gain minus loss; the highest window is compared with the class limit. For channels narrower than 10 MHz this equals total EIRP.</li>
+          <li>Mask: for each frequency outside the channel, power is integrated over 1% of the 26 dB EBW (first 1 MHz from the edge) or 1 MHz (beyond) per §96.41(e)(3). It is then compared with −13 dBm/MHz (within 10 MHz for CBSDs, within B MHz for EUDs) or −25 dBm/MHz. The §96.41(e)(2) limits also apply: −25 below 3540 / above 3710 and −40 below 3530 / above 3720 MHz.</li>
+          <li>EUD ACLR: channel power minus the higher of the two adjacent same-width channels. PSD (CBSDs): highest EIRP in any 1 MHz.</li>
+          <li>Channel edges are treated as the SAS-assigned channel edges. Certification testing uses the lowest and highest channels in the band.</li>
+          <li>Spectral shapes are idealized; the shoulder slider stands in for PA linearity (ACLR).</li>
+        </ul></details>
+      </div>
+      <div class="card" id="exercises"></div>
+    </section>
+  </div>
+  <div class="card" id="rl-regs" style="margin-top:14px"></div>
+</main>
+<footer class="rl-footer" id="rl-footer"></footer>
+
+<script>
+(function () {
+  'use strict';
+  const { $ } = RF.util, M = RF.math, C = RF.limits.fcc.cbrs;
+  RF.page.init({ id: 'cbrs-mask' });
+  const SIM_RBW = 30e3;
+  Object.entries(C.classes).forEach(([k, c]) => $('cls').add(new Option(`${c.label}: ${c.eirpDbmPer10MHz} dBm/10 MHz`, k)));
+  C.bwsMHz.forEach((w) => $('bw').add(new Option(w + ' MHz', w))); $('bw').value = 20;
+
+  const plot = RF.plot.create($('cv'), { readoutEl: $('readout') });
+  let trace = null, res = null;
+
+  function geometry() {
+    const W = +$('bw').value, pos = $('pos').value, b = C.band;
+    const fc = pos === 'low' ? b.loMHz + W / 2 : pos === 'high' ? b.hiMHz - W / 2 : (b.loMHz + b.hiMHz) / 2;
+    return { W, fc, lo: fc - W / 2, hi: fc + W / 2, cls: C.classes[$('cls').value] };
+  }
+
+  /** Part 96 conducted emission limit (dBm/MHz) at f for channel [lo, hi]; null inside the channel (§96.41(e)). */
+  function maskLimit(f, g) {
+    if (f >= g.lo && f <= g.hi) return null;
+    const d = f < g.lo ? g.lo - f : f - g.hi, near = g.cls.cbsd ? C.mask.nearWithinMHz.cbsd : g.W; // EUD: 0 to B MHz
+    let lim = d <= near ? C.mask.nearDbmPerMHz : C.mask.farDbmPerMHz;
+    C.mask.additional.forEach((x) => { if (f < x.belowMHz || f > x.aboveMHz) lim = Math.min(lim, x.dbmPerMHz); }); // (e)(2)
+    return lim;
+  }
+
+  function simulate(g) {
+    const pad = 35;
+    const t = M.simulateSignal({ fcMHz: g.fc, occMHz: g.W * 0.9, startMHz: g.lo - pad, stopMHz: g.hi + pad, points: 4001,
+      powerDbm: +$('pwr').value, order: 28, rippleDb: 0.5, rbwHz: SIM_RBW, noiseDbm: -80, seed: 13,
+      shoulderDbc: +$('lin').value, shoulderWidth: 1.5, shoulderOrder: 3 });
+    t.source = `Simulated: ${g.cls.label}, ${g.W} MHz at ${g.fc.toFixed(1)} MHz, ${$('pwr').value} dBm conducted`;
+    return t;
+  }
+
+  function windowPower(t) {
+    const N = t.f.length, df = (t.f[N - 1] - t.f[0]) / (N - 1) * 1e6, pre = new Float64Array(N + 1);
+    for (let i = 0; i < N; i++) pre[i + 1] = pre[i] + M.dbmToMw(t.a[i]) / t.rbw * df;
+    return (i, wHz) => { const h = Math.max(0, Math.round(wHz / df / 2)), lo = Math.max(0, i - h), hi = Math.min(N, i + h + 1); return M.mwToDbm((pre[hi] - pre[lo]) * (wHz / ((hi - lo) * df))); };
+  }
+
+  function measure(t, g) {
+    const ob = M.obw(t.f, t.a, 0.99), ebw = M.nDbBandwidth(t.f, t.a, 26), nearBw = Math.max(C.mask.nearEdgeRbwFracOfEbw * ebw.bwHz, 1e3);
+    const pow = M.channelPower(t.f, t.a, t.rbw, g.lo, g.hi), path = (+$('gain').value || 0) - (+$('loss').value || 0);
+    const wp = windowPower(t);
+    let e10 = -Infinity, e1 = -Infinity; for (let i = 0; i < t.f.length; i += 4) { e10 = Math.max(e10, wp(i, 10e6) + path); e1 = Math.max(e1, wp(i, 1e6) + path); }
+    const adj = Math.max(M.channelPower(t.f, t.a, t.rbw, g.lo - g.W, g.lo), M.channelPower(t.f, t.a, t.rbw, g.hi, g.hi + g.W)), aclr = pow - adj;
+    let worst = null;
+    for (let i = 0; i < t.f.length; i++) {
+      const f = t.f[i], lim = maskLimit(f, g); if (lim === null) continue;
+      const d = f < g.lo ? g.lo - f : f - g.hi, mbw = d <= C.mask.nearEdgeWidthMHz ? nearBw : 1e6;
+      if (d * 1e6 < mbw / 2) continue;
+      const lvl = wp(i, mbw), m = lim - lvl;
+      if (!worst || m < worst.margin) worst = { margin: m, at: f, level: lvl, limit: lim, mbw };
+    }
+    return { ob, ebw, nearBw, pow, e10, e1, aclr, eirpTotal: pow + path, worst, papr: +$('papr').value };
+  }
+
+  const setCard = (id, ok, text, note) => { $(id).textContent = text; $(id).className = 'v ' + (ok === null ? '' : ok ? 'pass' : 'fail'); if (note !== undefined) $(id + 'N').textContent = note; };
+
+  function update() {
+    $('pwrV').textContent = $('pwr').value + ' dBm'; $('linV').textContent = $('lin').value + ' dBc';
+    const g = geometry(); trace = simulate(g); const r = res = measure(trace, g), lim = g.cls.eirpDbmPer10MHz;
+    $('clsNote').textContent = g.cls.note;
+    setCard('mObw', null, M.fmtHz(r.ob.bwHz), `26 dB EBW ${M.fmtHz(r.ebw.bwHz)} → near-edge RBW ${M.fmtHz(r.nearBw)}`);
+    setCard('mPow', null, r.pow.toFixed(2) + ' dBm', `Total EIRP ${r.eirpTotal.toFixed(1)} dBm`);
+    const psdLim = g.cls.psdDbmPerMHz, psdOk = psdLim === null || r.e1 <= psdLim;
+    setCard('mEirp', r.e10 <= lim && psdOk, r.e10.toFixed(2) + ' dBm', `Limit ${lim} dBm/10 MHz (${g.cls.cite}) · margin ${(lim - r.e10).toFixed(2)} dB` + (psdLim === null ? '' : ` · PSD ${r.e1.toFixed(1)} vs ${psdLim} dBm/MHz`));
+    if (r.worst) setCard('mMask', r.worst.margin >= 0, (r.worst.margin >= 0 ? '+' : '') + r.worst.margin.toFixed(1) + ' dB', `Worst ${r.worst.level.toFixed(1)} dBm in ${M.fmtHz(r.worst.mbw)} at ${r.worst.at.toFixed(2)} MHz vs ${r.worst.limit} dBm/MHz`);
+    if (g.cls.cbsd) { $('mPaprL').textContent = 'Peak-to-average ratio'; setCard('mPapr', r.papr <= C.paprDb, r.papr.toFixed(1) + ' dB', `CBSD limit ${C.paprDb} dB (${C.citePapr})`); }
+    else { $('mPaprL').textContent = 'Adjacent channel leakage ratio'; setCard('mPapr', r.aclr >= C.mask.eudAclrDb, r.aclr.toFixed(1) + ' dB', `EUD minimum ${C.mask.eudAclrDb} dB (§96.41(e)(1)(ii)); PAPR limit applies to CBSDs only`); }
+    setCard('mSas', null, $('cls').value === 'eud' ? 'Under CBSD control' : 'SAS registration', $('cls').value === 'eud' ? '§96.47: transmits only when a CBSD authorizes it' : C.sas.note);
+
+    // stepped mask polyline in trace units (dBm per SIM_RBW), per MHz beyond the first 1 MHz
+    const toTrace = (lim, mbw) => lim - 10 * Math.log10(mbw / trace.rbw), f0 = trace.f[0], f1 = trace.f[trace.f.length - 1];
+    const side = (from, to, dir) => { const pts = []; for (let f = from; dir < 0 ? f >= to : f <= to; f += dir * 0.25) { const d = Math.abs(f - (dir < 0 ? g.lo : g.hi)); const l = maskLimit(f, g); if (l !== null) pts.push([f, toTrace(l, d <= 1 ? r.nearBw : 1e6)]); } return pts; };
+    plot.draw({
+      traces: [{ f: trace.f, a: trace.a }], rbw: trace.rbw,
+      shades: [{ x0: g.lo, x1: g.hi, color: 'trace', alpha: 0.05 }, ...C.mask.additional.flatMap((x) => [{ x0: f0, x1: Math.min(f1, x.belowMHz), color: 'limit', alpha: 0.05 }, { x0: Math.max(f0, x.aboveMHz), x1: f1, color: 'limit', alpha: 0.05 }])].filter((s) => s.x1 > s.x0),
+      vLines: [{ x: g.lo, label: 'Channel edge', color: 'limit', dash: [2, 3] }, { x: g.hi, label: 'Channel edge', color: 'limit', dash: [2, 3] },
+        { x: C.band.loMHz, label: '3550', color: 'muted', dash: [1, 3] }, { x: C.band.hiMHz, label: '3700', color: 'muted', dash: [1, 3] }],
+      segments: [{ y: side(g.lo - 0.01, f0, -1), label: 'Part 96 mask' }, { y: side(g.hi + 0.01, f1, 1) }],
+      hLines: [{ y: Math.max(...trace.a), label: `In-band ${Math.max(...trace.a).toFixed(1)} dBm/30 kHz` }]
+    });
+  }
+  ['cls', 'bw', 'pos', 'pwr', 'lin', 'papr', 'gain', 'loss'].forEach((k) => { $(k).addEventListener('input', update); $(k).addEventListener('change', update); });
+
+  const resultsText = () => !res ? '' : [trace.source,
+    `OBW ${M.fmtHz(res.ob.bwHz)} · Conducted ${res.pow.toFixed(2)} dBm · Max EIRP/10 MHz ${res.e10.toFixed(2)} dBm (${$('mEirp').className.includes('pass') ? 'pass' : 'fail'})`,
+    `Mask ${$('mMask').textContent} · PAPR ${$('mPapr').textContent}`, `Generated ${new Date().toLocaleString()} · RF Lab`].join('\n');
+  $('png').onclick = () => plot.exportPNG(`cbrs_${RF.util.stamp()}.png`, resultsText().split('\n').slice(0, 3).join('   |   '));
+  $('copy').onclick = async () => { await RF.util.copy(resultsText()); $('copied').textContent = 'Copied'; setTimeout(() => $('copied').textContent = '', 1500); };
+
+  /* ---------- exercises (hidden unless manifest.showExercises) ---------- */
+  const set = (o) => { Object.entries(o).forEach(([k, v]) => { $(k).value = v; }); update(); };
+  RF.ex.mount('exercises', 'cbrs-mask', [
+    { id: 'density', type: 'number', title: 'EIRP limit is a density',
+      prompt: 'An end user device uses a 20 MHz CBRS channel. What is the maximum total EIRP it may radiate?',
+      unit: 'dBm', tol: 0.1, hint: '23 dBm per 10 MHz, spread over 20 MHz: add 10·log10(20 ÷ 10).',
+      answer: () => 23 + 10 * Math.log10(2), explain: 'About 26 dBm total. A 5 MHz channel is still capped at 23 dBm, because no 10 MHz window may exceed the density.' },
+    { id: 'eud-max', type: 'state', title: 'Find the EUD power limit',
+      prompt: 'Select <b>End user device</b>, <b>20 MHz</b>, middle channel, gain <b>2 dBi</b>, loss <b>0.5 dB</b>. Set the highest conducted power (within 1 dB) that passes the EIRP limit, then press Check.',
+      hint: 'Total EIRP may be about 26 dBm; conducted = EIRP − gain + loss.',
+      check: () => { if ($('cls').value !== 'eud' || $('bw').value !== '20') return { ok: false, msg: 'Select EUD at 20 MHz.' };
+        const m = 23 - res.e10; if (m < 0) return { ok: false, msg: `EIRP over the limit by ${(-m).toFixed(1)} dB.` }; if (m > 1.5) return { ok: false, msg: `${m.toFixed(1)} dB to spare; raise the power.` };
+        return { ok: true, msg: `${$('pwr').value} dBm conducted gives ${res.e10.toFixed(1)} dBm per 10 MHz.` }; },
+      explain: 'Most CBRS UEs (Band 48 power class 3) run 23 dBm conducted, so antenna gain and channel width decide whether they need back-off.' },
+    { id: 'edge-40', type: 'state', title: 'The −40 dBm/MHz tier',
+      prompt: 'Select <b>Category A</b>, <b>20 MHz</b>, <b>lowest channel</b>, shoulder <b>−35 dBc</b>, 30 dBm conducted. Which mask tier fails first? Press Check once the mask fails.',
+      hint: 'Below 3530 MHz the limit drops to −40 dBm/MHz, only 20 MHz from the channel edge.',
+      check: () => { if ($('cls').value !== 'catA' || $('pos').value !== 'low') return { ok: false, msg: 'Select Category A on the lowest channel.' };
+        if (res.worst.margin >= 0) return { ok: false, msg: 'The mask still passes; raise the power or the shoulder.' };
+        return { ok: true, msg: `It fails at ${res.worst.at.toFixed(1)} MHz against ${res.worst.limit} dBm/MHz.` }; },
+      explain: 'The −40 dBm/MHz tier protects services below 3530 MHz (radar, fixed satellite), so edge channels at full CBSD power usually need a better PA or a filter.' },
+    { id: 'sas', type: 'choice', title: 'Who decides the channel?',
+      prompt: 'A Category A CBSD powers up. What must happen before it transmits?',
+      options: ['It registers with a SAS and transmits only on a channel and power the SAS grants', 'It scans for radar for 60 seconds, like 5 GHz DFS', 'It picks any channel above 3650 MHz without coordination', 'It needs a site-specific FCC license'],
+      answer: 0, explain: 'The SAS protects incumbents and Priority Access licensees. EUDs never talk to the SAS; they follow their CBSD.' }
+  ]);
+
+  /* ---------- known-answer tests ---------- */
+  RF.test.add('EUD 20 MHz total EIRP limit = 26.01 dBm', () => RF.test.near(23 + 10 * Math.log10(2), 26.01, 0.01));
+  RF.test.add('CBSD mask: −13 within 10 MHz, −25 beyond, −25 below 3540, −40 below 3530', () => { const g = { lo: 3600, hi: 3620, W: 20, cls: C.classes.catA }, h = { lo: 3550, hi: 3570, W: 20, cls: C.classes.catA }; const a = maskLimit(3595, g), b = maskLimit(3585, g), c = maskLimit(3539, h), d = maskLimit(3525, h); return { ok: a === -13 && b === -25 && c === -25 && d === -40, detail: `${a}, ${b}, ${c}, ${d}` }; });
+  RF.test.add('EUD 5 MHz channel: −13 only within 5 MHz (0 to B), −25 beyond', () => { const g = { lo: 3600, hi: 3605, W: 5, cls: C.classes.eud }; const a = maskLimit(3597, g), b = maskLimit(3593, g); return { ok: a === -13 && b === -25, detail: `${a}, ${b}` }; });
+  RF.test.add('EUD 20 MHz, 20 dBm: conducted power recovers 20 dBm', () => { set({ cls: 'eud', bw: 20, pos: 'mid', pwr: 20, lin: -40, gain: 2, loss: 0.5 }); return RF.test.near(res.pow, 20, 0.3); });
+  RF.test.add('EIRP per 10 MHz ≈ total − 3 dB for a 20 MHz channel', () => RF.test.near(res.e10, res.eirpTotal - 3, 0.6));
+  RF.test.add('EUD 20 MHz at 20 dBm passes EIRP and mask', () => ({ ok: res.e10 <= 23 && res.worst.margin > 0, detail: `EIRP ${res.e10.toFixed(1)}, mask ${res.worst.margin.toFixed(1)}` }));
+  RF.test.add('Cat A lowest channel at 30 dBm, −35 dBc fails the mask', () => { set({ cls: 'catA', pos: 'low', pwr: 30, lin: -35 }); const r = { ok: res.worst.margin < 0, detail: `${res.worst.margin.toFixed(1)} dB at ${res.worst.at.toFixed(1)}` }; set({ cls: 'eud', pos: 'mid', pwr: 20, lin: -40 }); return r; });
+
+  update();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RF Lab</title>
+<link rel="stylesheet" href="shared/theme.css">
+<script src="manifest.js"></script>
+<script src="shared/limits.js"></script>
+<script src="shared/rflab.js"></script>
+</head>
+<body>
+<header class="rl-header">
+  <h1>RF Lab</h1>
+  <div class="rl-sub">Interactive training tools for FCC regulatory limits, test methods and field deployment across Wi-Fi HaLow, Wi-Fi and LTE. Pick a track, then work through the levels in order. Each tool has a concept summary, a simulator, real-trace analysis, exercises and the relevant FCC rules.</div>
+  <div class="tracks" id="tracks" role="tablist" aria-label="Technology track"></div>
+  <div class="hint" id="trackDesc"></div>
+  <div class="row" style="max-width:520px;margin-top:12px;gap:10px">
+    <input type="search" id="q" placeholder="Search tools, e.g. PSD, 15.407 or Band 13" aria-label="Search tools">
+    <label class="row" style="flex:0 0 auto;gap:6px;margin:0;font-size:12.5px"><input type="checkbox" id="liveOnly" style="width:auto;flex:0 0 auto"> <span>Available only</span></label>
+  </div>
+  <div class="hint" id="summary"></div>
+</header>
+<main class="rl-main" id="levels"></main>
+<footer class="rl-footer" id="foot"></footer>
+<script>
+(function () {
+  'use strict';
+  const { $, esc } = RF.util, M = RF.manifest;
+  const TRACKS = [{ id: 'all', title: 'All tracks', desc: 'Every tool across HaLow, Wi-Fi and LTE.' }, ...M.tracks];
+  const STATUS = { live: ['live', 'Live'], review: ['review', 'In RF review'], planned: ['planned', 'Planned'] };
+  let track = (location.hash || '').slice(1);
+  if (!TRACKS.some((t) => t.id === track)) track = 'all';
+
+  $('tracks').innerHTML = TRACKS.map((t) => `<button role="tab" data-t="${t.id}">${esc(t.title)}</button>`).join('');
+  $('tracks').querySelectorAll('button').forEach((b) => b.onclick = () => { track = b.dataset.t; history.replaceState(null, '', '#' + track); render(); });
+
+  const open = (t) => t.status === 'live' || t.status === 'review';
+  const inTrack = (t) => track === 'all' || t.track === track || t.track === 'common';
+  const trackTitle = (id) => (M.tracks.find((x) => x.id === id) || { title: 'All tracks' }).title;
+
+  function render() {
+    $('tracks').querySelectorAll('button').forEach((b) => { const on = b.dataset.t === track; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+    $('trackDesc').textContent = TRACKS.find((t) => t.id === track).desc;
+    const q = $('q').value.trim().toLowerCase(), avail = $('liveOnly').checked;
+    const html = M.levels.map((lv) => {
+      const tools = M.tools.filter((t) => t.level === lv.n && inTrack(t))
+        .filter((t) => !avail || open(t))
+        .filter((t) => !q || [t.title, t.summary, trackTitle(t.track), ...(t.refs || [])].join(' ').toLowerCase().includes(q));
+      if (!tools.length) return '';
+      const cards = tools.map((t) => {
+        const p = RF.progress.tool(t.id), [cls, label] = STATUS[t.status] || STATUS.planned;
+        const prog = M.showExercises && open(t) && p.total ? `<span class="tag ${p.done >= p.total ? 'done' : ''}">${p.done >= p.total ? '✓ Complete' : p.done + '/' + p.total + ' exercises'}</span>` : '';
+        const tags = `<div class="rl-tags" style="margin:0"><span class="tag ${cls}">${label}</span>${prog}${(t.refs || []).slice(0, 2).map((r) => `<span class="tag">${esc(r)}</span>`).join('')}</div>`;
+        const inner = `<div class="track-tag">${esc(t.track === 'common' ? 'All tracks' : trackTitle(t.track))}</div><div class="tt">${esc(t.title)}</div><div class="ts">${esc(t.summary)}</div>${tags}`;
+        return open(t) ? `<a class="tool" href="${esc(t.path)}">${inner}</a>` : `<div class="tool planned" aria-disabled="true">${inner}</div>`;
+      }).join('');
+      return `<section class="level"><h2>Level ${lv.n}: ${esc(lv.title)}</h2><div class="ld">${esc(lv.desc)}</div><div class="grid">${cards}</div></section>`;
+    }).join('');
+    $('levels').innerHTML = html || '<p class="hint">No tools match your search.</p>';
+    const listed = M.tools.filter((t) => t.level > 0 && inTrack(t));
+    const n = (s) => listed.filter((t) => t.status === s).length;
+    $('summary').textContent = `${n('live')} live, ${n('review')} in RF review, ${n('planned')} planned. ${M.showExercises ? 'Your progress is saved in this browser only.' : ''}`;
+  }
+  $('q').addEventListener('input', render); $('liveOnly').addEventListener('change', render);
+  window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (TRACKS.some((t) => t.id === h)) { track = h; render(); } });
+  $('foot').innerHTML = `RF Lab v${esc(M.labVersion)} · Limits v${esc(RF.limits.version)}, verified ${esc(RF.limits.verified)}${M.showExercises ? ' · <a href="#" id="reset">Reset my progress</a>' : ''}<br>Training reference, not legal advice. Confirm against current eCFR text and KDB procedures before certification decisions.`;
+  if ($('reset')) $('reset').onclick = (e) => { e.preventDefault(); RF.progress.reset(); render(); };
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "rf-lab",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Specter RF Lab: offline training tools for HaLow, Wi-Fi and LTE regulatory measurements",
+  "scripts": {
+    "test": "node tests/run_tests.js",
+    "test:screens": "node tests/run_tests.js --screens",
+    "serve": "python3 -m http.server 8080",
+    "build": "node scripts/build_standalone.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.47.0"
+  }
+}

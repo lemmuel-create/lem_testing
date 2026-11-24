@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tool template · RF Lab</title>
+<!--
+  RF LAB TOOL TEMPLATE
+  1. Copy this folder to tools/<your-id>/ and add an entry with the same id to manifest.js (status: 'planned').
+  2. Replace every TODO. Keep the five sections: Concept, Simulate, Real data (if it applies), Try this, Method notes.
+  3. Read limits from RF.limits only. Never hard-code a regulatory number in a tool.
+  4. Add known-answer tests with RF.test.add(), run `node tests/run_tests.js`, get RF review, then set status: 'live'.
+-->
+<link rel="stylesheet" href="../../shared/theme.css">
+<script src="../../manifest.js"></script>
+<script src="../../shared/rfmath.js"></script>
+<script src="../../shared/limits.js"></script>
+<script src="../../shared/rfplot.js"></script>
+<script src="../../shared/rflab.js"></script>
+</head>
+<body>
+<header class="rl-header" id="rl-header"></header>
+<main class="rl-main">
+  <div class="card concept">
+    <h2>Concept</h2>
+    <p>TODO: two or three sentences on what this measures and why the rule exists. Link to the matching RF Knowledge Base article.</p>
+  </div>
+
+  <div class="layout" style="margin-top:14px">
+    <section>
+      <div class="card">
+        <h3>Controls</h3>
+        <!-- TODO: replace with this tool's inputs. Every input needs a <label for>. -->
+        <label for="pwr">Tone power (dBm)</label>
+        <div class="row"><input type="range" id="pwr" min="-20" max="30" step="0.5" value="10"><span class="val" id="pwrV"></span></div>
+        <label for="rbw">Analyzer RBW</label>
+        <select id="rbw"><option value="3000">3 kHz</option><option value="100000" selected>100 kHz</option></select>
+      </div>
+    </section>
+    <section>
+      <div class="card">
+        <div class="plotwrap"><canvas id="cv" role="img" aria-label="TODO: describe the plot"></canvas><div class="readout" id="readout"></div></div>
+        <div class="metrics">
+          <div class="m"><div class="l">Peak level</div><div class="v" id="mPk">–</div><div class="n">TODO: what this number means</div></div>
+          <div class="m"><div class="l">Scaled to 3 kHz</div><div class="v" id="mPsd">–</div><div class="n" id="mPsdN"></div></div>
+        </div>
+        <div class="toolbar"><button id="png">Save plot as PNG</button></div>
+        <details><summary>Method notes</summary><ul class="notes">
+          <li>TODO: test procedure reference (KDB / ANSI C63.10 section), analyzer settings, and limitations of the simulation.</li>
+        </ul></details>
+      </div>
+      <div class="card" id="exercises"></div>
+    </section>
+  </div>
+  <div class="card" id="rl-regs" style="margin-top:14px"></div>
+</main>
+<footer class="rl-footer" id="rl-footer"></footer>
+
+<script>
+(function () {
+  'use strict';
+  const { $ } = RF.util, M = RF.math, LIM = RF.limits.fcc.ism900;
+  RF.page.init({ id: 'template' });                       // TODO: your manifest id
+  const plot = RF.plot.create($('cv'), { readoutEl: $('readout') });
+  let state = null;
+
+  function compute() {                                    // TODO: replace with this tool's model
+    const t = M.simulateSignal({ fcMHz: 915, occMHz: 0.01, spanMHz: 1, powerDbm: +$('pwr').value, order: 2, rippleDb: 0, rbwHz: +$('rbw').value, noiseDbm: -70, seed: 3 });
+    const { pk, pi } = M.peak(t.a);
+    return { t, pk, f: t.f[pi], psd: M.scaleToBw(pk, t.rbw, 3000) };
+  }
+
+  function update() {
+    $('pwrV').textContent = $('pwr').value + ' dBm';
+    const s = state = compute(), lim = LIM.dts.psdDbmPer3kHz;
+    $('mPk').textContent = s.pk.toFixed(2) + ' dBm';
+    $('mPsd').textContent = s.psd.toFixed(2) + ' dBm'; $('mPsd').className = 'v ' + (s.psd <= lim ? 'pass' : 'fail');
+    $('mPsdN').textContent = `Limit ${lim} dBm/3 kHz (${LIM.dts.citePsd})`;
+    plot.draw({ traces: [{ f: s.t.f, a: s.t.a }], rbw: s.t.rbw, hLines: [{ y: s.pk, label: `Peak ${s.pk.toFixed(2)} dBm` }], markers: [{ x: s.f, y: s.pk, label: 'M1' }] });
+  }
+  ['pwr', 'rbw'].forEach((k) => $(k).addEventListener('input', update));
+  $('png').onclick = () => plot.exportPNG(`template_${RF.util.stamp()}.png`, 'TODO caption');
+
+  RF.ex.mount('exercises', 'template', [                  // TODO: 3–5 exercises; mix state, number and choice
+    { id: 'ex1', type: 'state', title: 'Example state check', prompt: 'Set the tone power to <b>20 dBm</b>, then press Check.',
+      check: () => +$('pwr').value === 20 ? { ok: true } : { ok: false, msg: 'Set the slider to 20 dBm.' }, explain: 'TODO: the lesson.' },
+    { id: 'ex2', type: 'number', title: 'Example calculation', prompt: 'A level of 20 dBm measured in 100 kHz RBW is how many dBm per 3 kHz?', unit: 'dBm', tol: 0.05,
+      answer: () => M.scaleToBw(20, 100e3, 3000), hint: 'Subtract 10·log10(100 kHz ÷ 3 kHz).', explain: 'TODO: the lesson.' },
+    { id: 'ex3', type: 'choice', title: 'Example concept check', prompt: 'TODO question?', options: ['Right answer', 'Wrong answer'], answer: 0, explain: 'TODO: why.' }
+  ]);
+
+  RF.test.add('scaleToBw: 20 dBm in 100 kHz = 4.77 dBm/3 kHz', () => RF.test.near(M.scaleToBw(20, 100e3), 4.77, 0.01)); // TODO: real known answers
+  update();
+})();
+</script>
+</body>
+</html>

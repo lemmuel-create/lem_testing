@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Co-location test plan builder · RF Lab</title>
+<style>
+/* RF Lab shared theme. Light/dark follows the OS setting. */
+:root{--bg:#fafaf8;--panel:#ffffff;--ink:#1a1a18;--ink2:#55544f;--muted:#8a8984;--grid:#e3e2dc;--axis:#c3c2b7;--border:rgba(0,0,0,.12);
+--trace:#2a78d6;--trace2:#eb6834;--mark:#d98a00;--pass:#1b8a3a;--fail:#c93434;--limit:#e34948;--accent:#2a78d6;--chip:#eef3fa;--warnbg:#fff6e0}
+@media (prefers-color-scheme:dark){:root{--bg:#141414;--panel:#1c1c1b;--ink:#f0efec;--ink2:#c3c2b7;--muted:#898781;--grid:#2c2c2a;--axis:#3d3d3a;
+--border:rgba(255,255,255,.12);--trace:#4a95ec;--trace2:#f07a48;--mark:#f0a92a;--pass:#3fbf63;--fail:#ef6a6a;--chip:#1f2a38;--warnbg:#2e2614}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.rl-header{padding:16px 24px 4px}
+.rl-crumb{font-size:12px;color:var(--muted)}
+.rl-header h1{font-size:20px;font-weight:600;margin:2px 0 0}
+.rl-sub{color:var(--ink2);font-size:13px;margin-top:2px;max-width:900px}
+.rl-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tag{font-size:11.5px;padding:2px 8px;border-radius:999px;background:var(--chip);color:var(--ink2)}
+.tag.live{color:var(--pass)}.tag.review{color:var(--mark)}.tag.planned{color:var(--muted)}.tag.done{color:var(--pass)}
+.rl-main{padding:12px 24px 24px}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.card+.card{margin-top:14px}
+.card h2{font-size:14px;font-weight:600;margin:0 0 8px}
+.card h3{font-size:13px;font-weight:600;margin:0 0 8px;color:var(--ink2)}
+.concept{font-size:13.5px;color:var(--ink2);max-width:900px}
+.concept p{margin:0 0 8px}
+label{display:block;font-size:12px;color:var(--ink2);margin:10px 0 4px}
+select,input[type=number],input[type=text],input[type=search],textarea{width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;font-size:13px}
+input[type=range]{width:100%}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
+.val{font-variant-numeric:tabular-nums;font-size:12px;min-width:64px;text-align:right;flex:0 0 auto}
+button{font:inherit;font-size:13px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--panel);color:var(--ink);cursor:pointer}
+button:hover{background:var(--chip)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.tabs{display:flex;gap:6px;margin-bottom:6px}
+.tabs button.on{background:var(--chip);border-color:var(--accent);color:var(--accent)}
+.plotwrap{position:relative;height:440px}
+.plotwrap canvas{display:block;width:100%;height:100%}
+.readout{position:absolute;top:8px;right:12px;font-size:12px;color:var(--ink2);font-variant-numeric:tabular-nums;pointer-events:none}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+@media (max-width:900px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.m{background:var(--chip);border-radius:10px;padding:10px 12px}
+.m .l{font-size:11.5px;color:var(--ink2)}
+.m .v{font-size:19px;font-weight:600;font-variant-numeric:tabular-nums}
+.m .n{font-size:11.5px;color:var(--muted)}
+.pass{color:var(--pass)}.fail{color:var(--fail)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+.err{font-size:12px;color:var(--fail);margin-top:6px;min-height:1em}
+.hidden{display:none}
+details{margin-top:14px}summary{cursor:pointer;color:var(--ink2);font-size:13px}
+.notes{font-size:12.5px;color:var(--ink2)}.notes li{margin:4px 0}
+/* exercises */
+.ex{border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:10px}
+.ex-h{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600}
+.ex-n{width:22px;height:22px;border-radius:50%;background:var(--chip);color:var(--ink2);display:inline-flex;align-items:center;justify-content:center;font-size:12px;flex:0 0 auto}
+.ex.done .ex-n{background:var(--pass);color:#fff}
+.ex-p{font-size:13px;color:var(--ink2);margin:6px 0 8px}
+.ex-opts label{display:flex;gap:8px;align-items:flex-start;margin:4px 0;font-size:13px;color:var(--ink)}
+.ex-opts input{margin-top:3px}
+.ex-fb{font-size:12.5px;margin-top:8px;min-height:1em}
+.ex-hint{font-size:12px;color:var(--muted);margin-top:6px}
+.progress{height:6px;border-radius:3px;background:var(--chip);overflow:hidden;margin-top:8px}
+.progress>div{height:100%;background:var(--pass)}
+.rl-footer{padding:10px 24px 24px;font-size:11.5px;color:var(--muted)}
+/* hub */
+.level{margin-top:18px}
+.level h2{font-size:15px;font-weight:600;margin:0 0 2px}
+.level .ld{font-size:12.5px;color:var(--muted);margin-bottom:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.tool{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;color:var(--ink)}
+a.tool:hover{border-color:var(--accent);text-decoration:none}
+.tool.planned{opacity:.65}
+.tool .tt{font-weight:600;font-size:14px}
+.tool .ts{font-size:12.5px;color:var(--ink2);flex:1}
+.banner{background:var(--warnbg);border-radius:10px;padding:10px 14px;font-size:12.5px;color:var(--ink2);margin-top:12px}
+/* regulations table */
+table.regs{width:100%;border-collapse:collapse;font-size:12.5px}
+table.regs th{text-align:left;font-weight:600;color:var(--ink2);border-bottom:1px solid var(--border);padding:6px 8px}
+table.regs td{vertical-align:top;border-bottom:1px solid var(--border);padding:7px 8px;color:var(--ink2)}
+table.regs td:first-child{white-space:nowrap;font-variant-numeric:tabular-nums}
+table.regs tr:last-child td{border-bottom:none}
+/* track switcher */
+.tracks{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tracks button.on{background:var(--chip);border-color:var(--accent);color:var(--accent)}
+.track-tag{font-size:11px;color:var(--muted)}
+
+</style>
+<script>
+/*
+ * RF Lab catalog. The hub builds itself from this file, and each tool page reads its own entry for its header,
+ * footer and "Relevant FCC regulations" section.
+ * Add a tool: append an entry, set status 'planned' until it passes tests, 'review' while awaiting RF sign-off,
+ * then 'live'. track: 'common' tools appear under every technology track.
+ */
+(function (root) {
+  'use strict';
+  const manifest = {
+    labVersion: '0.4.1',
+    // Checkup questions are hidden on tool pages for now (kept in the code and in the answer-key doc). Set true to show them.
+    showExercises: false,
+    tracks: [
+      { id: 'halow', title: 'Wi-Fi HaLow', desc: '802.11ah in 902–928 MHz under §15.247.' },
+      { id: 'wifi', title: 'Wi-Fi', desc: '802.11b/g/n/ac/ax at 2.4 GHz (§15.247) and 5 GHz U-NII (§15.407).' },
+      { id: 'lte', title: 'LTE', desc: 'LTE modules and devices in licensed bands under Parts 22, 24 and 27.' },
+      { id: 'cbrs', title: 'CBRS', desc: 'Citizens Broadband Radio Service, 3550–3700 MHz under Part 96 (LTE Band 48 / NR n48).' },
+      { id: 'coloc', title: 'Co-location', desc: 'Several radios in one product: harmonics, intermodulation and simultaneous-transmission testing.' }
+    ],
+    levels: [
+      { n: 1, title: 'Fundamentals', desc: 'Units, analyzer settings and the measurement basics every later tool assumes.' },
+      { n: 2, title: 'Transmitter limits', desc: 'The parameters a radio is certified against for its band.' },
+      { n: 3, title: 'Test setups', desc: 'How conducted, radiated and AC-line measurements are physically made.' },
+      { n: 4, title: 'Certification', desc: 'Module vs. full certification, permissive changes and RF exposure.' },
+      { n: 5, title: 'Field deployment', desc: 'Range, interference margin and site surveys for customer installs.' }
+    ],
+    tools: [
+      { id: 'template', track: 'common', level: 0, status: 'template', version: '1.0.0', owner: 'RF team', path: 'tools/_template/index.html', title: 'Tool template', summary: 'Starting point for new tools. Not shown on the hub.', refs: [], prereqs: [],
+        regulations: [{ cite: '§15.247(e)', req: 'TODO: requirement in one sentence.', use: 'TODO: which control or card in this tool relates to it.' }], guidance: ['TODO: KDB / ANSI references'] },
+
+      /* ---------- common ---------- */
+      { id: 'dbm', track: 'common', level: 1, status: 'planned', title: 'dB / dBm converter and power sum', summary: 'Convert mW↔dBm, add signals and noise, and build intuition for logarithmic math.', refs: [], prereqs: [] },
+      { id: 'rbw', track: 'common', level: 1, status: 'planned', title: 'RBW and detector explorer', summary: 'See how RBW, VBW and peak/average/quasi-peak detectors change the same signal on screen.', refs: ['ANSI C63.10', 'KDB 971168'], prereqs: ['dbm'] },
+      { id: 'eirp-erp', track: 'common', level: 1, status: 'planned', title: 'EIRP, ERP and antenna gain', summary: 'Conducted power, cable loss and antenna gain; when rules use EIRP vs. ERP (2.15 dB).', refs: [], prereqs: ['dbm'] },
+      { id: 'conducted-setup', track: 'common', level: 3, status: 'planned', title: 'Conducted test bench walkthrough', summary: 'Interactive antenna-port bench: attenuators, offsets and what each measurement needs.', refs: ['ANSI C63.10', 'KDB 971168'], prereqs: [] },
+      { id: 'radiated-setup', track: 'common', level: 3, status: 'planned', title: 'Radiated chamber walkthrough', summary: 'Turntable, height scan, polarization and why the floor changes above 1 GHz.', refs: ['ANSI C63.10'], prereqs: [] },
+      { id: 'lisn', track: 'common', level: 3, status: 'planned', title: 'LISN and AC-line conducted', summary: 'How the LISN separates power from noise, with an interactive impedance plot.', refs: ['§15.207'], prereqs: ['dbm'] },
+      { id: 'cert-path', track: 'common', level: 4, status: 'planned', title: 'Module vs. full certification', summary: 'Decision tree for module integration, Class II changes and new FCC IDs.', refs: ['§15.212', 'KDB 996369', '§2.1043'], prereqs: [] },
+      { id: 'mpe', track: 'common', level: 4, status: 'planned', title: 'RF exposure and co-location', summary: 'MPE distance by band, when SAR applies, and simultaneous transmission (HaLow + Wi-Fi + LTE).', refs: ['§1.1310', 'KDB 447498'], prereqs: ['eirp-erp'] },
+
+      /* ---------- HaLow ---------- */
+      {
+        id: 'bandwidth', track: 'halow', level: 2, status: 'live', version: '2.1.0', owner: 'RF team',
+        path: 'tools/bandwidth/index.html', title: 'HaLow 6 dB bandwidth',
+        summary: 'Measure 6 dB / n dB bandwidth, 99% OBW, PSD and band edge on simulated or real analyzer traces.',
+        refs: ['47 CFR §15.247(a)(2)', 'KDB 558074'], prereqs: ['dbm', 'rbw'],
+        regulations: [
+          { cite: '§15.247(a)(2)', req: 'Digitally modulated systems in 902–928 MHz must have a 6 dB bandwidth of at least 500 kHz.', use: 'The pass/fail test this tool performs (6 dB bandwidth and Result cards).' },
+          { cite: '§15.247(a)(1)(i)', req: 'Frequency-hopping systems in 902–928 MHz: 20 dB bandwidth up to 500 kHz, 25–50+ hopping channels, 0.4 s dwell limits.', use: 'Where a narrowband signal that fails the 6 dB test has to go instead. Use the 20 dB setting to measure it.' },
+          { cite: '§15.247(b)(3)', req: 'Maximum conducted output power of 1 W (+30 dBm).', use: 'Conducted power control and the Integrated channel power card.' },
+          { cite: '§15.247(b)(4)', req: 'Antenna gain above 6 dBi reduces the allowed conducted power dB for dB.', use: 'Context for the power and PSD margins; the tool assumes 6 dBi or less.' },
+          { cite: '§15.247(d)', req: 'Emissions outside the band must be at least 20 dB below the in-band peak in any 100 kHz (30 dB if power was measured as an average).', use: 'Band edge card at 902 and 928 MHz.' },
+          { cite: '§15.247(e)', req: 'Power spectral density of no more than 8 dBm in any 3 kHz band.', use: 'Peak PSD card.' },
+          { cite: '§15.215(c)', req: 'The 20 dB bandwidth must stay inside the authorized band under all operating conditions.', use: '20 dB setting; on edge channels, M1 and M2 must stay inside 902–928 MHz.' },
+          { cite: '§15.205', req: 'Restricted bands where only spurious emissions are allowed, at §15.209 levels.', use: 'Not measured here. Passing the band-edge check does not cover harmonics in restricted bands.' },
+          { cite: '§15.209', req: 'General radiated emission limits (above 960 MHz: 54 dBµV/m average, 74 dBµV/m peak at 3 m).', use: 'Applies to harmonics and spurious emissions; outside this tool’s scope.' },
+          { cite: '§15.35', req: 'Detector functions and averaging; where an average limit applies, the peak limit is 20 dB higher.', use: 'Why detector choice (peak vs. average) changes the PSD and power results.' },
+          { cite: '§15.31(a)(3)', req: 'Intentional radiators are measured using ANSI C63.10.', use: 'Basis for the measurement method the tool follows.' },
+          { cite: '§2.1049', req: 'Occupied bandwidth (99% power) measurement for equipment authorization.', use: '99% occupied bandwidth card.' }
+        ],
+        guidance: [
+          'FCC KDB 558074 D01: DTS measurement guidance (6 dB bandwidth, output power, PSD, band edge)',
+          'ANSI C63.10-2013: test procedures for unlicensed wireless devices',
+          'ISED RSS-247 and RSS-Gen: Canadian equivalent rules; 99% occupied bandwidth is reported here'
+        ]
+      },
+      { id: 'psd', track: 'halow', level: 2, status: 'planned', title: 'HaLow power spectral density', summary: 'Relate conducted power, bandwidth and the 8 dBm/3 kHz limit; average vs. peak methods.', refs: ['§15.247(e)', 'KDB 558074'], prereqs: ['bandwidth'] },
+      { id: 'bandedge', track: 'halow', level: 2, status: 'planned', title: 'HaLow band edge and harmonics', summary: 'Check 902/928 MHz edges and map harmonics against §15.205/15.209 field-strength limits.', refs: ['§15.247(d)', '§15.205', '§15.209'], prereqs: ['bandwidth'] },
+      { id: 'link-budget', track: 'halow', level: 5, status: 'planned', title: 'HaLow link budget', summary: 'Range by MCS and channel width with fade and interference margin.', refs: [], prereqs: ['eirp-erp'] },
+      { id: 'site-survey', track: 'halow', level: 5, status: 'planned', title: 'HaLow site noise-floor survey', summary: 'Load survey traces, find clean channels and flag RFID, LoRa and paging interferers.', refs: [], prereqs: ['bandwidth'] },
+
+      /* ---------- Wi-Fi ---------- */
+      {
+        id: 'wifi-24', track: 'wifi', level: 2, status: 'review', version: '1.0.0', owner: 'RF team',
+        path: 'tools/wifi-24/index.html', title: 'Wi-Fi 2.4 GHz bandwidth and band edges',
+        summary: '§15.247 at 2.4 GHz: 6 dB bandwidth, PSD, the 2400 MHz band edge and the 2483.5 MHz restricted-band limit by channel.',
+        refs: ['47 CFR §15.247', '§15.205', 'KDB 558074'], prereqs: ['bandwidth', 'eirp-erp'],
+        regulations: [
+          { cite: '§15.247(a)(2)', req: 'Digitally modulated systems in 2400–2483.5 MHz must have a 6 dB bandwidth of at least 500 kHz.', use: '6 dB bandwidth and Result cards (all 802.11 modes pass easily).' },
+          { cite: '§15.247(b)(3)', req: 'Maximum conducted output power of 1 W (+30 dBm).', use: 'Conducted power control and Channel power card.' },
+          { cite: '§15.247(b)(4)', req: 'Antenna gain above 6 dBi reduces allowed conducted power dB for dB.', use: 'Antenna gain input and the power limit shown.' },
+          { cite: '§15.247(c)(1)(i)', req: 'Fixed point-to-point links may reduce power only 1 dB per 3 dB of gain above 6 dBi.', use: 'Noted only; the tool applies the standard dB-for-dB rule.' },
+          { cite: '§15.247(d)', req: 'Emissions outside the band at least 20 dB below the in-band peak per 100 kHz (30 dB with the average method); emissions in restricted bands must meet §15.209.', use: 'Lower band-edge card at 2400 MHz.' },
+          { cite: '§15.247(e)', req: 'PSD no more than 8 dBm in any 3 kHz band.', use: 'Peak PSD card.' },
+          { cite: '§15.205', req: '2483.5–2500 MHz and 2310–2390 MHz are restricted bands.', use: 'Restricted-band card: emissions above 2483.5 MHz are judged against an absolute field-strength limit, not a relative one.' },
+          { cite: '§15.209', req: 'Above 960 MHz: 54 dBµV/m average and 74 dBµV/m peak at 3 m (≈ −41.2 / −21.2 dBm EIRP).', use: 'Restricted-band limit line on the plot.' },
+          { cite: '§15.35(b)', req: 'Peak limit is 20 dB above the average limit.', use: 'Peak vs. average restricted-band limits.' },
+          { cite: '§2.1049', req: 'Occupied bandwidth (99% power) measurement.', use: '99% occupied bandwidth card.' }
+        ],
+        guidance: ['FCC KDB 558074 D01: DTS measurement guidance, including band-edge marker-delta and integration methods', 'ANSI C63.10-2013', 'ISED RSS-247']
+      },
+      {
+        id: 'wifi-unii', track: 'wifi', level: 2, status: 'review', version: '1.1.0', owner: 'RF team',
+        path: 'tools/wifi-unii/index.html', title: 'Wi-Fi 5 GHz U-NII power and PSD',
+        summary: '§15.407 by sub-band and device class: 26 dB bandwidth, power and PSD limits, antenna gain, out-of-band emissions, DFS and TPC.',
+        refs: ['47 CFR §15.407', 'KDB 789033', 'KDB 905462'], prereqs: ['bandwidth', 'eirp-erp'],
+        regulations: [
+          { cite: '§15.407(a)(1)', req: 'U-NII-1 (5150–5250 MHz): access points 1 W and 17 dBm/MHz; client devices 250 mW and 11 dBm/MHz; outdoor APs limited to 125 mW EIRP above 30° elevation.', use: 'Power and PSD limits for U-NII-1 by device class.' },
+          { cite: '§15.407(a)(2)', req: 'U-NII-2A/2C (5250–5350, 5470–5725 MHz): lesser of 250 mW or 11 dBm + 10·log10(B), and 11 dBm/MHz PSD, where B is the 26 dB emission bandwidth in MHz.', use: '26 dB bandwidth card feeds the power limit.' },
+          { cite: '§15.407(a)(3)', req: 'U-NII-3 (5725–5850 MHz): 1 W and 30 dBm in any 500 kHz.', use: 'Power and PSD limits for U-NII-3.' },
+          { cite: '§15.407(a) (antenna gain)', req: 'Above 6 dBi, reduce conducted power and PSD by the excess gain. Fixed point-to-point exceptions: U-NII-1 up to 23 dBi (§15.407(a)(1)(iii)); U-NII-3 without reduction (§15.407(a)(3)).', use: 'Antenna gain input.' },
+          { cite: '§15.407(b)', req: 'Out-of-band emissions: −27 dBm/MHz EIRP outside U-NII-1/2A/2C; U-NII-3 uses a stepped mask from 27 dBm/MHz at the edge down to −27 dBm/MHz at 75 MHz.', use: 'Out-of-band card and limit line.' },
+          { cite: '§15.407(e)', req: 'U-NII-3 minimum 6 dB bandwidth of 500 kHz.', use: '6 dB bandwidth note for U-NII-3.' },
+          { cite: '§15.407(h)(1)', req: 'Transmit power control in U-NII-2A/2C for devices at 500 mW EIRP or more.', use: 'TPC requirement card.' },
+          { cite: '§15.407(h)(2)', req: 'DFS in U-NII-2A/2C: detect radar at −64 dBm (−62 dBm if EIRP < 200 mW and PSD < 10 dBm/MHz); 60 s channel availability check; stop normal traffic within 200 ms and all transmission within 10 s; 30 min non-occupancy.', use: 'DFS requirement card.' },
+          { cite: '§15.205 / §15.209', req: '4500–5150 and 5350–5460 MHz are restricted; emissions there must meet 54 dBµV/m average at 3 m (≈ −41.2 dBm EIRP).', use: 'Restricted-band portions of the out-of-band check.' },
+          { cite: '§2.1049', req: 'Occupied bandwidth (99% power) measurement.', use: '99% occupied bandwidth card.' }
+        ],
+        guidance: ['FCC KDB 789033 D02: U-NII measurement procedures (EBW, power, PSD, unwanted emissions)', 'FCC KDB 905462: DFS compliance procedures', 'ISED RSS-247']
+      },
+      { id: 'wifi-dfs', track: 'wifi', level: 2, status: 'planned', title: 'DFS radar timeline', summary: 'Channel availability check, radar detection, channel move and non-occupancy timing for U-NII-2A/2C.', refs: ['§15.407(h)(2)', 'KDB 905462'], prereqs: ['wifi-unii'] },
+      { id: 'wifi-coex', track: 'wifi', level: 5, status: 'planned', title: '2.4 GHz coexistence planner', summary: 'Channel planning around Bluetooth, Zigbee and microwave ovens; 1/6/11 and adjacent-channel interference.', refs: [], prereqs: ['wifi-24'] },
+
+      /* ---------- LTE ---------- */
+      {
+        id: 'lte-mask', track: 'lte', level: 2, status: 'review', version: '1.1.0', owner: 'RF team',
+        path: 'tools/lte-mask/index.html', title: 'LTE device power and emission mask',
+        summary: 'Parts 22/24/27 by band: ERP/EIRP limits, occupied bandwidth, the −13 dBm emission mask and PAPR for LTE modules.',
+        refs: ['Parts 22H, 24E, 27', 'KDB 971168'], prereqs: ['eirp-erp', 'rbw'],
+        regulations: [
+          { cite: '§22.913(a)(5)', req: 'Cellular (824–849 MHz) mobile stations: 7 W ERP.', use: 'Band 5 power limit.' },
+          { cite: '§24.232(c)', req: 'PCS (1850–1915 MHz) mobile and portable stations: 2 W EIRP.', use: 'Band 2 power limit.' },
+          { cite: '§24.232(d) / §27.50(d)(5)', req: 'Peak-to-average power ratio no more than 13 dB.', use: 'PAPR input and card.' },
+          { cite: '§27.50(b)(10), (c)(10)', req: '700 MHz and 600 MHz portable stations: 3 W ERP (fixed and mobile stations have higher limits).', use: 'Band 12, 13 and 71 power limits.' },
+          { cite: '§27.50(d)(4)', req: 'AWS (1710–1780 MHz) mobile and portable stations: 1 W EIRP.', use: 'Band 4 and 66 power limits.' },
+          { cite: '§24.238 / §27.53(h)', req: 'PCS and AWS: emissions outside the block attenuated by at least 43 + 10·log10(P) dB (−13 dBm) in 1 MHz; ≥ 1% of the emission bandwidth may be used in the first 1 MHz.', use: 'Emission mask for Bands 2, 4 and 66.' },
+          { cite: '§22.917', req: 'Cellular: 43 + 10·log10(P) dB (−13 dBm) in a 100 kHz reference bandwidth below 1 GHz; ≥ 1% of the emission bandwidth in the first 1 MHz.', use: 'Emission mask for Band 5.' },
+          { cite: '§27.53(c), (g)', req: '600/700 MHz: 43 + 10·log10(P) dB (−13 dBm) in 100 kHz; ≥ 30 kHz may be used in the first 100 kHz. Upper 700 MHz mobiles: 65 + 10·log10(P) dB (−35 dBm in 6.25 kHz) in 763–775 and 793–805 MHz.', use: 'Emission mask for Bands 12, 13 and 71, including the Band 13 public-safety limit.' },
+          { cite: '§27.53(f)', req: 'Band 13 devices must also protect GNSS: ≤ −70 dBW/MHz EIRP (wideband) and −80 dBW (discrete) in 1559–1610 MHz.', use: 'Noted for Band 13; not simulated.' },
+          { cite: '§2.1046', req: 'RF output power measurement for equipment authorization.', use: 'Conducted power and ERP/EIRP cards.' },
+          { cite: '§2.1049', req: 'Occupied bandwidth (99% power) measurement.', use: '99% occupied bandwidth card.' },
+          { cite: '§2.1051 / §2.1053', req: 'Spurious emissions at the antenna terminals and radiated spurious emissions.', use: 'Basis for the mask check; harmonics are outside this tool’s scope.' },
+          { cite: '§2.1055', req: 'Frequency stability over temperature and supply voltage.', use: 'Not simulated; see the planned frequency stability tool.' }
+        ],
+        guidance: ['FCC KDB 971168 D01: power and emission measurement procedures for licensed digital transmitters', 'ANSI C63.26-2015: compliance testing of licensed transmitters', 'FCC KDB 996369: module integration (when an LTE module is built into a host)']
+      },
+      { id: 'lte-freqstab', track: 'lte', level: 2, status: 'planned', title: 'LTE frequency stability', summary: 'Frequency error over temperature and voltage, and why it must keep emissions inside the block.', refs: ['§2.1055', '§22.355', '§27.54'], prereqs: ['lte-mask'] },
+      { id: 'lte-module', track: 'lte', level: 4, status: 'planned', title: 'LTE module integration and co-location', summary: 'Using a certified LTE module in a HaLow product: antenna gain limits, simultaneous transmission and SAR.', refs: ['KDB 996369', 'KDB 447498'], prereqs: ['lte-mask', 'mpe'] },
+      { id: 'lte-bands', track: 'lte', level: 5, status: 'planned', title: 'LTE band and carrier selection', summary: 'Which bands a US deployment needs (2/4/5/12/13/66/71) and what each costs in certification.', refs: [], prereqs: ['lte-mask'] },
+
+      /* ---------- CBRS ---------- */
+      {
+        id: 'cbrs-mask', track: 'cbrs', level: 2, status: 'review', version: '1.1.0', owner: 'RF team',
+        path: 'tools/cbrs-mask/index.html', title: 'CBRS power and emission mask',
+        summary: 'Part 96 by device class (EUD, CBSD Category A/B): EIRP per 10 MHz, the three-tier emission mask, PAPR and SAS obligations.',
+        refs: ['47 CFR Part 96', '§96.41', 'KDB 940660'], prereqs: ['lte-mask', 'eirp-erp'],
+        regulations: [
+          { cite: '§96.41(b)', req: 'Maximum EIRP per 10 MHz: end user devices 23 dBm, Category A CBSDs 30 dBm, Category B CBSDs 47 dBm. Maximum PSD: Category A 20 dBm/MHz, Category B 37 dBm/MHz.', use: 'Device class selector, EIRP per 10 MHz and PSD cards.' },
+          { cite: '§96.41(e)', req: 'Conducted emissions outside the assigned channel: −13 dBm/MHz within 10 MHz of the channel edge (CBSD) or within B MHz (EUD, B = its channel bandwidth), −25 dBm/MHz beyond; additionally −25 dBm/MHz below 3540 and above 3710 MHz, and −40 dBm/MHz below 3530 and above 3720 MHz. EUD ACLR ≥ 30 dB. 1% EBW resolution allowed in the first 1 MHz.', use: 'Emission mask card, ACLR and the stepped limit line.' },
+          { cite: '§96.41(g)', req: 'CBSD transmitters: peak-to-average power ratio no more than 13 dB.', use: 'PAPR card (CBSD classes).' },
+          { cite: '§96.39', req: 'CBSDs must register with a SAS, report geolocation and operate only on SAS-authorized channels and power.', use: 'Device class notes (CBSD vs. EUD).' },
+          { cite: '§96.43', req: 'Category A and B CBSD deployment limits (antenna height, indoor/outdoor, professional installation).', use: 'Device class notes.' },
+          { cite: '§96.47', req: 'End user devices may transmit only when authorized by and under the control of a CBSD.', use: 'EUD notes.' },
+          { cite: '§2.1046 / §2.1049', req: 'RF output power and occupied bandwidth measurements.', use: 'Conducted power and occupied bandwidth cards.' },
+          { cite: '§2.1051 / §2.1053', req: 'Spurious emissions at antenna terminals and radiated.', use: 'Basis for the mask check.' }
+        ],
+        guidance: ['FCC KDB 940660: Part 96 CBRS equipment certification guidance', 'WInnForum WINNF-TS-0122: CBSD/DP conformance and certification test specification', 'ANSI C63.26-2015: compliance testing of licensed transmitters']
+      },
+      { id: 'cbrs-sas', track: 'cbrs', level: 4, status: 'planned', title: 'CBSD registration and SAS grants', summary: 'Registration parameters, grant/heartbeat cycle, and what changes when the SAS suspends or relocates a grant.', refs: ['§96.39', 'WINNF-TS-0016'], prereqs: ['cbrs-mask'] },
+
+      /* ---------- Co-location ---------- */
+      {
+        id: 'coloc-im', track: 'coloc', level: 2, status: 'review', version: '1.1.0', owner: 'RF team',
+        path: 'tools/coloc-im/index.html', title: 'Intermod and spurious planner',
+        summary: 'Enter the radios in a host; find harmonics and 2nd/3rd/5th-order intermod products that land in restricted bands, licensed bands or another radio’s receiver, and export a test matrix.',
+        refs: ['§15.205', 'KDB 996369', 'ANSI C63.10'], prereqs: ['bandwidth', 'lte-mask'],
+        regulations: [
+          { cite: '§15.205', req: 'Restricted bands: Part 15 transmitters may only emit spurious emissions there, at §15.209 levels.', use: 'Red bands on the chart and the "Restricted" hits in the table.' },
+          { cite: '§15.209', req: 'General radiated limits (above 960 MHz: 54 dBµV/m average, 74 dBµV/m peak at 3 m).', use: 'The limit a restricted-band hit is tested against.' },
+          { cite: '§15.247(d) / §15.407(b)', req: 'Unwanted-emission limits for HaLow, 2.4 GHz and 5 GHz Wi-Fi transmitters.', use: 'Apply to harmonics and products generated while those radios transmit.' },
+          { cite: '§22.917 / §24.238 / §27.53 / §96.41(e)', req: 'Licensed-band emission limits (−13 dBm, and Part 96 tiers) for LTE and CBRS transmitters.', use: '"Licensed band" hits and LTE/CBRS-generated products.' },
+          { cite: '§27.53(f)', req: 'Band 13 emissions in 1559–1610 MHz limited to −70 dBW/MHz EIRP to protect GNSS.', use: 'Band 13 second-harmonic hit on GNSS L1.' },
+          { cite: '§2.1051 / §2.1053', req: 'Spurious emissions at antenna terminals and radiated, for licensed transmitters.', use: 'Basis for testing LTE/CBRS products.' },
+          { cite: '§2.1043', req: 'Permissive changes: adding or co-locating a transmitter can require a Class II change or a new FCC ID.', use: 'When a co-location finding forces new certification work.' },
+          { cite: '§15.31(a)(3)', req: 'Part 15 intentional radiators are measured per ANSI C63.10.', use: 'Radiated test method for simultaneous transmission.' },
+          { cite: '§15.33(a)', req: 'Radiated emissions are searched up to the 10th harmonic of the highest fundamental, or 40 GHz, whichever is lower (fundamentals below 10 GHz).', use: 'Harmonics setting (default 10) and the 40 GHz cut for Part 15 radios.' },
+          { cite: '§2.1057(a)', req: 'Licensed transmitters: spurious emissions are investigated up to the 10th harmonic of the fundamental.', use: 'LTE and CBRS harmonics are not cut at 40 GHz.' }
+        ],
+        guidance: ['FCC KDB 996369 D04: module integration, including co-location and simultaneous transmission in the host', 'FCC KDB 447498: RF exposure for simultaneous transmission', 'ANSI C63.10-2013 and ANSI C63.26-2015: radiated spurious test methods']
+      },
+      {
+        id: 'coloc-mpe', track: 'coloc', level: 4, status: 'review', version: '1.0.0', owner: 'RF team',
+        path: 'tools/coloc-mpe/index.html', title: 'Simultaneous-transmission RF exposure',
+        summary: 'Sum of exposure ratios across radios that transmit at once: MPE for mobile use, SAR test exemption for portable use, and the minimum safe separation.',
+        refs: ['§1.1307(b)', '§1.1310', 'KDB 447498'], prereqs: ['coloc-im', 'eirp-erp'],
+        regulations: [
+          { cite: '§1.1310', req: 'Maximum permissible exposure for the general population: f/1500 mW/cm² for 300–1500 MHz, 1.0 mW/cm² for 1.5–100 GHz; SAR 1.6 W/kg over 1 g.', use: 'MPE limit per radio and the SAR limit for measured values.' },
+          { cite: '§1.1307(b)(3)(i)(B)', req: 'SAR test exemption threshold P_th for 300 MHz–6 GHz at 0.5–40 cm, based on ERP at 20 cm and frequency.', use: 'Portable mode: each radio’s available power vs. P_th.' },
+          { cite: '§1.1307(b)(3)(ii)', req: 'Multiple transmitters: exemption holds only if the sum of each transmitter’s fraction of its threshold (or limit) is ≤ 1.', use: 'Sum of ratios card and the 1.0 line on the chart.' },
+          { cite: '§2.1091', req: 'Mobile devices (≥ 20 cm from people) are evaluated against MPE.', use: 'Mobile/fixed mode.' },
+          { cite: '§2.1093', req: 'Portable devices (< 20 cm, body-worn or handheld) are evaluated against SAR.', use: 'Portable mode.' },
+          { cite: '§2.1043', req: 'A new co-location or use condition outside a module’s grant needs a Class II permissive change or a new FCC ID.', use: 'Result card: when exposure is not covered by the module grants.' }
+        ],
+        guidance: ['FCC KDB 447498 D01 (and D04 for the 2019 rules): RF exposure procedures, including simultaneous transmission and SAR-to-peak-location ratios', 'FCC KDB 865664: SAR measurement procedures', 'FCC KDB 996369: module integration and co-location conditions in grants']
+      },
+      {
+        id: 'coloc-plan', track: 'coloc', level: 4, status: 'review', version: '1.0.0', owner: 'RF team',
+        path: 'tools/coloc-plan/index.html', title: 'Co-location test plan builder',
+        summary: 'From the radios, module grants, antennas and use condition: the certification path for each radio and a lab-ready test matrix, including simultaneous-transmission and RF exposure work.',
+        refs: ['KDB 996369', 'KDB 447498', '§2.1043'], prereqs: ['coloc-im', 'coloc-mpe'],
+        regulations: [
+          { cite: '§15.212', req: 'Modular approval: a certified module may be used in a host under the grant’s conditions (antennas, exposure, co-location).', use: '“Module grant covers it” path.' },
+          { cite: '§2.1043', req: 'Permissive changes: Class II for changes that degrade the reported characteristics (higher-gain or different antennas, new exposure conditions, co-location).', use: '“Class II permissive change” path.' },
+          { cite: '§2.933', req: 'Change in identification: a host maker may take over a module’s certification under its own FCC ID and file changes itself.', use: 'Alternative when the module grantee won’t file a Class II change.' },
+          { cite: '§15.101 / §15.109 / §15.107', req: 'Unintentional radiators: the host’s digital circuitry needs authorization (usually SDoC) against Part 15 Subpart B radiated and AC-conducted limits.', use: 'Host Part 15B rows.' },
+          { cite: '§15.207', req: 'AC power-line conducted limits for Part 15 transmitters powered from the mains.', use: 'AC conducted row (mains-powered hosts).' },
+          { cite: '§15.205 / §15.209 / §15.33', req: 'Restricted bands, general radiated limits, and the 10th-harmonic search range.', use: 'Simultaneous-transmission radiated spurious rows.' },
+          { cite: '§1.1307 / §1.1310 / §2.1091 / §2.1093', req: 'RF exposure: MPE for mobile, SAR (or exemption) for portable, summed for simultaneous transmission.', use: 'RF exposure row.' },
+          { cite: '§2.925 / §15.19', req: 'Labeling: FCC ID on the product (“Contains FCC ID” for modules) and required statements.', use: 'Labeling row.' }
+        ],
+        guidance: ['FCC KDB 996369 D01–D04: modular transmitter integration and host responsibilities', 'FCC KDB 447498: RF exposure, simultaneous transmission', 'FCC KDB 178919: permissive change policy', 'ANSI C63.10 / C63.26: test methods']
+      },
+      { id: 'coloc-desense', track: 'coloc', level: 5, status: 'planned', title: 'Coexistence and desense margin', summary: 'Antenna isolation needed so one radio’s transmitter doesn’t desensitize another’s receiver.', refs: [], prereqs: ['coloc-im'] }
+    ]
+  };
+  if (typeof module !== 'undefined' && module.exports) module.exports = manifest;
+  root.RF = root.RF || {}; root.RF.manifest = manifest;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+</script>
+<script>
+/* RF Lab math library. Pure functions, no DOM. Works in the browser (window.RF.math) and Node (require). */
+(function (root) {
+  'use strict';
+  const LOG10 = Math.log10;
+
+  const dbmToMw = (dbm) => Math.pow(10, dbm / 10);
+  const mwToDbm = (mw) => 10 * LOG10(mw);
+  /** Power-sum a list of dBm values (incoherent). */
+  const sumDbm = (list) => mwToDbm(list.reduce((s, d) => s + dbmToMw(d), 0));
+  /** Scale a level measured in rbwHz to a reference bandwidth (default 3 kHz). */
+  const scaleToBw = (dbm, rbwHz, refHz = 3000) => dbm - 10 * LOG10(rbwHz / refHz);
+  /** Average PSD of a flat signal of total power spread over bwHz, per refHz. */
+  const avgPsd = (totalDbm, bwHz, refHz = 3000) => totalDbm - 10 * LOG10(bwHz / refHz);
+  /** EIRP from conducted power, antenna gain and losses. */
+  const eirp = (condDbm, gainDbi, lossDb = 0) => condDbm + gainDbi - lossDb;
+  /** Field strength (dBuV/m) from EIRP (dBm) at distance d (m), far-field free space. */
+  const eirpToFieldDbuv = (eirpDbm, dM) => eirpDbm + 104.77 - 20 * LOG10(dM);
+  const fieldDbuvToEirp = (eDbuv, dM) => eDbuv - 104.77 + 20 * LOG10(dM);
+  /** Free-space path loss in dB (fMHz, dKm). */
+  const fspl = (fMHz, dKm) => 20 * LOG10(dKm) + 20 * LOG10(fMHz) + 32.44;
+
+  function peak(a) { let pk = -Infinity, pi = 0; for (let i = 0; i < a.length; i++) if (a[i] > pk) { pk = a[i]; pi = i; } return { pk, pi }; }
+
+  /**
+   * n-dB bandwidth: outermost crossings of (peak - n) on each side of the peak, linearly interpolated.
+   * f in MHz, a in dBm. Returns {fL, fR, bwHz, pk, pi, th, clipped}.
+   */
+  function nDbBandwidth(f, a, n = 6) {
+    const N = f.length, { pk, pi } = peak(a), th = pk - n;
+    let i1 = 0; while (i1 < pi && a[i1] < th) i1++;
+    let i2 = N - 1; while (i2 > pi && a[i2] < th) i2--;
+    const ip = (ia, ib) => { const d = a[ib] - a[ia]; return Math.abs(d) < 1e-12 ? f[ib] : f[ia] + (th - a[ia]) / d * (f[ib] - f[ia]); };
+    const fL = i1 > 0 ? ip(i1 - 1, i1) : f[0];
+    const fR = i2 < N - 1 ? ip(i2 + 1, i2) : f[N - 1];
+    const clipped = (i1 === 0 && a[0] >= th) || (i2 === N - 1 && a[N - 1] >= th);
+    return { fL, fR, bwHz: (fR - fL) * 1e6, pk, pi, th, n, clipped };
+  }
+
+  /** Occupied bandwidth containing `frac` of integrated trace power. */
+  function obw(f, a, frac = 0.99) {
+    const N = f.length, cum = [0];
+    for (let i = 1; i < N; i++) cum.push(cum[i - 1] + (dbmToMw(a[i]) + dbmToMw(a[i - 1])) / 2 * (f[i] - f[i - 1]));
+    const T = cum[N - 1], cut = (1 - frac) / 2;
+    const at = (q) => { for (let i = 1; i < N; i++) if (cum[i] >= q) { const r = (q - cum[i - 1]) / ((cum[i] - cum[i - 1]) || 1); return f[i - 1] + r * (f[i] - f[i - 1]); } return f[N - 1]; };
+    const oL = at(cut * T), oR = at((1 - cut) * T);
+    return { oL, oR, bwHz: (oR - oL) * 1e6, totalMwMHz: T };
+  }
+
+  /** Channel power (dBm) from a trace in dBm/RBW: integrate and divide by RBW (ENBW ~ RBW). */
+  function channelPower(f, a, rbwHz, fLo = -Infinity, fHi = Infinity) {
+    let s = 0;
+    for (let i = 1; i < f.length; i++) {
+      const fm = (f[i] + f[i - 1]) / 2; if (fm < fLo || fm > fHi) continue;
+      s += (dbmToMw(a[i]) + dbmToMw(a[i - 1])) / 2 * (f[i] - f[i - 1]) * 1e6;
+    }
+    return mwToDbm(s / rbwHz);
+  }
+
+  /** Band-edge: max level outside [lo, hi] MHz relative to peak (dBc). Null where trace doesn't extend. */
+  function bandEdge(f, a, lo, hi) {
+    const { pk } = peak(a); let mb = -Infinity, ma = -Infinity;
+    for (let i = 0; i < f.length; i++) { if (f[i] < lo) mb = Math.max(mb, a[i]); else if (f[i] > hi) ma = Math.max(ma, a[i]); }
+    return { lo: mb === -Infinity ? null : pk - mb, hi: ma === -Infinity ? null : pk - ma, pk };
+  }
+
+  /**
+   * Parse analyzer export text. First two numbers per line = freq, amplitude.
+   * units: 'auto' | multiplier to Hz (1, 1e3, 1e6, 1e9). Returns {f (MHz), a (dBm)}.
+   */
+  function parseTrace(text, units = 'auto', offsetDb = 0) {
+    const rows = [];
+    for (const line of String(text).split(/\r?\n/)) {
+      const nums = line.split(/[,;\t ]+/).filter((s) => s !== '').map(Number).filter(Number.isFinite);
+      if (nums.length >= 2) rows.push([nums[0], nums[1]]);
+    }
+    if (rows.length < 10) throw new Error('Need at least 10 data rows with two numeric columns (frequency, dBm).');
+    rows.sort((p, q) => p[0] - q[0]);
+    let toMHz;
+    if (units === 'auto') { const mx = rows[rows.length - 1][0]; toMHz = mx > 1e7 ? 1e-6 : mx > 1e4 ? 1e-3 : mx > 100 ? 1 : 1e3; }
+    else toMHz = Number(units) / 1e6;
+    const f = new Float64Array(rows.length), a = new Float64Array(rows.length);
+    rows.forEach((r, i) => { f[i] = r[0] * toMHz; a[i] = r[1] + offsetDb; });
+    return { f, a };
+  }
+
+  /** Seeded PRNG (xorshift32) for repeatable simulations. */
+  function rng(seed) { let x = (seed >>> 0) || 1; return () => { x ^= x << 13; x >>>= 0; x ^= x >> 17; x ^= x << 5; x >>>= 0; return x / 4294967296; }; }
+
+  /**
+   * Simulate an analyzer trace of a band-limited signal.
+   * opts: {fcMHz, occMHz, spanMHz | startMHz+stopMHz, powerDbm, order, rippleDb, rbwHz, noiseDbm, seed, points,
+   *        shoulderDbc, shoulderWidth, shoulderOrder}  (shoulder = PA spectral regrowth relative to in-band density)
+   */
+  function simulateSignal(o) {
+    const N = o.points || 2401, r = rng(o.seed || 1);
+    const fStart = o.startMHz ?? o.fcMHz - o.spanMHz / 2, span = (o.stopMHz ?? o.fcMHz + o.spanMHz / 2) - fStart, df = span / (N - 1) * 1e6;
+    const ph = [0, 1, 2, 3, 4].map(() => r() * 6.283), fr = [3.1, 5.7, 9.3, 13.9, 21.1];
+    const f = new Float64Array(N), dens = new Float64Array(N); let tot = 0;
+    for (let i = 0; i < N; i++) {
+      const fm = fStart + span * i / (N - 1); f[i] = fm;
+      const x = (fm - o.fcMHz) / (o.occMHz / 2);
+      let lin = 1 / (1 + Math.pow(Math.abs(x), 2 * o.order));
+      if (o.rippleDb > 0) { let s = 0; for (let k = 0; k < 5; k++) s += Math.sin(fr[k] * x + ph[k]); lin *= Math.pow(10, (o.rippleDb / 2) * (s / 3.2) / 10); }
+      // optional spectral-regrowth shoulder (PA nonlinearity): a wider, lower skirt relative to the in-band level
+      if (o.shoulderDbc !== undefined && o.shoulderDbc !== null) { const sw = o.shoulderWidth || 3; lin += Math.pow(10, o.shoulderDbc / 10) / (1 + Math.pow(Math.abs(x) / sw, 2 * (o.shoulderOrder || 2))); }
+      dens[i] = lin; tot += lin * df;
+    }
+    const Pmw = dbmToMw(o.powerDbm); for (let i = 0; i < N; i++) dens[i] = dens[i] / tot * Pmw;
+    const half = Math.max(0, Math.round(o.rbwHz / df / 2)), pre = new Float64Array(N + 1);
+    for (let i = 0; i < N; i++) pre[i + 1] = pre[i] + dens[i] * df;
+    const a = new Float64Array(N), nlin = dbmToMw(o.noiseDbm ?? -70);
+    for (let i = 0; i < N; i++) {
+      const lo = Math.max(0, i - half), hi = Math.min(N, i + half + 1);
+      const pw = (pre[hi] - pre[lo]) * (o.rbwHz / ((hi - lo) * df || o.rbwHz));
+      const j = (r() - 0.5);
+      a[i] = mwToDbm(pw + nlin * Math.pow(10, (r() - 0.5) * 0.6)) + j * (pw < nlin * 20 ? 1 : 0.25);
+    }
+    return { f, a, rbw: o.rbwHz };
+  }
+
+  /** ERP/EIRP conversion: ERP is referenced to a half-wave dipole (2.15 dBi). */
+  const eirpToErp = (eirpDbm) => eirpDbm - 2.15;
+  const erpToEirp = (erpDbm) => erpDbm + 2.15;
+
+  /** Max trace level (and its frequency) within [lo, hi] MHz. Returns null if the trace has no points there. */
+  function maxInRange(f, a, lo, hi) {
+    let m = -Infinity, at = null;
+    for (let i = 0; i < f.length; i++) if (f[i] >= lo && f[i] <= hi && a[i] > m) { m = a[i]; at = f[i]; }
+    return at === null ? null : { max: m, at };
+  }
+
+  /** Piecewise-linear interpolation over [[x, y], ...] sorted by x (clamped at the ends). */
+  function interp(points, x) {
+    if (x <= points[0][0]) return points[0][1];
+    for (let i = 1; i < points.length; i++) if (x <= points[i][0]) { const [x0, y0] = points[i - 1], [x1, y1] = points[i]; return y0 + (y1 - y0) * (x - x0) / (x1 - x0); }
+    return points[points.length - 1][1];
+  }
+
+  /**
+   * Worst margin of a trace against a limit line. limitFn(fMHz) returns the limit in the same units as the
+   * converted trace level, or null where no limit applies. convert(level, fMHz) maps trace dBm/RBW to the limit's units.
+   * Returns {margin, at, level, limit} (margin = limit − level; negative = fail) or null if nothing was checked.
+   */
+  function worstMargin(f, a, limitFn, convert = (v) => v) {
+    let w = null;
+    for (let i = 0; i < f.length; i++) {
+      const lim = limitFn(f[i]); if (lim === null || lim === undefined) continue;
+      const lv = convert(a[i], f[i]), m = lim - lv;
+      if (!w || m < w.margin) w = { margin: m, at: f[i], level: lv, limit: lim };
+    }
+    return w;
+  }
+
+  function fmtHz(h) { h = Math.abs(h); return h >= 1e6 ? (h / 1e6).toFixed(3) + ' MHz' : h >= 1e3 ? (h / 1e3).toFixed(h >= 1e5 ? 0 : 1) + ' kHz' : h.toFixed(0) + ' Hz'; }
+  const fmtDb = (v, d = 2, unit = 'dB') => (Number.isFinite(v) ? v.toFixed(d) : '–') + ' ' + unit;
+
+  const api = { dbmToMw, mwToDbm, sumDbm, scaleToBw, avgPsd, eirp, eirpToErp, erpToEirp, maxInRange, interp, worstMargin, eirpToFieldDbuv, fieldDbuvToEirp, fspl, peak, nDbBandwidth, obw, channelPower, bandEdge, parseTrace, rng, simulateSignal, fmtHz, fmtDb };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  root.RF = root.RF || {}; root.RF.math = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+</script>
+<script>
+/*
+ * RF Lab regulatory constants. SINGLE SOURCE OF TRUTH: tools must read limits from here, never hard-code them.
+ * When a rule changes: update the value, its `cite`, and `verified`, then bump `version` and note it in CHANGELOG.md.
+ * Every value below was checked against the CFR text on 2026-11-23 (Cornell LII mirror of the eCFR; the §1.1307
+ * SAR-exemption formula, published only as an image, was checked against FCC-filed RF exposure reports quoting it).
+ * Each section's `sources` lists what it was checked against. Training reference, not legal advice.
+ */
+(function (root) {
+  'use strict';
+  const limits = {
+    version: '2026.11.5',
+    verified: '2026-11-23',
+    verifiedAgainst: 'CFR text (law.cornell.edu mirror of eCFR), 2026-11-23',
+    fcc: {
+      /* ---------------- HaLow / 900 MHz ISM ---------------- */
+      ism900: {
+        cite: '47 CFR §15.247', band: { loMHz: 902, hiMHz: 928 }, sources: ['https://www.law.cornell.edu/cfr/text/47/15.247', 'https://www.law.cornell.edu/cfr/text/47/15.249'],
+        dts: {
+          min6dBBwKHz: 500, cite6dB: '§15.247(a)(2)',
+          maxConductedDbm: 30, citePower: '§15.247(b)(3)',
+          antennaGainRefDbi: 6, gainReductionDbPerDb: 1, citeGain: '§15.247(b)(4)',
+          psdDbmPer3kHz: 8, citePsd: '§15.247(e)',
+          bandEdgeDbc: { peakMethod: 20, averageMethod: 30 }, citeBandEdge: '§15.247(d)'
+        },
+        fhss: {
+          cite: '§15.247(a)(1)(i), (b)(2)',
+          narrow: { max20dBBwKHz: 250, minChannels: 50, maxDbm: 30, dwellS: 0.4, periodS: 20 },
+          wide: { max20dBBwKHz: 500, minChannels: 25, maxDbm: 24, dwellS: 0.4, periodS: 10 }
+        },
+        lowPower15249: { cite: '§15.249', fieldMvPerM3m: 50 }
+      },
+
+      /* ---------------- Wi-Fi 2.4 GHz (same §15.247 DTS rules as 900 MHz) ---------------- */
+      wifi24: {
+        cite: '47 CFR §15.247', band: { loMHz: 2400, hiMHz: 2483.5 }, sources: ['https://www.law.cornell.edu/cfr/text/47/15.247', 'https://www.law.cornell.edu/cfr/text/47/15.205'],
+        dts: {
+          min6dBBwKHz: 500, maxConductedDbm: 30, psdDbmPer3kHz: 8, antennaGainRefDbi: 6,
+          bandEdgeDbc: { peakMethod: 20, averageMethod: 30 },
+          ptpGainNote: 'Fixed point-to-point: reduce power 1 dB per 3 dB of gain above 6 dBi (§15.247(c)(1)(i))'
+        },
+        restrictedAbove: { loMHz: 2483.5, hiMHz: 2500, cite: '§15.205(a)' },
+        restrictedBelow: { loMHz: 2310, hiMHz: 2390, cite: '§15.205(a)' },
+        channelsUS: { first: 1, last: 11, f1MHz: 2412, stepMHz: 5, note: 'Channels 12–13 are allowed only if the 2483.5 MHz restricted-band limit is met, usually with heavy power back-off.' }
+      },
+
+      /* ---------------- Wi-Fi 5 GHz U-NII (§15.407) ---------------- */
+      unii: {
+        cite: '47 CFR §15.407', sources: ['https://www.law.cornell.edu/cfr/text/47/15.407'],
+        antennaGainRefDbi: 6, gainNote: 'Above 6 dBi, reduce conducted power and PSD dB for dB. Exceptions: U-NII-1 fixed point-to-point up to 23 dBi with no reduction (§15.407(a)(1)(iii)); U-NII-3 fixed point-to-point without reduction (§15.407(a)(3)).',
+        subbands: {
+          'U-NII-1': { loMHz: 5150, hiMHz: 5250, cite: '§15.407(a)(1)', channels: [36, 40, 44, 48], dfs: false,
+            classes: {
+              client: { label: 'Client device', powerDbm: 24, psdDbmPerMHz: 11 },
+              apIndoor: { label: 'Indoor access point', powerDbm: 30, psdDbmPerMHz: 17 },
+              apOutdoor: { label: 'Outdoor access point', powerDbm: 30, psdDbmPerMHz: 17, note: 'EIRP above 30° elevation limited to 125 mW (21 dBm).' }
+            },
+            oob: { type: 'flat', eirpDbmPerMHz: -27, outsideMHz: [5150, 5350], cite: '§15.407(b)(1)' } },
+          'U-NII-2A': { loMHz: 5250, hiMHz: 5350, cite: '§15.407(a)(2)', channels: [52, 56, 60, 64], dfs: true,
+            classes: { any: { label: 'Any device', powerDbm: 24, powerFormula: '11 + 10·log10(B)', psdDbmPerMHz: 11 } },
+            oob: { type: 'flat', eirpDbmPerMHz: -27, outsideMHz: [5150, 5350], cite: '§15.407(b)(2)' } },
+          'U-NII-2C': { loMHz: 5470, hiMHz: 5725, cite: '§15.407(a)(2)', channels: [100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144], dfs: true,
+            classes: { any: { label: 'Any device', powerDbm: 24, powerFormula: '11 + 10·log10(B)', psdDbmPerMHz: 11 } },
+            oob: { type: 'flat', eirpDbmPerMHz: -27, outsideMHz: [5470, 5725], cite: '§15.407(b)(3)' } },
+          'U-NII-3': { loMHz: 5725, hiMHz: 5850, cite: '§15.407(a)(3)', channels: [149, 153, 157, 161, 165], dfs: false, min6dBBwKHz: 500, cite6dB: '§15.407(e)',
+            classes: { any: { label: 'Any device', powerDbm: 30, psdDbmPer500kHz: 30 } },
+            oob: { type: 'mask', outsideMHz: [5725, 5850], cite: '§15.407(b)(4)(i)',
+              // EIRP dBm/MHz vs. MHz outside the band edge (piecewise linear)
+              points: [[0, 27], [5, 15.6], [25, 10], [75, -27], [1e6, -27]] } }
+        },
+        restricted: [[4500, 5150], [5350, 5460]],
+        dfs: { cite: '§15.407(h)(2); KDB 905462', thresholdDbm: { lowPower: -62, other: -64 }, lowPowerCondition: { eirpBelowDbm: 23, psdBelowDbmPerMHz: 10 }, cacS: 60, channelMoveS: 10, closingTxMs: 200, nonOccupancyMin: 30,
+          note: '−62 dBm applies only when EIRP < 200 mW AND PSD < 10 dBm/MHz; otherwise −64 dBm (EIRP 200 mW–1 W). Normal traffic stops within 200 ms; all transmission within 10 s.' },
+        tpc: { cite: '§15.407(h)(1)', requiredAtEirpDbm: 27, reduceDb: 6, note: 'Required in U-NII-2A/2C when max EIRP is 500 mW or more; must operate at least 6 dB below a 30 dBm mean EIRP.' },
+        channelCenterMHz: (ch) => 5000 + 5 * ch
+      },
+
+      /* ---------------- LTE device (UE / module) side ---------------- */
+      lte: {
+        sources: ['https://www.law.cornell.edu/cfr/text/47/22.913', 'https://www.law.cornell.edu/cfr/text/47/22.917', 'https://www.law.cornell.edu/cfr/text/47/24.232', 'https://www.law.cornell.edu/cfr/text/47/24.238', 'https://www.law.cornell.edu/cfr/text/47/27.50', 'https://www.law.cornell.edu/cfr/text/47/27.53'],
+        erpOffsetDb: 2.15, // ERP = EIRP − 2.15 dB
+        mask: {
+          absDbm: -13, formula: 'Attenuation ≥ 43 + 10·log10(P) dB below transmitter power P (W), i.e. −13 dBm absolute in the reference bandwidth',
+          note: 'Reference bandwidth and the near-edge allowance differ by band: 1 MHz above 1 GHz (PCS/AWS), 100 kHz below 1 GHz (Parts 22 and 27).'
+        },
+        bands: {
+          B2: { dlLoMHz: 1930, dlHiMHz: 1990, name: 'PCS', ulLoMHz: 1850, ulHiMHz: 1910, part: '24 Subpart E', limitType: 'EIRP', limitDbm: 33, citePower: '§24.232(c)', citeMask: '§24.238', paprDb: 13, citePapr: '§24.232(d)', maskBwHz: 1e6, nearEdge: { widthHz: 1e6, rbwFracOfEbw: 0.01 }, bwsMHz: [1.4, 3, 5, 10, 15, 20] },
+          B4: { dlLoMHz: 2110, dlHiMHz: 2155, name: 'AWS-1', ulLoMHz: 1710, ulHiMHz: 1755, part: '27', limitType: 'EIRP', limitDbm: 30, citePower: '§27.50(d)(4)', citeMask: '§27.53(h)', paprDb: 13, citePapr: '§27.50(d)(5)', maskBwHz: 1e6, nearEdge: { widthHz: 1e6, rbwFracOfEbw: 0.01 }, bwsMHz: [1.4, 3, 5, 10, 15, 20] },
+          B5: { dlLoMHz: 869, dlHiMHz: 894, name: 'Cellular 850', ulLoMHz: 824, ulHiMHz: 849, part: '22 Subpart H', limitType: 'ERP', limitDbm: 38.45, citePower: '§22.913(a)(5)', citeMask: '§22.917', paprDb: null, maskBwHz: 1e5, nearEdge: { widthHz: 1e6, rbwFracOfEbw: 0.01 }, bwsMHz: [1.4, 3, 5, 10] },
+          B12: { dlLoMHz: 729, dlHiMHz: 746, name: 'Lower 700', ulLoMHz: 699, ulHiMHz: 716, part: '27', limitType: 'ERP', limitDbm: 34.77, citePower: '§27.50(c)(10)', citeMask: '§27.53(g)', paprDb: null, maskBwHz: 1e5, nearEdge: { widthHz: 1e5, minRbwHz: 3e4 }, bwsMHz: [1.4, 3, 5, 10], note: 'Portable limit (3 W ERP, §27.50(c)(10)) shown; mobile stations 30 W ERP (§27.50(c)(9)).' },
+          B13: { dlLoMHz: 746, dlHiMHz: 756, name: 'Upper 700 C', ulLoMHz: 777, ulHiMHz: 787, part: '27', limitType: 'ERP', limitDbm: 34.77, citePower: '§27.50(b)(10)', citeMask: '§27.53(c)', paprDb: null, maskBwHz: 1e5, nearEdge: { widthHz: 1e5, minRbwHz: 3e4 }, extraMasks: [{ loMHz: 763, hiMHz: 775, dbm: -35, bwHz: 6250, cite: '§27.53(c)(4), (c)(6)' }, { loMHz: 793, hiMHz: 805, dbm: -35, bwHz: 6250, cite: '§27.53(c)(4), (c)(6)' }], bwsMHz: [5, 10], note: 'Portable limit shown (mobile 30 W ERP, §27.50(b)(9)). Mobile/portable emissions in 763–775 and 793–805 MHz must be attenuated 65 + 10·log10(P) dB (−35 dBm in 6.25 kHz, §27.53(c)(4)). GNSS: ≤ −70 dBW/MHz EIRP wideband and −80 dBW discrete in 1559–1610 MHz (§27.53(f)).' },
+          B66: { dlLoMHz: 2110, dlHiMHz: 2200, name: 'AWS-1/3', ulLoMHz: 1710, ulHiMHz: 1780, part: '27', limitType: 'EIRP', limitDbm: 30, citePower: '§27.50(d)(4)', citeMask: '§27.53(h)', paprDb: 13, citePapr: '§27.50(d)(5)', maskBwHz: 1e6, nearEdge: { widthHz: 1e6, rbwFracOfEbw: 0.01 }, bwsMHz: [1.4, 3, 5, 10, 15, 20] },
+          B71: { dlLoMHz: 617, dlHiMHz: 652, name: '600 MHz', ulLoMHz: 663, ulHiMHz: 698, part: '27', limitType: 'ERP', limitDbm: 34.77, citePower: '§27.50(c)(10)', citeMask: '§27.53(g)', paprDb: null, maskBwHz: 1e5, nearEdge: { widthHz: 1e5, minRbwHz: 3e4 }, bwsMHz: [5, 10, 15, 20] }
+        },
+        occupiedFraction: 0.9, // LTE uses 90% of the channel for resource blocks (e.g. 18 MHz of 20 MHz)
+        freqStability: { cite: '§2.1055; §22.355; §24.235; §27.54', note: 'Fundamental must stay within the authorized band over temperature and voltage; Part 22 mobile ±2.5 ppm.' }
+      },
+
+      /* ---------------- CBRS (3550–3700 MHz, Part 96) ---------------- */
+      cbrs: {
+        cite: '47 CFR Part 96', band: { loMHz: 3550, hiMHz: 3700 }, sources: ['https://www.law.cornell.edu/cfr/text/47/96.41'],
+        classes: {
+          eud: { label: 'End user device (EUD)', eirpDbmPer10MHz: 23, psdDbmPerMHz: null, cite: '§96.41(b)', cbsd: false, note: 'Operates only under the control of a registered CBSD; no SAS registration of its own.' },
+          catA: { label: 'CBSD Category A', eirpDbmPer10MHz: 30, psdDbmPerMHz: 20, cite: '§96.41(b)', cbsd: true, note: 'Registers with a SAS; outdoor antenna height ≤ 6 m HAAT; geolocation within ±50 m horizontal, ±3 m vertical.' },
+          catB: { label: 'CBSD Category B', eirpDbmPer10MHz: 47, psdDbmPerMHz: 37, cite: '§96.41(b)', cbsd: true, note: 'Outdoor only, professionally installed (CPI), registered with a SAS; authorized only once an ESC is operating.' }
+        },
+        mask: {
+          cite: '§96.41(e)', nearDbmPerMHz: -13, farDbmPerMHz: -25,
+          nearWithinMHz: { cbsd: 10, eud: 'B' }, // EUD: 0 to B MHz, B = the EUD's channel bandwidth (§96.41(e)(1)(ii))
+          additional: [{ belowMHz: 3540, aboveMHz: 3710, dbmPerMHz: -25 }, { belowMHz: 3530, aboveMHz: 3720, dbmPerMHz: -40 }], // §96.41(e)(2)
+          nearEdgeWidthMHz: 1, nearEdgeRbwFracOfEbw: 0.01, // §96.41(e)(3)(i)
+          eudAclrDb: 30, // §96.41(e)(1)(ii)
+          note: 'Conducted, per MHz, relative to the assigned channel edges. Additional limits: −25 dBm/MHz below 3540 and above 3710 MHz, −40 dBm/MHz below 3530 and above 3720 MHz.'
+        },
+        paprDb: 13, citePapr: '§96.41(g)', paprAppliesTo: 'CBSD',
+        sas: { cite: '§96.39, §96.45, §96.53–96.66', note: 'CBSDs must register with a Spectrum Access System and operate only on channels and powers it assigns.' },
+        bwsMHz: [5, 10, 15, 20]
+      },
+
+      gnss: { bands: { L1: [1559, 1610], L5: [1164, 1215] }, note: 'Receive-only; protected by §27.53(f) for Band 13 and by restricted band 1435–1626.5 MHz.' },
+
+      /* ---------------- general limits shared by all unlicensed tracks ---------------- */
+      generalLimits15209: {
+        cite: '§15.209(a); §15.35(b)', distanceM: 3, sources: ['https://www.law.cornell.edu/cfr/text/47/15.209', 'https://www.law.cornell.edu/cfr/text/47/15.35'],
+        above960MHz: { avgDbuvPerM: 54, peakDbuvPerM: 74 }
+      },
+      restrictedBands15205: {
+        sources: ['https://www.law.cornell.edu/cfr/text/47/15.205'], cite: '§15.205(a) (bands from 30 MHz up; everything above 38.6 GHz is restricted)',
+        mhz: [[37.5, 38.25], [73, 74.6], [74.8, 75.2], [108, 121.94], [123, 138], [149.9, 150.05], [156.52475, 156.52525], [156.7, 156.9], [162.0125, 167.17], [167.72, 173.2], [240, 285], [322, 335.4], [399.9, 410], [608, 614],
+          [960, 1240], [1300, 1427], [1435, 1626.5], [1645.5, 1646.5], [1660, 1710], [1718.8, 1722.2], [2200, 2300], [2310, 2390], [2483.5, 2500], [2690, 2900], [3260, 3267], [3332, 3339], [3345.8, 3358], [3600, 4400],
+          [4500, 5150], [5350, 5460], [7250, 7750], [8025, 8500], [9000, 9200], [9300, 9500], [10600, 12700], [13250, 13400], [14470, 14500], [15350, 16200], [17700, 21400], [22010, 23120], [23600, 24000], [31200, 31800], [36430, 36500], [38600, 1e6]]
+      },
+      measurementRange: {
+        sources: ['https://www.law.cornell.edu/cfr/text/47/15.33', 'https://www.law.cornell.edu/cfr/text/47/2.1057'], cite: '§15.33(a); §2.1057(a)', harmonics: 10, part15MaxMHz: 40000,
+        note: 'Emissions are measured up to the 10th harmonic of the highest fundamental. For Part 15 devices below 10 GHz the search stops at the 10th harmonic or 40 GHz, whichever is lower; licensed transmitters (§2.1057) go to the 10th harmonic.'
+      },
+      acConducted15207: { cite: '§15.207(a)', note: '150 kHz–30 MHz, quasi-peak and average limits; see rule table' },
+      rfExposure: {
+        sources: ['https://www.law.cornell.edu/cfr/text/47/1.1310', 'https://www.law.cornell.edu/cfr/text/47/1.1307'],
+        sarExemptionSource: 'P_th formula (§1.1307(b)(3)(i)(B)) is an image in the CFR; constants confirmed from FCC-filed RF exposure reports (e.g. fcc.report/FCC-ID/w2eichimev34/6248169.pdf) and KDB 447498 D04 App. B',
+        cite: '47 CFR §1.1310', mpeGeneralPopulation: 'f/1500 mW/cm² for 300–1500 MHz; 1 mW/cm² for 1.5–100 GHz',
+        mpe: (fMHz) => (fMHz < 1500 ? fMHz / 1500 : 1), sarWPerKg: 1.6, mobileSeparationCm: 20
+      }
+    }
+  };
+  if (typeof module !== 'undefined' && module.exports) module.exports = limits;
+  root.RF = root.RF || {}; root.RF.limits = limits;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+</script>
+<script>
+/*
+ * RF Lab analyzer-style plot on <canvas>. Usage:
+ *   const plot = RF.plot.create(canvasEl, {readoutEl});
+ *   plot.draw({ traces:[{f,a,color:'trace'}], rbw, hLines:[...], vLines:[...], shades:[...], markers:[...], spans:[...], header:'...' });
+ * Overlays (x in MHz, y in dBm; color = CSS var name without "--", e.g. 'mark', 'limit', 'muted', 'trace2'):
+ *   hLines:  {y, label, color, dash}
+ *   vLines:  {x, label, color, dash, fromY}       fromY: start the line at this dBm level instead of the top
+ *   shades:  {x0, x1, label, color, alpha}
+ *   markers: {x, y, label}                         downward triangle marker
+ *   spans:   {x0, x1, y, label}                    dimension line with centered label (y in dBm)
+ *   segments:{x0, x1, y, label, color, dash}       limit line over a range; y may be [[x,y],...] for a piecewise mask
+ */
+(function (root) {
+  'use strict';
+  const css = (n) => getComputedStyle(document.documentElement).getPropertyValue('--' + n).trim();
+
+  function create(canvas, opts = {}) {
+    const ctx = canvas.getContext('2d');
+    let last = null, hoverX = null, geom = null;
+
+    function draw(spec) {
+      if (spec) last = spec;
+      const s = last, wrap = canvas.parentElement;
+      const dpr = window.devicePixelRatio || 1, W = wrap.clientWidth, H = wrap.clientHeight;
+      canvas.width = W * dpr; canvas.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = css('panel'); ctx.fillRect(0, 0, W, H);
+      if (!s || !s.traces || !s.traces.length) { ctx.fillStyle = css('muted'); ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(s && s.empty || 'No data', W / 2, H / 2); geom = null; return; }
+      const t0 = s.traces[0], f = t0.f, N = f.length;
+      let pk = -Infinity; s.traces.forEach((t) => { for (let i = 0; i < t.a.length; i++) if (t.a[i] > pk) pk = t.a[i]; });
+      const top = s.refLevel ?? Math.ceil((pk + 5) / 10) * 10, div = s.dbPerDiv || 10, bot = top - div * 10;
+      const L = 58, R = 18, T = 40, B = 46, pw = W - L - R, ph = H - T - B;
+      const f0 = s.xMin ?? f[0], f1 = s.xMax ?? f[N - 1];
+      const X = (v) => L + (v - f0) / (f1 - f0) * pw, Y = (d) => T + (top - Math.max(bot, Math.min(top, d))) / (top - bot) * ph;
+      geom = { L, T, pw, ph, f0, f1, X, Y };
+      ctx.strokeStyle = css('grid'); ctx.lineWidth = 1;
+      for (let i = 0; i <= 10; i++) { const x = L + pw * i / 10; ctx.beginPath(); ctx.moveTo(x, T); ctx.lineTo(x, T + ph); ctx.stroke(); const y = T + ph * i / 10; ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(L + pw, y); ctx.stroke(); }
+      ctx.strokeStyle = css('axis'); ctx.strokeRect(L, T, pw, ph);
+      ctx.font = '11px sans-serif'; ctx.fillStyle = css('muted'); ctx.textAlign = 'right';
+      for (let i = 0; i <= 10; i++) ctx.fillText((top - i * div).toFixed(0), L - 6, T + ph * i / 10 + 4);
+      ctx.textAlign = 'center';
+      for (let i = 0; i <= 10; i += 2) ctx.fillText((f0 + (f1 - f0) * i / 10).toFixed(3), L + pw * i / 10, T + ph + 16);
+      ctx.fillText(s.xLabel || 'Frequency (MHz)', L + pw / 2, H - 8);
+      ctx.save(); ctx.translate(14, T + ph / 2); ctx.rotate(-Math.PI / 2); ctx.fillText(s.yLabel || 'Amplitude (dBm in RBW)', 0, 0); ctx.restore();
+      ctx.textAlign = 'left'; ctx.fillStyle = css('ink2');
+      ctx.fillText(s.header ?? `${s.rbw ? 'RBW ' + RF.math.fmtHz(s.rbw) + '   ' : ''}Span ${RF.math.fmtHz((f1 - f0) * 1e6)}   Ref ${top} dBm   ${div} dB/div`, L, 24);
+
+      (s.shades || []).forEach((sh) => {
+        ctx.globalAlpha = sh.alpha ?? 0.08; ctx.fillStyle = css(sh.color || 'limit');
+        ctx.fillRect(X(sh.x0), T, X(sh.x1) - X(sh.x0), ph); ctx.globalAlpha = 1;
+        if (sh.label) { ctx.fillStyle = css(sh.color || 'limit'); ctx.textAlign = 'center'; ctx.fillText(sh.label, (X(sh.x0) + X(sh.x1)) / 2, T + ph - 8); }
+      });
+      s.traces.forEach((t) => {
+        ctx.strokeStyle = css(t.color || 'trace'); ctx.lineWidth = 1.6; ctx.lineJoin = 'round'; ctx.beginPath();
+        const step = Math.max(1, Math.floor(t.f.length / (pw * 2)));
+        for (let i = 0; i < t.f.length; i += step) { const x = X(t.f[i]), y = Y(t.a[i]); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+        ctx.stroke();
+      });
+      (s.hLines || []).forEach((h) => {
+        ctx.strokeStyle = css(h.color || 'mark'); ctx.setLineDash(h.dash || [6, 4]); ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(L, Y(h.y)); ctx.lineTo(L + pw, Y(h.y)); ctx.stroke(); ctx.setLineDash([]);
+        if (h.label) { ctx.fillStyle = css('ink2'); ctx.textAlign = 'left'; ctx.fillText(h.label, L + 6, Y(h.y) + (h.labelBelow ? 14 : -6)); }
+      });
+      (s.vLines || []).forEach((v) => {
+        if (v.x < f0 || v.x > f1) return;
+        ctx.strokeStyle = css(v.color || 'mark'); ctx.setLineDash(v.dash || [6, 4]); ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(X(v.x), v.fromY !== undefined ? Y(v.fromY) : T); ctx.lineTo(X(v.x), T + ph); ctx.stroke(); ctx.setLineDash([]);
+        if (v.label) { ctx.fillStyle = css(v.color || 'mark'); ctx.textAlign = 'center'; ctx.fillText(v.label, X(v.x), T - 4); }
+      });
+      (s.segments || []).forEach((g) => {
+        // limit lines over a frequency range; y may be a number or an array of [x, y] points (piecewise mask)
+        const pts = Array.isArray(g.y) ? g.y : [[g.x0, g.y], [g.x1, g.y]];
+        ctx.strokeStyle = css(g.color || 'limit'); ctx.setLineDash(g.dash || []); ctx.lineWidth = 1.5; ctx.beginPath();
+        pts.forEach(([x, y], i) => { const xx = X(Math.max(f0, Math.min(f1, x))); i ? ctx.lineTo(xx, Y(y)) : ctx.moveTo(xx, Y(y)); });
+        ctx.stroke(); ctx.setLineDash([]);
+        if (g.label) { const [lx, ly] = pts[0]; ctx.fillStyle = css(g.color || 'limit'); ctx.textAlign = 'left'; ctx.fillText(g.label, X(Math.max(f0, Math.min(f1, lx))) + 4, Y(ly) - 5); }
+      });
+      (s.markers || []).forEach((m) => {
+        const x = X(m.x), y = Y(m.y); ctx.fillStyle = css('mark');
+        ctx.beginPath(); ctx.moveTo(x, y - 2); ctx.lineTo(x - 6, y - 12); ctx.lineTo(x + 6, y - 12); ctx.closePath(); ctx.fill();
+        if (m.label) { ctx.fillStyle = css('ink'); ctx.textAlign = 'center'; ctx.fillText(m.label, x, y - 16); }
+      });
+      (s.spans || []).forEach((sp) => {
+        const y = Math.min(T + ph - 22, Y(sp.y)); ctx.strokeStyle = css('ink2'); ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(X(sp.x0), y); ctx.lineTo(X(sp.x1), y); ctx.stroke();
+        ctx.fillStyle = css('ink'); ctx.textAlign = 'center'; ctx.fillText(sp.label, (X(sp.x0) + X(sp.x1)) / 2, y - 6);
+      });
+      if (hoverX !== null && hoverX >= L && hoverX <= L + pw) {
+        const fv = f0 + (hoverX - L) / pw * (f1 - f0); let lo = 0, hi = N - 1;
+        while (hi - lo > 1) { const m = (lo + hi) >> 1; if (f[m] < fv) lo = m; else hi = m; }
+        const i = Math.abs(f[lo] - fv) < Math.abs(f[hi] - fv) ? lo : hi;
+        ctx.strokeStyle = css('axis'); ctx.beginPath(); ctx.moveTo(X(f[i]), T); ctx.lineTo(X(f[i]), T + ph); ctx.stroke();
+        ctx.fillStyle = css(t0.color || 'trace'); ctx.beginPath(); ctx.arc(X(f[i]), Y(t0.a[i]), 3.5, 0, 6.283); ctx.fill();
+        if (opts.readoutEl) opts.readoutEl.textContent = `${f[i].toFixed(4)} MHz   ${t0.a[i].toFixed(2)} dBm`;
+      } else if (opts.readoutEl) opts.readoutEl.textContent = '';
+    }
+
+    canvas.addEventListener('mousemove', (e) => { hoverX = e.clientX - canvas.getBoundingClientRect().left; draw(); });
+    canvas.addEventListener('mouseleave', () => { hoverX = null; draw(); });
+    window.addEventListener('resize', () => draw());
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => draw());
+
+    /** Download the plot as PNG with an optional caption line underneath. */
+    function exportPNG(filename, caption) {
+      const h = hoverX; hoverX = null; draw();
+      const s = window.devicePixelRatio || 1, out = document.createElement('canvas');
+      out.width = canvas.width; out.height = canvas.height + 40 * s;
+      const c = out.getContext('2d'); c.fillStyle = css('panel'); c.fillRect(0, 0, out.width, out.height); c.drawImage(canvas, 0, 0);
+      if (caption) { c.fillStyle = css('ink2'); c.font = `${12 * s}px sans-serif`; c.fillText(caption, 10 * s, canvas.height + 24 * s); }
+      RF.util.download(filename, out.toDataURL('image/png')); hoverX = h; draw();
+    }
+    return { draw, exportPNG, get geom() { return geom; } };
+  }
+
+  root.RF = root.RF || {}; root.RF.plot = { create };
+})(window);
+
+</script>
+<script>
+/*
+ * RF Lab page framework: header/footer from manifest, exercises, per-browser progress, known-answer test registry.
+ * Load order on a tool page: theme.css, ../../manifest.js, rfmath.js, limits.js, rfplot.js, rflab.js, then the tool script.
+ */
+(function (root) {
+  'use strict';
+  const RF = root.RF = root.RF || {};
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  RF.util = {
+    $, esc,
+    stamp() { const d = new Date(), p = (n) => String(n).padStart(2, '0'); return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}`; },
+    download(name, href) { const a = document.createElement('a'); a.href = href; a.download = name; document.body.appendChild(a); a.click(); a.remove(); },
+    downloadText(name, text, type = 'text/csv') { RF.util.download(name, URL.createObjectURL(new Blob([text], { type }))); },
+    async copy(text) { try { await navigator.clipboard.writeText(text); return true; } catch (e) { window.prompt('Copy:', text); return false; } }
+  };
+
+  /* ---------- progress (per browser; storage may be unavailable, so every call is guarded) ---------- */
+  const KEY = 'rflab.progress.v1';
+  RF.progress = {
+    all() { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { return {}; } },
+    save(p) { try { localStorage.setItem(KEY, JSON.stringify(p)); } catch (e) { /* private mode etc. */ } },
+    mark(toolId, exId, total) {
+      const p = RF.progress.all(); const t = p[toolId] = p[toolId] || { ex: {} };
+      t.ex[exId] = true; t.total = total; t.updated = new Date().toISOString(); RF.progress.save(p);
+    },
+    tool(toolId) { const t = RF.progress.all()[toolId]; if (!t) return { done: 0, total: 0 }; const done = Object.keys(t.ex || {}).length; return { done, total: t.total || done }; },
+    reset(toolId) { const p = RF.progress.all(); if (toolId) delete p[toolId]; else Object.keys(p).forEach((k) => delete p[k]); RF.progress.save(p); }
+  };
+
+  /* ---------- page chrome ---------- */
+  RF.page = {
+    entry: null,
+    init({ id, root: base = '../../' }) {
+      const m = RF.manifest, e = m && m.tools.find((t) => t.id === id);
+      if (!e) { console.error('RF Lab: tool id not found in manifest.js:', id); return null; }
+      RF.page.entry = e;
+      const lvl = m.levels.find((l) => l.n === e.level) || { title: '' };
+      document.title = `${e.title} · RF Lab`;
+      const hd = $('rl-header');
+      const tr = (m.tracks || []).find((x) => x.id === e.track), trTitle = tr ? tr.title : 'All tracks';
+      const review = e.status === 'review' ? `<div class="banner">In RF review: the limits on this page were checked against the CFR text (${esc((RF.limits && RF.limits.verifiedAgainst) || '')}). The simulation models and wording are awaiting sign-off by an RF engineer.</div>` : '';
+      if (hd) hd.innerHTML = `<div class="rl-crumb"><a href="${base}index.html${tr ? '#' + tr.id : ''}">RF Lab</a> / ${esc(trTitle)} / Level ${e.level}: ${esc(lvl.title)}</div>
+        <h1>${esc(e.title)}</h1><div class="rl-sub">${esc(e.summary)}</div>
+        <div class="rl-tags">${(e.refs || []).map((r) => `<span class="tag">${esc(r)}</span>`).join('')}<span class="tag">v${esc(e.version || '0.0.0')}</span>${e.status === 'review' ? '<span class="tag review">In RF review</span>' : ''}</div>${review}`;
+      RF.page.renderRegs(e);
+      const ft = $('rl-footer'), L = RF.limits;
+      if (ft) ft.innerHTML = `${esc(e.title)} v${esc(e.version || '0.0.0')} · Owner: ${esc(e.owner || 'unassigned')} · Limits ${L ? 'v' + esc(L.version) + ', verified ' + esc(L.verified) : 'not loaded'} · RF Lab v${esc(m.labVersion)}<br>Training reference, not legal advice. Confirm against current eCFR text and KDB procedures before certification decisions.`;
+      return e;
+    },
+    /** Fill <div id="rl-regs"> from the manifest entry's `regulations` [{cite, req, use}] and `guidance` [string]. */
+    renderRegs(e) {
+      const el = $('rl-regs'); if (!el) return;
+      const regs = e.regulations || [];
+      if (!regs.length) { el.classList.add('hidden'); return; }
+      const link = (c) => { const m = /§\s*(\d+)\.(\d+)/.exec(c); return m ? `https://www.ecfr.gov/current/title-47/section-${m[1]}.${m[2]}` : null; };
+      el.innerHTML = `<h2>Relevant FCC regulations</h2>
+        <div class="hint" style="margin:0 0 8px">Title 47 CFR unless noted. Requirements are paraphrased for training; follow the links to the current eCFR text before relying on them.</div>
+        <table class="regs"><thead><tr><th style="width:16%">Rule</th><th style="width:44%">Requirement</th><th>How it relates to this tool</th></tr></thead><tbody>
+        ${regs.map((r) => { const u = link(r.cite); return `<tr><td>${u ? `<a href="${u}" target="_blank" rel="noopener">${esc(r.cite)}</a>` : esc(r.cite)}</td><td>${esc(r.req)}</td><td>${esc(r.use)}</td></tr>`; }).join('')}
+        </tbody></table>
+        ${(e.guidance || []).length ? `<h3 style="margin-top:14px">Measurement guidance and related standards</h3><ul class="notes">${e.guidance.map((g) => `<li>${esc(g)}</li>`).join('')}</ul>` : ''}`;
+    }
+  };
+
+  /* ---------- exercises ----------
+   * {id, type:'choice', prompt, options:[...], answer:index, explain, hint}
+   * {id, type:'number', prompt, answer:number|fn, tol, unit, explain, hint}
+   * {id, type:'state', prompt, check:()=>({ok, msg}), explain, hint}   // user sets up the tool, then presses Check
+   */
+  RF.ex = {
+    registered: {},
+    /** Registers a tool's exercises and renders them only when manifest.showExercises is true. */
+    mount(container, toolId, list) {
+      RF.ex.registered[toolId] = list;
+      const el = typeof container === 'string' ? $(container) : container;
+      if (!(RF.manifest && RF.manifest.showExercises)) { if (el) el.classList.add('hidden'); return; }
+      const done = (RF.progress.all()[toolId] || { ex: {} }).ex || {};
+      el.innerHTML = `<div class="row" style="justify-content:space-between"><h2 style="flex:0 0 auto;margin:0">Try this</h2><span class="hint" id="ex-count" style="flex:0 0 auto;margin:0"></span></div>
+        <div class="progress"><div id="ex-bar" style="width:0"></div></div>`;
+      const count = () => { const n = list.filter((x) => (RF.progress.all()[toolId] || { ex: {} }).ex[x.id]).length; $('ex-count').textContent = `${n} of ${list.length} complete`; $('ex-bar').style.width = (100 * n / list.length) + '%'; };
+      list.forEach((x, i) => {
+        const box = document.createElement('div'); box.className = 'ex' + (done[x.id] ? ' done' : ''); box.dataset.ex = x.id;
+        let body = '';
+        if (x.type === 'choice') body = `<div class="ex-opts">${x.options.map((o, k) => `<label><input type="radio" name="ex-${x.id}" value="${k}"> <span>${esc(o)}</span></label>`).join('')}</div>`;
+        else if (x.type === 'number') body = `<div class="row" style="max-width:260px"><input type="number" step="any" class="ex-in" aria-label="Answer"><span class="val" style="min-width:40px;text-align:left">${esc(x.unit || '')}</span></div>`;
+        box.innerHTML = `<div class="ex-h"><span class="ex-n">${i + 1}</span><span>${esc(x.title || 'Exercise ' + (i + 1))}</span></div>
+          <div class="ex-p">${x.prompt}</div>${body}
+          <div class="toolbar" style="margin-top:8px"><button class="ex-check">Check</button>${x.hint ? '<button class="ex-hintbtn">Hint</button>' : ''}</div>
+          <div class="ex-hint hidden">${x.hint ? esc(x.hint) : ''}</div><div class="ex-fb"></div>`;
+        const fb = box.querySelector('.ex-fb');
+        const ok = (msg) => { fb.className = 'ex-fb pass'; fb.innerHTML = '✓ ' + (msg ? esc(msg) + ' ' : '') + (x.explain ? esc(x.explain) : ''); box.classList.add('done'); RF.progress.mark(toolId, x.id, list.length); count(); };
+        const no = (msg) => { fb.className = 'ex-fb fail'; fb.textContent = msg; };
+        box.querySelector('.ex-check').onclick = () => {
+          if (x.type === 'choice') {
+            const sel = box.querySelector('input[type=radio]:checked'); if (!sel) return no('Pick an answer first.');
+            return +sel.value === x.answer ? ok('Correct.') : no('Not quite. Try again, or open the hint.');
+          }
+          if (x.type === 'number') {
+            const raw = box.querySelector('.ex-in').value.trim(); if (raw === '') return no('Enter a number first.');
+            const v = Number(raw); if (!Number.isFinite(v)) return no('That is not a number.');
+            const ans = typeof x.answer === 'function' ? x.answer() : x.answer, tol = x.tol ?? Math.abs(ans) * 0.02;
+            return Math.abs(v - ans) <= tol ? ok(`Correct (${ans.toFixed(2)} ${x.unit || ''}).`) : no('Not quite. Check your units and try again.');
+          }
+          const r = x.check(); return r.ok ? ok(r.msg || 'Done.') : no(r.msg || 'Not yet. Adjust the tool and check again.');
+        };
+        const hb = box.querySelector('.ex-hintbtn'); if (hb) hb.onclick = () => box.querySelector('.ex-hint').classList.toggle('hidden');
+        box.querySelectorAll('input').forEach((inp) => inp.addEventListener('input', () => { if (fb.classList.contains('fail')) { fb.textContent = ''; fb.className = 'ex-fb'; } }));
+        el.appendChild(box);
+      });
+      count();
+    }
+  };
+
+  /* ---------- known-answer tests: tools push {name, run:()=>({ok, detail})}; tests/run_tests.js executes them ---------- */
+  RF.tests = RF.tests || [];
+  RF.test = {
+    add(name, run) { RF.tests.push({ name, run }); },
+    near(got, exp, tol) { return { ok: Number.isFinite(got) && Math.abs(got - exp) <= tol, detail: `got ${Number(got).toFixed(3)}, expected ${exp} ± ${tol}` }; },
+    async runAll() { const out = []; for (const t of RF.tests) { try { const r = await t.run(); out.push({ name: t.name, ...r }); } catch (e) { out.push({ name: t.name, ok: false, detail: String(e) }); } } return out; }
+  };
+})(window);
+
+</script>
+<script>
+/*
+ * RF Lab co-location library (RF.coloc): radio presets, harmonic/intermod products, and RF exposure math shared by
+ * the intermod planner, the simultaneous-transmission RF exposure tool and the test plan builder.
+ * Load after rfmath.js and limits.js. All regulatory numbers come from RF.limits.
+ */
+(function (root) {
+  'use strict';
+  const RF = root.RF, F = RF.limits.fcc, M = RF.math;
+
+  /* ---------------- radio presets ---------------- */
+  // pwr/gain/duty are typical starting values for a module, not limits.
+  const TECH = {
+    halow: { label: 'Wi-Fi HaLow', part: '15', rule: '§15.247', tx: [F.ism900.band.loMHz, F.ism900.band.hiMHz], rx: [[F.ism900.band.loMHz, F.ism900.band.hiMHz, 'HaLow']], bws: [1, 2, 4, 8], fc: 915, bw: 1, pwr: 24, gain: 2, duty: 100 },
+    wifi24: { label: 'Wi-Fi 2.4 GHz', part: '15', rule: '§15.247', tx: [F.wifi24.band.loMHz, F.wifi24.band.hiMHz], rx: [[F.wifi24.band.loMHz, F.wifi24.band.hiMHz, 'Wi-Fi 2.4 GHz']], bws: [20, 40], fc: 2437, bw: 20, pwr: 20, gain: 3, duty: 100 },
+    wifi5: { label: 'Wi-Fi 5 GHz', part: '15', rule: '§15.407', tx: [5150, 5850], rx: [[5150, 5850, 'Wi-Fi 5 GHz']], bws: [20, 40, 80], fc: 5500, bw: 20, pwr: 18, gain: 4, duty: 100 },
+    cbrs: { label: 'CBRS (B48)', part: '96', rule: 'Part 96', tx: [F.cbrs.band.loMHz, F.cbrs.band.hiMHz], rx: [[F.cbrs.band.loMHz, F.cbrs.band.hiMHz, 'CBRS']], bws: [10, 20], fc: 3625, bw: 20, pwr: 23, gain: 3, duty: 100, licensed: true },
+    gnss: { label: 'GNSS receiver', part: null, tx: null, rx: Object.entries(F.gnss.bands).map(([k, [lo, hi]]) => [lo, hi, 'GNSS ' + k]), bws: [], fc: 1575.42, bw: 0 }
+  };
+  Object.entries(F.lte.bands).forEach(([k, b]) => {
+    TECH['lte' + k] = { label: `LTE ${k} (${b.name})`, part: b.part.split(' ')[0], rule: `Part ${b.part}`, tx: [b.ulLoMHz, b.ulHiMHz], rx: [[b.dlLoMHz, b.dlHiMHz, `LTE ${k} downlink`]],
+      bws: b.bwsMHz.filter((w) => w >= 5), fc: (b.ulLoMHz + b.ulHiMHz) / 2, bw: Math.min(10, Math.max(...b.bwsMHz)), pwr: 23, gain: 2, duty: 100, licensed: true, lteBand: k };
+  });
+  const isLicensed = (r) => !!(TECH[r.tech] && TECH[r.tech].licensed);
+
+  /** A new radio row with the preset's defaults. */
+  const newRadio = (tech, over = {}) => { const T = TECH[tech]; return Object.assign({ tech, on: !!T.tx, fc: T.fc, bw: T.bw, whole: false, pwr: T.pwr, gain: T.gain, duty: T.duty }, over); };
+  const radioName = (radios, r, i) => `${TECH[r.tech].label}${radios.filter((x) => x.tech === r.tech).length > 1 ? ' #' + (i + 1) : ''}`;
+
+  /** Occupied transmit range [lo, hi] MHz (channel or whole band), or null if not transmitting. */
+  function txRange(r) {
+    const T = TECH[r.tech]; if (!T.tx || !r.on) return null;
+    return r.whole ? [T.tx[0], T.tx[1]] : [r.fc - r.bw / 2, r.fc + r.bw / 2];
+  }
+
+  /** Range of a·f1 + b·f2 over f1 ∈ r1, f2 ∈ r2 (r2 optional), folded to positive frequency. */
+  function combo(a, r1, b, r2) {
+    const pick = (c, r, wantLo) => (c >= 0) === wantLo ? c * r[0] : c * r[1];
+    let lo = pick(a, r1, true) + (r2 ? pick(b, r2, true) : 0), hi = pick(a, r1, false) + (r2 ? pick(b, r2, false) : 0);
+    if (hi < 0) [lo, hi] = [-hi, -lo]; else if (lo < 0) [lo, hi] = [0, Math.max(-lo, hi)];
+    return [lo, hi];
+  }
+  const overlap = (p, b) => p[0] <= b[1] && p[1] >= b[0];
+
+  /**
+   * Harmonics (2..hmax) and 2nd/3rd (+ optional 5th) order intermod products of all transmitting radios, each flagged
+   * against §15.205 restricted bands and host receive bands. Part 15 products are cut at the §15.33 search limit.
+   * Returns [{label, order, kind, rng, srcs, restricted, rx, sev (2 restricted, 1 receiver, 0 clear), licensed, clipped}].
+   */
+  function products(radios, { hmax = F.measurementRange.harmonics, im5 = false } = {}) {
+    const list = [], name = (r, i) => radioName(radios, r, i);
+    const tx = radios.map((r, i) => ({ r, i, rng: txRange(r) })).filter((x) => x.rng);
+    tx.forEach(({ r, i, rng }) => { for (let n = 2; n <= hmax; n++) list.push({ label: `${n}·f(${name(r, i)})`, order: n, kind: 'Harmonic', rng: combo(n, rng), srcs: [i] }); });
+    const terms = [[1, 1, 2], [1, -1, 2], [2, -1, 3], [-1, 2, 3], [2, 1, 3], [1, 2, 3], ...(im5 ? [[3, -2, 5], [-2, 3, 5]] : [])];
+    const term = (c, n) => `${Math.abs(c) === 1 ? '' : Math.abs(c) + '·'}f(${n})`;
+    for (let x = 0; x < tx.length; x++) for (let y = x + 1; y < tx.length; y++) {
+      const A = tx[x], B = tx[y];
+      terms.forEach(([a, b, ord]) => {
+        const lbl = a > 0 ? `${term(a, name(A.r, A.i))} ${b > 0 ? '+' : '−'} ${term(b, name(B.r, B.i))}` : `${term(b, name(B.r, B.i))} − ${term(a, name(A.r, A.i))}`;
+        list.push({ label: lbl, order: ord, kind: ord === 2 ? '2nd-order IM' : ord === 3 ? '3rd-order IM' : '5th-order IM', rng: combo(a, A.rng, b, B.rng), srcs: [A.i, B.i] });
+      });
+    }
+    const rxBands = []; radios.forEach((r, i) => TECH[r.tech].rx.forEach(([lo, hi, n]) => rxBands.push({ lo, hi, n, i })));
+    const restricted = F.restrictedBands15205.mhz, cap = F.measurementRange.part15MaxMHz;
+    list.forEach((p) => {
+      p.restricted = restricted.filter((b) => overlap(p.rng, b));
+      p.rx = rxBands.filter((b) => overlap(p.rng, [b.lo, b.hi]) && !(p.srcs.length === 1 && p.srcs[0] === b.i && p.kind !== 'Harmonic'))
+        .filter((b, k, arr) => arr.findIndex((c) => c.n === b.n) === k);
+      p.licensed = p.srcs.some((i) => isLicensed(radios[i]));
+      p.sev = p.restricted.length ? 2 : p.rx.length ? 1 : 0;
+    });
+    list.sort((a, b) => b.sev - a.sev || a.order - b.order || a.rng[0] - b.rng[0]);
+    const licensedOnly = (p) => p.srcs.every((i) => isLicensed(radios[i]));
+    return list.filter((p) => p.rng[1] >= 30 && (licensedOnly(p) || p.rng[0] <= cap))
+      .map((p) => (licensedOnly(p) || p.rng[1] <= cap ? p : { ...p, rng: [p.rng[0], cap], clipped: true }));
+  }
+
+  /* ---------------- RF exposure (general population / uncontrolled) ---------------- */
+  /** MPE power-density limit, mW/cm² (§1.1310 Table 1(B)). */
+  function mpeLimit(fMHz) {
+    if (fMHz < 30) return 180 / (fMHz * fMHz);
+    if (fMHz < 300) return 0.2;
+    if (fMHz < 1500) return fMHz / 1500;
+    return 1.0;
+  }
+  /** Far-field power density, mW/cm², from EIRP (mW) at distance r (cm). */
+  const powerDensity = (eirpMw, rCm) => eirpMw / (4 * Math.PI * rCm * rCm);
+
+  /**
+   * SAR test-exemption threshold P_th (mW) per §1.1307(b)(3)(i)(B), for 300 MHz–6 GHz and 0.5–40 cm separation.
+   * ERP_20cm = 2040·f (0.3–1.5 GHz) or 3060 (1.5–6 GHz); x = −log10(60 / (ERP_20cm·√f)), f in GHz.
+   * Returns null outside the formula's range.
+   */
+  function sarExemptionMw(fMHz, dCm) {
+    const f = fMHz / 1000; if (f < 0.3 || f > 6 || dCm < 0.5 || dCm > 40) return null;
+    const erp20 = f < 1.5 ? 2040 * f : 3060;
+    if (dCm > 20) return erp20;
+    const x = -Math.log10(60 / (erp20 * Math.sqrt(f)));
+    return erp20 * Math.pow(dCm / 20, x);
+  }
+
+  /**
+   * Per-radio exposure terms at separation dCm for the transmitting radios.
+   * Uses the lowest frequency of each radio's range (lowest limits) and time-averaged power (duty %).
+   * mobile: power density vs MPE.  portable: max(conducted, ERP) vs P_th (or measured SAR vs 1.6 W/kg if given).
+   */
+  function exposure(radios, dCm, mode) {
+    const lim = F.rfExposure;
+    const rows = radios.map((r, i) => {
+      const rng = txRange(r); if (!rng) return null;
+      const f = rng[0], duty = Math.max(0, Math.min(100, r.duty ?? 100)) / 100;
+      const condMw = M.dbmToMw(r.pwr) * duty, eirpMw = M.dbmToMw(r.pwr + r.gain) * duty, erpMw = M.dbmToMw(r.pwr + r.gain - 2.15) * duty;
+      const row = { i, name: radioName(radios, r, i), f, condMw, eirpMw, erpMw };
+      if (mode === 'mobile') { row.s = powerDensity(eirpMw, dCm); row.limit = mpeLimit(f); row.ratio = row.s / row.limit; row.basis = 'MPE'; }
+      else if (r.sar > 0) { row.sar = r.sar; row.limit = lim.sarWPerKg; row.ratio = r.sar / lim.sarWPerKg; row.basis = 'Measured SAR'; }
+      else { row.pAvail = Math.max(condMw, erpMw); row.pth = sarExemptionMw(f, dCm); row.limit = row.pth; row.ratio = row.pth ? row.pAvail / row.pth : Infinity; row.basis = 'SAR exemption'; }
+      return row;
+    }).filter(Boolean);
+    return { rows, sum: rows.reduce((s, x) => s + x.ratio, 0) };
+  }
+
+  /** Smallest separation (cm) where the mobile MPE sum of ratios reaches 1 (closed form: ratios scale as 1/r²). */
+  function mpeMinDistance(radios) {
+    const s = exposure(radios, 1, 'mobile').sum; // sum at 1 cm; sum(r) = s / r²
+    return Math.sqrt(s);
+  }
+
+  root.RF.coloc = { TECH, isLicensed, newRadio, radioName, txRange, combo, overlap, products, mpeLimit, powerDensity, sarExemptionMw, exposure, mpeMinDistance };
+})(window);
+
+</script>
+<style>
+table.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+table.tbl th{text-align:left;font-weight:600;color:var(--ink2);padding:6px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:bottom}
+table.tbl td{padding:6px;border-bottom:1px solid var(--border);vertical-align:top;color:var(--ink2)}
+table.tbl input[type=number]{width:70px}
+table.tbl select{min-width:140px}
+.scroll{overflow-x:auto}
+table.tbl input[type=text]{max-width:130px}
+table.tbl td.t{color:var(--ink);font-weight:600}
+.path{font-size:11.5px;padding:2px 8px;border-radius:999px;background:var(--chip);white-space:nowrap}
+.path.ok{color:var(--pass)}.path.chg{color:var(--mark)}.path.full{color:var(--fail)}
+@media print{.rl-header .rl-tags,.toolbar,details,#rl-regs,.concept,button{display:none!important}.card{border:none}body{background:#fff}}
+</style>
+</head>
+<body>
+<header class="rl-header" id="rl-header"></header>
+<main class="rl-main">
+  <div class="card concept">
+    <h2>Concept</h2>
+    <p>Putting certified modules into one product doesn't automatically keep them certified. Each module's grant has conditions: which antennas are allowed, its RF exposure assumptions, and usually "not co-located with other transmitters" unless evaluated. Under KDB 996369, <b>the host maker</b> is responsible for showing the final product still complies.</p>
+    <p>This builder takes the radios, their grants and the way the product is used, and works out three things. First, whether each radio can ride on its module grant, needs a <b>Class II permissive change</b>, or needs its own certification. Second, which <b>simultaneous-transmission</b> radiated tests the intermod planner says are needed. Third, what <b>RF exposure</b> work applies. The result is a test matrix you can hand to the lab.</p>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <h3>Host product</h3>
+    <div class="row" style="flex-wrap:wrap;align-items:flex-end">
+      <div style="min-width:200px"><label for="name">Product name</label><input type="text" id="name" value="Sensor gateway"></div>
+      <div style="min-width:220px"><label for="use">How people use it</label><select id="use"><option value="mobile">Mobile or fixed (≥ 20 cm)</option><option value="portable">Portable (&lt; 20 cm, handheld or worn)</option></select></div>
+      <div style="min-width:150px"><label for="dist">Closest distance to people (cm)</label><input type="number" id="dist" value="20" step="0.5" min="0.5"></div>
+      <div style="min-width:170px"><label for="spacing">Closest antenna-to-antenna spacing (cm)</label><input type="number" id="spacing" value="5" step="0.5" min="0"></div>
+      <div style="flex:0 0 auto"><label class="row" style="gap:6px;margin:0 0 8px"><input type="checkbox" id="mains" checked style="width:auto;flex:0 0 auto"> <span>Mains powered</span></label></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <h3>Radios</h3>
+    <div class="scroll"><table class="tbl" style="min-width:1250px"><thead><tr><th>Radio</th><th>Implementation</th><th>Module FCC ID</th><th>Grant max antenna gain (dBi)</th><th>Host antenna gain (dBi)</th><th>Same antenna type as grant</th><th>Grant RF exposure condition</th><th>Max conducted power (dBm)</th><th>Duty (%)</th><th>Transmits at the same time</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+    <div class="toolbar"><button id="add">Add radio</button><span class="hint">Intermod is evaluated across each radio's whole band, so the matrix covers every channel combination.</span></div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <div class="metrics" style="margin-top:0">
+      <div class="m"><div class="l">Radios needing certification work</div><div class="v" id="mCert">–</div><div class="n" id="mCertN"></div></div>
+      <div class="m"><div class="l">Simultaneous-Tx radiated configurations</div><div class="v" id="mSim">–</div><div class="n" id="mSimN"></div></div>
+      <div class="m"><div class="l">RF exposure</div><div class="v" id="mExp">–</div><div class="n" id="mExpN"></div></div>
+    </div>
+    <h3 style="margin-top:16px">Certification path per radio</h3>
+    <table class="tbl"><thead><tr><th>Radio</th><th>Path</th><th>Why</th></tr></thead><tbody id="paths"></tbody></table>
+    <h3 style="margin-top:16px">Test matrix</h3>
+    <table class="tbl"><thead><tr><th>#</th><th>Test</th><th>Applies to</th><th>Configuration</th><th>Rule / guidance</th><th>Why it’s needed</th><th>Who</th></tr></thead><tbody id="matrix"></tbody></table>
+    <div class="toolbar"><button id="csv">Export test matrix (CSV)</button><button id="copy">Copy as text</button><button id="print">Print / save PDF</button><span class="hint" id="copied"></span></div>
+    <details><summary>Method notes</summary><ul class="notes">
+      <li>Certification path, for each certified module: higher antenna gain than the grant, a different antenna type, portable use when the grant assumes 20 cm or more, or simultaneous-transmission exposure that isn't excluded all point to a Class II permissive change (filed by the grantee) or a change in FCC ID (§2.933). Otherwise the grant covers the radio and the host does an integration check. Own designs need full certification.</li>
+      <li>Simultaneous-transmission rows come from the intermod planner's math (shared/coloc.js): every pair of radios that transmit at the same time and produce a harmonic or intermod product inside a §15.205 restricted band, up to the 10th harmonic.</li>
+      <li>RF exposure uses the same sum-of-ratios calculation as the RF exposure tool: MPE for mobile use, SAR exemption for portable use.</li>
+      <li>Radios count as co-located when antennas are closer than 20 cm and they transmit at the same time. This rule of thumb comes from KDB 447498 and typical grant conditions; always read each module's grant notes.</li>
+      <li>This is a planning aid. The lab and the certification body make the final call, and module grant conditions override anything here.</li>
+    </ul></details>
+  </div>
+  <div class="card" id="exercises" style="margin-top:14px"></div>
+  <div class="card" id="rl-regs" style="margin-top:14px"></div>
+</main>
+<footer class="rl-footer" id="rl-footer"></footer>
+
+<script>
+(function () {
+  'use strict';
+  const { $, esc } = RF.util, C = RF.coloc, F = RF.limits.fcc, M = RF.math;
+  RF.page.init({ id: 'coloc-plan' });
+  const TX_TECH = Object.entries(C.TECH).filter(([, t]) => t.tx);
+  const mk = (tech, o = {}) => Object.assign(C.newRadio(tech, { whole: true }), { impl: 'module', fccId: '', grantGain: C.TECH[tech].gain + 1, sameType: true, grantExp: 'mobile' }, o);
+  let radios = [mk('halow', { fccId: '2AB12-HLW01' }), mk('wifi24', { fccId: '2AC34-WIFI2' }), mk('lteB13', { fccId: '2AD56-LTE01' })];
+  let plan = null;
+
+  /* ---------- radio table ---------- */
+  function renderRows() {
+    const cell = (i, k, v, attrs = '') => `<input ${attrs} data-i="${i}" data-k="${k}" value="${esc(v ?? '')}" aria-label="Radio ${i + 1} ${k}">`;
+    $('rows').innerHTML = radios.map((r, i) => `<tr>
+      <td><select data-i="${i}" data-k="tech" aria-label="Radio ${i + 1}">${TX_TECH.map(([k, t]) => `<option value="${k}"${k === r.tech ? ' selected' : ''}>${esc(t.label)}</option>`).join('')}</select></td>
+      <td><select data-i="${i}" data-k="impl" aria-label="Radio ${i + 1} implementation"><option value="module"${r.impl === 'module' ? ' selected' : ''}>Certified module</option><option value="own"${r.impl === 'own' ? ' selected' : ''}>Own design</option></select></td>
+      <td>${r.impl === 'module' ? cell(i, 'fccId', r.fccId, 'type="text" placeholder="FCC ID"') : '<span class="hint">—</span>'}</td>
+      <td>${r.impl === 'module' ? cell(i, 'grantGain', r.grantGain, 'type="number" step="0.5"') : '<span class="hint">—</span>'}</td>
+      <td>${cell(i, 'gain', r.gain, 'type="number" step="0.5"')}</td>
+      <td>${r.impl === 'module' ? `<input type="checkbox" data-i="${i}" data-k="sameType" ${r.sameType ? 'checked' : ''} style="width:auto" aria-label="Radio ${i + 1} same antenna type">` : '<span class="hint">—</span>'}</td>
+      <td>${r.impl === 'module' ? `<select data-i="${i}" data-k="grantExp" aria-label="Radio ${i + 1} grant exposure"><option value="mobile"${r.grantExp === 'mobile' ? ' selected' : ''}>Mobile (≥ 20 cm)</option><option value="portable"${r.grantExp === 'portable' ? ' selected' : ''}>Portable</option></select>` : '<span class="hint">—</span>'}</td>
+      <td>${cell(i, 'pwr', r.pwr, 'type="number" step="0.5"')}</td>
+      <td>${cell(i, 'duty', r.duty, 'type="number" step="1" min="0" max="100"')}</td>
+      <td><input type="checkbox" data-i="${i}" data-k="on" ${r.on ? 'checked' : ''} style="width:auto" aria-label="Radio ${i + 1} transmits simultaneously"></td>
+      <td><button data-del="${i}" aria-label="Remove radio ${i + 1}">Remove</button></td></tr>`).join('');
+    $('rows').querySelectorAll('[data-k]').forEach((el) => el.addEventListener('change', () => {
+      const i = +el.dataset.i, k = el.dataset.k;
+      if (k === 'tech') { radios[i] = mk(el.value, { impl: radios[i].impl }); renderRows(); }
+      else if (k === 'impl') { radios[i].impl = el.value; renderRows(); }
+      else if (el.type === 'checkbox') radios[i][k] = el.checked;
+      else radios[i][k] = el.type === 'number' ? +el.value : el.value;
+      update();
+    }));
+    $('rows').querySelectorAll('[data-del]').forEach((b) => b.onclick = () => { radios.splice(+b.dataset.del, 1); renderRows(); update(); });
+  }
+  $('add').onclick = () => { radios.push(mk('wifi5')); renderRows(); update(); };
+  ['use', 'dist', 'spacing', 'mains', 'name'].forEach((k) => $(k).addEventListener('input', update));
+  $('use').addEventListener('change', () => { $('dist').value = $('use').value === 'mobile' ? 20 : 5; update(); });
+
+  /* ---------- per-technology certification test sets ---------- */
+  function techTests(r) {
+    const T = C.TECH[r.tech];
+    if (r.tech === 'halow' || r.tech === 'wifi24') return { rule: '§15.247; KDB 558074', list: '6 dB bandwidth, max conducted power, PSD, band edge (conducted and radiated restricted bands), conducted and radiated spurious to the 10th harmonic' };
+    if (r.tech === 'wifi5') return { rule: '§15.407; KDB 789033; KDB 905462', list: '26 dB EBW and 99% OBW, power, PSD, unwanted emissions and restricted bands, frequency stability, DFS and TPC (U-NII-2A/2C)' };
+    if (r.tech === 'cbrs') return { rule: 'Part 96 (§96.41); KDB 940660; WINNF-TS-0122 for CBSDs', list: 'EIRP per 10 MHz, emission mask (−13/−25/−40 dBm/MHz), PAPR, occupied bandwidth, frequency stability; SAS/CBSD conformance if the device is a CBSD' };
+    const b = F.lte.bands[T.lteBand];
+    return { rule: `Part ${b.part} (${b.citePower}, ${b.citeMask}); §2.1046–§2.1055; KDB 971168`, list: `${b.limitType} vs ${b.limitDbm} dBm, occupied bandwidth, band-edge mask (−13 dBm), conducted and radiated spurious to the 10th harmonic, frequency stability${b.paprDb ? ', PAPR' : ''}` };
+  }
+
+  /* ---------- the plan ---------- */
+  function build() {
+    const use = $('use').value, d = Math.max(0.5, +$('dist').value || 20), spacing = +$('spacing').value, simul = radios.filter((r) => r.on);
+    const coloc = simul.length > 1 && spacing < 20;
+    const exp = C.exposure(radios, d, use === 'mobile' ? 'mobile' : 'portable'), expOk = exp.sum <= 1;
+    const paths = radios.map((r, i) => {
+      const n = C.radioName(radios, r, i), T = C.TECH[r.tech], why = [];
+      if (r.impl === 'own') return { i, n, kind: 'full', label: 'Full certification (own FCC ID)', why: ['Own radio design: no existing grant to rely on.'] };
+      if (r.gain > r.grantGain) why.push(`Host antenna gain ${r.gain} dBi is above the grant's ${r.grantGain} dBi.`);
+      if (!r.sameType) why.push('Antenna type differs from those listed on the grant.');
+      if (use === 'portable' && r.grantExp === 'mobile') why.push('Portable use, but the grant assumes ≥ 20 cm separation.');
+      if (coloc && r.on && !expOk) why.push(`Co-located simultaneous transmission is not excluded (exposure sum ${exp.sum.toFixed(2)} > 1).`);
+      if (T.licensed) { const b = T.lteBand ? F.lte.bands[T.lteBand] : null, lim = b ? b.limitDbm : F.cbrs.classes.eud.eirpDbmPer10MHz + 10 * Math.log10(Math.max(1, r.bw / 10));
+        const rad = r.pwr + r.gain - (b && b.limitType === 'ERP' ? 2.15 : 0); if (rad > lim) why.push(`${b ? b.limitType : 'EIRP'} ${rad.toFixed(1)} dBm exceeds the ${lim.toFixed(1)} dBm limit: reduce power first.`); }
+      if (!why.length) return { i, n, kind: 'ok', label: 'Module grant covers it', why: [`Antenna and use condition within the grant${coloc && r.on ? '; simultaneous-transmission exposure excluded (sum ' + exp.sum.toFixed(2) + ')' : ''}. Host integration check per KDB 996369.`] };
+      return { i, n, kind: 'chg', label: 'Class II permissive change or change in FCC ID', why };
+    });
+
+    const rows = [], add = (test, applies, config, rule, why, who) => rows.push({ test, applies, config, rule, why, who });
+    add('Unintentional radiated emissions (Part 15B)', 'Host', 'All radios idle or receiving; worst-case host operating mode', '§15.109; ANSI C63.4', 'The host’s digital circuitry is its own device and needs authorization (usually SDoC).', 'Host maker (SDoC)');
+    if ($('mains').checked) {
+      add('AC power-line conducted, digital', 'Host', 'Radios idle; host on its power supply via LISN', '§15.107', 'Mains-powered host digital emissions, 150 kHz–30 MHz.', 'Host maker (SDoC)');
+      const p15 = radios.filter((r) => !C.TECH[r.tech].licensed).map((r) => C.radioName(radios, r, radios.indexOf(r)));
+      if (p15.length) add('AC power-line conducted, transmitting', p15.join(', '), 'Each Part 15 radio transmitting at max power, low/mid/high channel', '§15.207', 'Part 15 transmitters powered from the mains must meet the AC conducted limits while transmitting.', 'Host maker / lab');
+    }
+    paths.forEach((p) => {
+      const r = radios[p.i];
+      if (p.kind === 'ok') add('Module integration spot check', p.n, 'Radio transmitting at max power on low/mid/high channels with the final antenna; radiated emissions scan to the 10th harmonic', '§15.212; KDB 996369 D04', 'Confirms the module still complies in this host (enclosure, antenna placement, grounding).', 'Host maker / lab');
+      else { const tt = techTests(r); add(p.kind === 'full' ? 'Full certification test set' : 'Class II permissive change tests', p.n, tt.list, tt.rule, p.why.join(' '), p.kind === 'full' ? 'You (new FCC ID)' : 'Module grantee, or you after a change in FCC ID (§2.933)'); }
+    });
+
+    const prods = C.products(radios.map((r) => ({ ...r, whole: true })));
+    const pairs = {};
+    prods.filter((p) => p.sev === 2 && p.srcs.length === 2).forEach((p) => { const key = p.srcs.slice().sort().join('+'); (pairs[key] = pairs[key] || []).push(p); });
+    Object.entries(pairs).forEach(([key, ps]) => {
+      const names = key.split('+').map((i) => C.radioName(radios, radios[+i], +i));
+      const ex = ps.slice().sort((a, b) => a.order - b.order).slice(0, 3).map((p) => `${p.label} → ${p.rng[0].toFixed(0)}–${p.rng[1].toFixed(0)} MHz (restricted ${p.restricted[0][0]}–${p.restricted[0][1]})`);
+      add('Radiated spurious, simultaneous transmission', names.join(' + '), `Both at max power at the same time; choose channels that put these products inside the restricted band: ${ex.join('; ')}${ps.length > 3 ? `; +${ps.length - 3} more` : ''}`, '§15.205 / §15.209; KDB 996369; ANSI C63.10' + (ps.some((p) => p.licensed) ? '; §2.1053' : ''), `${ps.length} intermod product${ps.length > 1 ? 's' : ''} from this pair can land in restricted bands; neither module’s own report covers them.`, 'Host maker / lab');
+    });
+    const harmHits = prods.filter((p) => p.sev === 2 && p.srcs.length === 1);
+    paths.filter((p) => p.kind !== 'ok').forEach((p) => { const h = harmHits.filter((x) => x.srcs[0] === p.i); if (h.length) add('Harmonics in restricted bands (re-verify with final antenna)', p.n, h.slice(0, 4).map((x) => `${x.label}: ${x.rng[0].toFixed(0)}–${x.rng[1].toFixed(0)} MHz`).join('; '), '§15.205 / §15.209 / §15.33; §2.1053', 'Antenna or design change means the radio’s own harmonic results no longer apply as-is.', 'Grantee or you'); });
+
+    if (use === 'mobile') add('RF exposure: MPE with simultaneous transmission', simul.map((r) => C.radioName(radios, r, radios.indexOf(r))).join(', ') || 'All radios', `Calculation at ${d} cm; sum of ratios ${exp.sum.toFixed(3)}; minimum separation ${C.mpeMinDistance(radios).toFixed(1)} cm`, '§1.1310; §2.1091; KDB 447498', expOk ? 'Sum ≤ 1: document in the RF exposure exhibit and state the separation in the manual.' : 'Sum > 1: increase separation, reduce power/duty, or prevent simultaneous transmission.', 'Host maker');
+    else add(expOk ? 'RF exposure: SAR test exemption' : 'RF exposure: SAR testing', simul.map((r) => C.radioName(radios, r, radios.indexOf(r))).join(', ') || 'All radios', expOk ? `Exemption calculation at ${d} cm; sum ${exp.sum.toFixed(3)}` : `SAR per radio at ${d} cm and the worst body positions, then simultaneous-transmission SAR sum (≤ 1.6 W/kg) or SPLSR`, expOk ? '§1.1307(b)(3); KDB 447498' : '§2.1093; KDB 865664; KDB 447498', expOk ? 'Each radio’s fraction of its exemption threshold sums to ≤ 1.' : `Exemption sum ${exp.sum.toFixed(2)} > 1, so SAR must be measured.`, 'Lab');
+    add('Labeling and user information', 'Host', radios.filter((r) => r.impl === 'module').map((r) => `“Contains FCC ID: ${r.fccId || 'XXXXX'}”`).join(', ') + `; RF exposure statement (${use === 'mobile' ? `≥ ${Math.max(20, Math.ceil(C.mpeMinDistance(radios)))} cm separation` : 'portable use'}); co-location statement`, '§2.925; §15.19; §15.21; KDB 784748', 'Each module’s FCC ID must be visible on the host, with the required compliance and exposure statements.', 'Host maker');
+    return { paths, rows, exp, expOk, pairs: Object.keys(pairs).length, coloc, use, d };
+  }
+
+  function update() {
+    const p = plan = build();
+    const chg = p.paths.filter((x) => x.kind !== 'ok').length;
+    $('mCert').textContent = `${chg} of ${p.paths.length}`; $('mCert').className = 'v ' + (chg ? 'fail' : 'pass');
+    $('mCertN').textContent = chg ? p.paths.filter((x) => x.kind !== 'ok').map((x) => x.n).join(', ') : 'All radios ride on their module grants';
+    $('mSim').textContent = p.pairs; $('mSim').className = 'v ' + (p.pairs ? '' : 'pass');
+    $('mSimN').textContent = p.coloc ? 'Radio pairs with products in restricted bands' : 'Antennas ≥ 20 cm apart or no simultaneous Tx (still listed if products hit)';
+    $('mExp').textContent = p.use === 'mobile' ? (p.expOk ? 'MPE OK' : 'Exceeds MPE') : (p.expOk ? 'SAR exempt' : 'SAR testing');
+    $('mExp').className = 'v ' + (p.expOk ? 'pass' : 'fail'); $('mExpN').textContent = `Sum of ratios ${p.exp.sum.toFixed(3)} at ${p.d} cm`;
+    $('paths').innerHTML = p.paths.map((x) => `<tr><td class="t">${esc(x.n)}</td><td><span class="path ${x.kind}">${esc(x.label)}</span></td><td>${x.why.map(esc).join('<br>')}</td></tr>`).join('');
+    $('matrix').innerHTML = p.rows.map((r, k) => `<tr><td>${k + 1}</td><td class="t">${esc(r.test)}</td><td>${esc(r.applies)}</td><td>${esc(r.config)}</td><td>${esc(r.rule)}</td><td>${esc(r.why)}</td><td>${esc(r.who)}</td></tr>`).join('');
+  }
+
+  const header = () => `Co-location test plan: ${$('name').value} (${$('use').value}, ${$('dist').value} cm to people, antennas ${$('spacing').value} cm apart${$('mains').checked ? ', mains powered' : ''}). Generated ${new Date().toLocaleString()} · RF Lab`;
+  $('csv').onclick = () => {
+    const q = (s) => `"${String(s).replace(/"/g, '""')}"`;
+    let s = `${q(header())}\n\nradio,path,why\n` + plan.paths.map((x) => [q(x.n), q(x.label), q(x.why.join(' '))].join(',')).join('\n');
+    s += '\n\n#,test,applies_to,configuration,rule,why,who\n' + plan.rows.map((r, k) => [k + 1, q(r.test), q(r.applies), q(r.config), q(r.rule), q(r.why), q(r.who)].join(',')).join('\n') + '\n';
+    RF.util.downloadText(`coloc_test_plan_${RF.util.stamp()}.csv`, s);
+  };
+  $('copy').onclick = async () => {
+    const t = [header(), '', 'Certification path:', ...plan.paths.map((x) => `- ${x.n}: ${x.label}. ${x.why.join(' ')}`), '', 'Test matrix:', ...plan.rows.map((r, k) => `${k + 1}. ${r.test} — ${r.applies}. ${r.config}. [${r.rule}] (${r.who})`)].join('\n');
+    await RF.util.copy(t); $('copied').textContent = 'Copied'; setTimeout(() => $('copied').textContent = '', 1500);
+  };
+  $('print').onclick = () => window.print();
+
+  /* ---------- exercises (hidden unless manifest.showExercises) ---------- */
+  RF.ex.mount('exercises', 'coloc-plan', [
+    { id: 'gain', type: 'state', title: 'A bigger antenna',
+      prompt: 'Raise the <b>HaLow host antenna gain</b> above its grant maximum, then press Check.',
+      hint: 'Edit the “Host antenna gain” cell in the HaLow row.',
+      check: () => { const i = radios.findIndex((r) => r.tech === 'halow'); if (i < 0) return { ok: false, msg: 'Keep a HaLow radio in the list.' };
+        return plan.paths[i].kind === 'chg' ? { ok: true, msg: 'HaLow now needs a Class II permissive change.' } : { ok: false, msg: 'Gain is still within the grant.' }; },
+      explain: 'A higher-gain antenna can raise radiated emissions and exposure, which the grantee must re-test and file.' },
+    { id: 'portable', type: 'state', title: 'Move it closer to people',
+      prompt: 'Change <b>How people use it</b> to Portable (5 cm), then press Check.',
+      check: () => $('use').value === 'portable' ? { ok: true, msg: `Exposure is now “${$('mExp').textContent}”, and modules with mobile-only grants need changes.` } : { ok: false, msg: 'Select Portable.' },
+      explain: 'Most modules are certified for ≥ 20 cm. Portable use brings in SAR, which usually means a Class II change and SAR testing.' },
+    { id: 'which', type: 'choice', title: 'Which test catches intermod?',
+      prompt: 'Which test shows whether intermod products from two modules exceed the limits?',
+      options: ['Radiated spurious emissions with both radios transmitting at the same time', 'Each module’s conducted power test', 'Part 15B with radios idle', 'AC power-line conducted with radios idle'],
+      answer: 0, explain: 'Intermod only exists while both radios transmit, so it has to be measured that way, on channels that put the products in restricted bands.' },
+    { id: 'who', type: 'choice', title: 'Who files the change?',
+      prompt: 'A module needs a Class II permissive change, but the module maker won’t file it. What can the host maker do?',
+      options: ['File a change in FCC ID (§2.933) to take over the certification under its own FCC ID, then file the change', 'Nothing: the module can’t be used', 'Ship it and note the change in the manual', 'File the Class II change under the module maker’s FCC ID without permission'],
+      answer: 0, explain: 'Only the grant holder can file permissive changes on an FCC ID, so the host maker gets its own ID first.' }
+  ]);
+
+  /* ---------- known-answer tests ---------- */
+  RF.test.add('Default plan: all modules ride on grants (mobile, 20 cm)', () => ({ ok: plan.paths.every((p) => p.kind === 'ok'), detail: plan.paths.map((p) => p.kind).join(',') }));
+  RF.test.add('Default plan lists a simultaneous-Tx radiated row for HaLow + Wi-Fi 2.4', () => ({ ok: plan.rows.some((r) => r.test.startsWith('Radiated spurious, simultaneous') && r.applies.includes('HaLow') && r.applies.includes('2.4')), detail: plan.pairs + ' pairs' }));
+  RF.test.add('Higher antenna gain → Class II', () => { radios[0].gain = radios[0].grantGain + 3; update(); const k = plan.paths[0].kind; radios[0].gain = C.TECH.halow.gain; update(); return { ok: k === 'chg', detail: k }; });
+  RF.test.add('Portable use with mobile grants → SAR testing and Class II', () => { $('use').value = 'portable'; $('dist').value = 5; update(); const r = { ok: plan.rows.some((x) => x.test === 'RF exposure: SAR testing') && plan.paths.every((p) => p.kind === 'chg'), detail: $('mExp').textContent }; $('use').value = 'mobile'; $('dist').value = 20; update(); return r; });
+  RF.test.add('Own design → full certification row', () => { radios[1].impl = 'own'; update(); const ok = plan.paths[1].kind === 'full' && plan.rows.some((x) => x.test === 'Full certification test set'); radios[1].impl = 'module'; update(); return { ok, detail: plan.paths[1].label }; });
+  RF.test.add('Not mains powered → no AC conducted rows', () => { $('mains').checked = false; update(); const ok = !plan.rows.some((x) => x.test.startsWith('AC power-line')); $('mains').checked = true; update(); return { ok, detail: plan.rows.length + ' rows' }; });
+
+  renderRows(); update();
+})();
+</script>
+<script>document.querySelectorAll('.rl-crumb a').forEach(a=>a.removeAttribute('href'));</script>
+</body>
+</html>

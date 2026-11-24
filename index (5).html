@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LTE device power and emission mask · RF Lab</title>
+<link rel="stylesheet" href="../../shared/theme.css">
+<script src="../../manifest.js"></script>
+<script src="../../shared/rfmath.js"></script>
+<script src="../../shared/limits.js"></script>
+<script src="../../shared/rfplot.js"></script>
+<script src="../../shared/rflab.js"></script>
+</head>
+<body>
+<header class="rl-header" id="rl-header"></header>
+<main class="rl-main">
+  <div class="card concept">
+    <h2>Concept</h2>
+    <p>LTE operates in <b>licensed</b> spectrum, so the rules come from the service rules for each band (Parts 22, 24 and 27), not Part 15. There's no minimum bandwidth or PSD limit. A device is certified against a <b>radiated power limit</b>, either ERP (relative to a dipole, used below 1 GHz) or EIRP (relative to an isotropic antenna), plus an <b>emission mask</b>. Emissions outside the authorized block must be attenuated by 43 + 10·log10(P) dB, which works out to <b>−13 dBm</b> regardless of transmit power.</p>
+    <p>The reference bandwidth depends on the band. PCS and AWS (above 1 GHz) use 1 MHz, and in the first 1 MHz outside the block the measurement bandwidth may shrink to 1% of the emission bandwidth. Cellular, 600 MHz and 700 MHz (below 1 GHz) use 100 kHz. Bands 12, 13 and 71 allow at least 30 kHz in the first 100 kHz, and Band 5 allows 1% of the emission bandwidth in the first 1 MHz. Band 13 also has a stricter −35 dBm limit, measured in 6.25 kHz, over the public-safety bands 763–775 and 793–805 MHz. PCS and AWS cap the peak-to-average power ratio at 13 dB.</p>
+  </div>
+
+  <div class="layout" style="margin-top:14px">
+    <section>
+      <div class="card">
+        <h3>Signal</h3>
+        <label for="band">LTE band (uplink)</label><select id="band"></select>
+        <label for="bw">Channel bandwidth</label><select id="bw"></select>
+        <label for="pos">Channel position</label>
+        <select id="pos"><option value="low">Lowest channel (at lower band edge)</option><option value="mid" selected>Middle of band</option><option value="high">Highest channel (at upper band edge)</option></select>
+        <label for="pwr">Conducted power (dBm)</label>
+        <div class="row"><input type="range" id="pwr" min="0" max="30" step="0.5" value="23"><span class="val" id="pwrV"></span></div>
+        <label for="lin">PA spectral regrowth (shoulder, dBc)</label>
+        <div class="row"><input type="range" id="lin" min="-50" max="-20" step="1" value="-38"><span class="val" id="linV"></span></div>
+        <label for="papr">Measured PAPR at 0.1% CCDF (dB)</label><input type="number" id="papr" value="8" step="0.1">
+      </div>
+      <div class="card">
+        <h3>Antenna path</h3>
+        <label for="gain">Antenna gain (dBi)</label><input type="number" id="gain" value="2" step="0.5">
+        <label for="loss">Cable and matching loss (dB)</label><input type="number" id="loss" value="0.5" step="0.1">
+        <div class="hint" id="bandNote"></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="card">
+        <div class="plotwrap"><canvas id="cv" role="img" aria-label="LTE uplink spectrum with block edges and the −13 dBm emission mask"></canvas><div class="readout" id="readout"></div></div>
+        <div class="metrics">
+          <div class="m"><div class="l">Occupied bandwidth (99%)</div><div class="v" id="mObw">–</div><div class="n" id="mObwN"></div></div>
+          <div class="m"><div class="l">Conducted power</div><div class="v" id="mPow">–</div><div class="n" id="mPowN"></div></div>
+          <div class="m"><div class="l" id="mRadL">Radiated power</div><div class="v" id="mRad">–</div><div class="n" id="mRadN"></div></div>
+          <div class="m"><div class="l">Emission mask (−13 dBm)</div><div class="v" id="mMask">–</div><div class="n" id="mMaskN"></div></div>
+          <div class="m"><div class="l">Peak-to-average ratio</div><div class="v" id="mPapr">–</div><div class="n" id="mPaprN"></div></div>
+          <div class="m"><div class="l">Rule part</div><div class="v" id="mPart">–</div><div class="n" id="mPartN"></div></div>
+        </div>
+        <div class="toolbar"><button id="png">Save plot as PNG</button><button id="copy">Copy results</button><span class="hint" id="copied"></span></div>
+        <details><summary>Method notes</summary><ul class="notes">
+          <li>Measurements follow KDB 971168: conducted power over the channel, 99% OBW, and 26 dB emission bandwidth (EBW) to set the near-edge measurement bandwidth.</li>
+          <li>Emission mask: for each frequency outside the block, power is integrated over the band's measurement bandwidth: 1 MHz (PCS/AWS, §24.238(b), §27.53(h)(3)) or 100 kHz (Band 5, §22.917(b); Bands 12/13/71, §27.53(c)(5), (g)). Near the edge it uses 1% of the EBW in the first 1 MHz (PCS/AWS, Band 5) or 30 kHz in the first 100 kHz (Bands 12/13/71). Then it compares with −13 dBm, or −35 dBm in 6.25 kHz in Band 13's public-safety ranges. The plot draws the mask in the trace's own units (dBm per 30 kHz).</li>
+          <li>This tool treats the channel edges as the authorized block edges, which is how labs test the lowest and highest channels at the band edges. In service, the block edge is the carrier's licensed block.</li>
+          <li>ERP = EIRP − 2.15 dB. Limits shown are for portable/mobile devices; some bands allow more for fixed or vehicle-mounted stations.</li>
+          <li>Spectral shapes are idealized; the shoulder slider stands in for PA linearity (ACLR).</li>
+        </ul></details>
+      </div>
+      <div class="card" id="exercises"></div>
+    </section>
+  </div>
+  <div class="card" id="rl-regs" style="margin-top:14px"></div>
+</main>
+<footer class="rl-footer" id="rl-footer"></footer>
+
+<script>
+(function () {
+  'use strict';
+  const { $ } = RF.util, M = RF.math, LT = RF.limits.fcc.lte;
+  RF.page.init({ id: 'lte-mask' });
+  const SIM_RBW = 30e3;
+  Object.entries(LT.bands).forEach(([k, b]) => $('band').add(new Option(`${k} ${b.name} (${b.ulLoMHz}–${b.ulHiMHz} MHz)`, k)));
+  $('band').value = 'B66';
+  function fillBw() { const b = LT.bands[$('band').value], prev = $('bw').value; $('bw').innerHTML = ''; b.bwsMHz.forEach((w) => $('bw').add(new Option(w + ' MHz', w))); $('bw').value = b.bwsMHz.map(String).includes(prev) ? prev : String(b.bwsMHz[b.bwsMHz.length - 1]); }
+  fillBw();
+
+  const plot = RF.plot.create($('cv'), { readoutEl: $('readout') });
+  let trace = null, res = null;
+
+  function geometry() {
+    const b = LT.bands[$('band').value], W = +$('bw').value, pos = $('pos').value;
+    const fc = pos === 'low' ? b.ulLoMHz + W / 2 : pos === 'high' ? b.ulHiMHz - W / 2 : (b.ulLoMHz + b.ulHiMHz) / 2;
+    return { b, W, fc, blockLo: fc - W / 2, blockHi: fc + W / 2 };
+  }
+
+  function simulate(g) {
+    const pad = W => Math.max(2.2 * W, 10);
+    const t = M.simulateSignal({ fcMHz: g.fc, occMHz: g.W * LT.occupiedFraction, startMHz: g.blockLo - pad(g.W), stopMHz: g.blockHi + pad(g.W), points: 4001,
+      powerDbm: +$('pwr').value, order: 28, rippleDb: 0.5, rbwHz: SIM_RBW, noiseDbm: -75, seed: 7,
+      shoulderDbc: +$('lin').value, shoulderWidth: 1.5, shoulderOrder: 3 });
+    t.source = `Simulated: ${$('band').value} ${g.W} MHz (${$('pos').value} channel, ${g.fc.toFixed(1)} MHz), ${$('pwr').value} dBm conducted`;
+    return t;
+  }
+
+  /** Power (dBm) integrated over a window of width wHz centered at each frequency, from a trace in dBm/SIM_RBW. */
+  function windowPower(t) {
+    const N = t.f.length, df = (t.f[N - 1] - t.f[0]) / (N - 1) * 1e6, pre = new Float64Array(N + 1);
+    for (let i = 0; i < N; i++) pre[i + 1] = pre[i] + M.dbmToMw(t.a[i]) / t.rbw * df;
+    return (i, wHz) => { const h = Math.max(0, Math.round(wHz / df / 2)), lo = Math.max(0, i - h), hi = Math.min(N, i + h + 1); return M.mwToDbm((pre[hi] - pre[lo]) * (wHz / ((hi - lo) * df))); };
+  }
+
+  function measure(t, g) {
+    const ob = M.obw(t.f, t.a, 0.99), ebw = M.nDbBandwidth(t.f, t.a, 26), ne = g.b.nearEdge;
+    const nearBw = ne.rbwFracOfEbw ? Math.max(ne.rbwFracOfEbw * ebw.bwHz, 1e3) : ne.minRbwHz, nearW = ne.widthHz / 1e6, farBw = g.b.maskBwHz;
+    const pow = M.channelPower(t.f, t.a, t.rbw, g.blockLo, g.blockHi);
+    const eirp = pow + (+$('gain').value || 0) - (+$('loss').value || 0), erp = M.eirpToErp(eirp);
+    const rad = g.b.limitType === 'ERP' ? erp : eirp;
+    const wp = windowPower(t); let worst = null;
+    for (let i = 0; i < t.f.length; i++) {
+      const f = t.f[i]; if (f >= g.blockLo && f <= g.blockHi) continue;
+      const d = f < g.blockLo ? g.blockLo - f : f - g.blockHi, x = (g.b.extraMasks || []).find((e) => f >= e.loMHz && f <= e.hiMHz);
+      const mbw = x ? x.bwHz : d <= nearW ? nearBw : farBw, lim = x ? x.dbm : LT.mask.absDbm;
+      // the measurement window must lie entirely outside the block
+      if (d * 1e6 < mbw / 2) continue;
+      const lvl = wp(i, mbw), m = lim - lvl;
+      if (!worst || m < worst.margin) worst = { margin: m, at: f, level: lvl, mbw, limit: lim };
+    }
+    return { ob, ebw, nearBw, nearW, farBw, pow, eirp, erp, rad, worst, papr: +$('papr').value };
+  }
+
+  const setCard = (id, ok, text, note) => { $(id).textContent = text; $(id).className = 'v ' + (ok === null ? '' : ok ? 'pass' : 'fail'); if (note !== undefined) $(id + 'N').textContent = note; };
+
+  function update() {
+    $('pwrV').textContent = $('pwr').value + ' dBm'; $('linV').textContent = $('lin').value + ' dBc';
+    const g = geometry(); trace = simulate(g); const r = res = measure(trace, g);
+    $('bandNote').textContent = g.b.note || '';
+    setCard('mObw', null, M.fmtHz(r.ob.bwHz), `26 dB EBW ${M.fmtHz(r.ebw.bwHz)} → near-edge RBW ${M.fmtHz(r.nearBw)}`);
+    setCard('mPow', null, r.pow.toFixed(2) + ' dBm', `Within the ${g.W} MHz channel`);
+    $('mRadL').textContent = g.b.limitType === 'ERP' ? 'ERP vs limit' : 'EIRP vs limit';
+    setCard('mRad', r.rad <= g.b.limitDbm, r.rad.toFixed(2) + ' dBm', `Limit ${g.b.limitDbm} dBm ${g.b.limitType} (${(M.dbmToMw(g.b.limitDbm) / 1000).toFixed(g.b.limitDbm < 31 ? 1 : 0)} W, ${g.b.citePower}) · margin ${(g.b.limitDbm - r.rad).toFixed(2)} dB`);
+    if (r.worst) setCard('mMask', r.worst.margin >= 0, (r.worst.margin >= 0 ? '+' : '') + r.worst.margin.toFixed(1) + ' dB', `Worst ${r.worst.level.toFixed(1)} dBm in ${M.fmtHz(r.worst.mbw)} at ${r.worst.at.toFixed(2)} MHz vs ${r.worst.limit} dBm (${g.b.citeMask})`);
+    if (g.b.paprDb) setCard('mPapr', r.papr <= g.b.paprDb, r.papr.toFixed(1) + ' dB', `Limit ${g.b.paprDb} dB (${g.b.citePapr})`);
+    else setCard('mPapr', null, r.papr.toFixed(1) + ' dB', 'No PAPR limit modeled for this band');
+    setCard('mPart', null, 'Part ' + g.b.part.split(' ')[0], `${g.b.part} · ${g.b.name}`);
+
+    const toTrace = (mbw, lim = LT.mask.absDbm) => lim - 10 * Math.log10(mbw / trace.rbw), f0 = trace.f[0], f1 = trace.f[trace.f.length - 1], ne = r.nearW;
+    plot.draw({
+      traces: [{ f: trace.f, a: trace.a }], rbw: trace.rbw, refLevel: Math.ceil((Math.max(...trace.a) + 5) / 10) * 10,
+      shades: [{ x0: g.blockLo, x1: g.blockHi, color: 'trace', alpha: 0.05 }],
+      vLines: [{ x: g.blockLo, label: 'Block edge', color: 'limit', dash: [2, 3] }, { x: g.blockHi, label: 'Block edge', color: 'limit', dash: [2, 3] },
+        { x: r.ob.oL, color: 'muted', dash: [1, 3] }, { x: r.ob.oR, color: 'muted', dash: [1, 3] }],
+      segments: [
+        { x0: f0, x1: g.blockLo - ne, y: toTrace(r.farBw), label: `−13 dBm / ${M.fmtHz(r.farBw)}` }, { x0: g.blockLo - ne, x1: g.blockLo, y: toTrace(r.nearBw) },
+        { x0: g.blockHi, x1: g.blockHi + ne, y: toTrace(r.nearBw) }, { x0: g.blockHi + ne, x1: f1, y: toTrace(r.farBw) },
+        ...(g.b.extraMasks || []).map((e) => ({ x0: e.loMHz, x1: e.hiMHz, y: toTrace(e.bwHz, e.dbm), label: '−35 dBm / 6.25 kHz' }))
+      ],
+      hLines: [{ y: Math.max(...trace.a), label: `In-band ${Math.max(...trace.a).toFixed(1)} dBm/30 kHz` }]
+    });
+  }
+
+  $('band').addEventListener('change', () => { fillBw(); update(); });
+  ['bw', 'pos', 'pwr', 'lin', 'papr', 'gain', 'loss'].forEach((k) => { $(k).addEventListener('input', update); $(k).addEventListener('change', update); });
+
+  const resultsText = () => !res ? '' : [trace.source,
+    `OBW ${M.fmtHz(res.ob.bwHz)} · EBW ${M.fmtHz(res.ebw.bwHz)} · Conducted ${res.pow.toFixed(2)} dBm · ${$('mRadL').textContent.split(' ')[0]} ${res.rad.toFixed(2)} dBm (${$('mRad').className.includes('pass') ? 'pass' : 'fail'})`,
+    `Mask ${$('mMask').textContent} · PAPR ${$('mPapr').textContent}`, `Generated ${new Date().toLocaleString()} · RF Lab`].join('\n');
+  $('png').onclick = () => plot.exportPNG(`lte_${RF.util.stamp()}.png`, resultsText().split('\n').slice(0, 3).join('   |   '));
+  $('copy').onclick = async () => { await RF.util.copy(resultsText()); $('copied').textContent = 'Copied'; setTimeout(() => $('copied').textContent = '', 1500); };
+
+  /* ---------- exercises ---------- */
+  const set = (o) => { if (o.band) { $('band').value = o.band; fillBw(); } Object.entries(o).forEach(([k, v]) => { if (k !== 'band') $(k).value = v; }); update(); };
+  RF.ex.mount('exercises', 'lte-mask', [
+    { id: 'erp', type: 'number', title: 'Conducted power to ERP',
+      prompt: 'A Band 5 module transmits 23 dBm conducted into a 2 dBi antenna through 1 dB of cable loss. What is the ERP?',
+      unit: 'dBm', tol: 0.1, hint: 'EIRP = conducted + gain − loss; ERP = EIRP − 2.15 dB.',
+      answer: () => M.eirpToErp(23 + 2 - 1), explain: 'Below 1 GHz most limits are in ERP, so a 2.15 dBi antenna radiates the same ERP as the conducted power.' },
+    { id: 'atten', type: 'number', title: 'Where −13 dBm comes from',
+      prompt: 'A device transmits 23 dBm (0.2 W). How many dB of attenuation does 43 + 10·log10(P) require?',
+      unit: 'dB', tol: 0.1, hint: '10·log10(0.2) ≈ −7.',
+      answer: () => 43 + 10 * Math.log10(0.2), explain: '23 dBm − 36 dB = −13 dBm. Whatever the power, the mask works out to the same absolute −13 dBm.' },
+    { id: 'b13-ps', type: 'state', title: 'Band 13 and public safety',
+      prompt: 'Select <b>B13</b>, <b>10 MHz</b>, shoulder <b>−20 dBc</b>. The mask fails at 23 dBm. Which limit fails, and what is the highest conducted power (within 1 dB) that passes? Set it, then press Check.',
+      hint: 'Look at where the worst point is: 763–775 and 793–805 MHz carry a −35 dBm limit in 6.25 kHz.',
+      check: () => { if ($('band').value !== 'B13' || $('bw').value !== '10') return { ok: false, msg: 'Select B13 at 10 MHz.' };
+        if (+$('lin').value !== -20) return { ok: false, msg: 'Set the shoulder to −20 dBc.' };
+        const m = res.worst.margin; if (m < 0) return { ok: false, msg: `Failing by ${(-m).toFixed(1)} dB at ${res.worst.at.toFixed(1)} MHz.` }; if (m > 1.5) return { ok: false, msg: `${m.toFixed(1)} dB to spare; you can raise the power.` };
+        return { ok: true, msg: `Passes at ${$('pwr').value} dBm; the binding limit is the −35 dBm public-safety limit at ${res.worst.at.toFixed(1)} MHz.` }; },
+      explain: 'Band 13 sits next to 700 MHz public-safety spectrum, so §27.53(c)(4) adds a much tighter limit there. It, not the −13 dBm mask, usually sets Band 13 power back-off.' },
+    { id: 'rbw-why', type: 'choice', title: 'Why 1% of the EBW near the edge?',
+      prompt: 'For PCS and AWS bands, why may the measurement bandwidth shrink to 1% of the emission bandwidth in the first 1 MHz outside the block?',
+      options: ['A 1 MHz window right at the block edge would capture the carrier’s own steep skirt and overstate the emission', 'Analyzers cannot use 1 MHz RBW near a strong carrier', 'It makes the limit stricter close to the carrier', 'It applies only to TDD bands'],
+      answer: 0, explain: 'A narrow window measures what is actually just outside the block, instead of averaging in power from right next to it.' }
+  ]);
+
+  /* ---------- known-answer tests ---------- */
+  RF.test.add('ERP = EIRP − 2.15 (24 dBm EIRP → 21.85)', () => RF.test.near(M.eirpToErp(24), 21.85, 0.001));
+  RF.test.add('43 + 10·log10(P) gives −13 dBm at 0.2 W and 2 W', () => { const a = 23 - (43 + 10 * Math.log10(0.2)), b = 33 - (43 + 10 * Math.log10(2)); return { ok: Math.abs(a + 13) < 0.02 && Math.abs(b + 13) < 0.02, detail: `${a.toFixed(2)}, ${b.toFixed(2)}` }; });
+  RF.test.add('B66 20 MHz mid, 23 dBm: conducted power 23 dBm', () => { set({ band: 'B66', bw: '20', pos: 'mid', pwr: 23, lin: -38, gain: 2, loss: 0.5 }); return RF.test.near(res.pow, 23, 0.3); });
+  RF.test.add('B66 20 MHz OBW ≈ 18 MHz', () => ({ ok: res.ob.bwHz > 17.5e6 && res.ob.bwHz < 18.8e6, detail: M.fmtHz(res.ob.bwHz) }));
+  RF.test.add('B66 default passes mask and EIRP', () => ({ ok: res.worst.margin > 0 && res.rad <= 30, detail: `mask ${res.worst.margin.toFixed(1)} dB, EIRP ${res.rad.toFixed(1)}` }));
+  RF.test.add('B5 uses ERP', () => { set({ band: 'B5' }); const r = { ok: $('mRadL').textContent.startsWith('ERP'), detail: $('mRadL').textContent }; return r; });
+  RF.test.add('B13 −20 dBc at 23 dBm fails the −35 dBm public-safety limit', () => { set({ band: 'B13', bw: '10', pos: 'mid', lin: -20, pwr: 23 }); return { ok: res.worst.margin < 0 && res.worst.limit === -35, detail: `${res.worst.margin.toFixed(1)} dB at ${res.worst.at.toFixed(1)} MHz` }; });
+  RF.test.add('Below 1 GHz bands use a 100 kHz reference bandwidth', () => { set({ band: 'B12', bw: '10', pos: 'low', lin: -38, pwr: 23 }); return { ok: res.farBw === 1e5 && res.nearBw === 3e4, detail: `${res.farBw} / ${res.nearBw}` }; });
+  RF.test.add('Mask margin moves 1 dB per dB of power', () => { set({ band: 'B66', bw: '20', pos: 'low', lin: -20, pwr: 23 }); const a = res.worst.margin; set({ pwr: 18 }); const b = res.worst.margin; set({ band: 'B66', bw: '20', pos: 'mid', lin: -38, pwr: 23 }); return RF.test.near(b - a, 5, 0.3); });
+
+  update();
+})();
+</script>
+</body>
+</html>

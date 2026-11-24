@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Intermod and spurious planner · RF Lab</title>
+<link rel="stylesheet" href="../../shared/theme.css">
+<script src="../../manifest.js"></script>
+<script src="../../shared/rfmath.js"></script>
+<script src="../../shared/limits.js"></script>
+<script src="../../shared/rfplot.js"></script>
+<script src="../../shared/rflab.js"></script>
+<script src="../../shared/coloc.js"></script>
+<style>
+table.radios{width:100%;border-collapse:collapse;font-size:13px}
+table.radios th{text-align:left;font-weight:600;color:var(--ink2);padding:6px 6px;border-bottom:1px solid var(--border);font-size:12px}
+table.radios td{padding:6px;border-bottom:1px solid var(--border);vertical-align:middle}
+table.radios select,table.radios input[type=number]{min-width:90px}
+table.prods{width:100%;border-collapse:collapse;font-size:12.5px}
+table.prods th{text-align:left;font-weight:600;color:var(--ink2);padding:6px 8px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--panel)}
+table.prods td{padding:6px 8px;border-bottom:1px solid var(--border);vertical-align:top;color:var(--ink2)}
+table.prods td.p{color:var(--ink);white-space:nowrap}
+.sev{font-size:11.5px;padding:2px 8px;border-radius:999px;background:var(--chip);white-space:nowrap}
+.sev.hi{color:var(--fail)}.sev.md{color:var(--mark)}.sev.lo{color:var(--muted)}
+.prodwrap{max-height:520px;overflow:auto;margin-top:10px}
+.stripwrap{position:relative;height:300px}
+.stripwrap canvas{display:block;width:100%;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--ink2);margin-top:6px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:10px;height:10px;border-radius:2px;display:inline-block}
+</style>
+</head>
+<body>
+<header class="rl-header" id="rl-header"></header>
+<main class="rl-main">
+  <div class="card concept">
+    <h2>Concept</h2>
+    <p>When several radios share one product and transmit at the same time, nonlinear parts mix their signals. Those parts include the PAs, front-end switches, and even corroded or ferrous metal. The mixing creates <b>harmonics</b> (n·f) and <b>intermodulation products</b> (a·f1 ± b·f2) at frequencies none of the radios was certified for. Each module's own grant covers only its own emissions, so the host has to show that the combination is clean too (KDB 996369).</p>
+    <p>A product matters most when it lands in a <b>§15.205 restricted band</b>, where an absolute field-strength limit applies. When an LTE or CBRS transmitter is one of the sources, its <b>−13 dBm mask</b> (Part 96: −25/−40 dBm/MHz) applies wherever the product falls. A product on <b>another radio's receiver</b> in the same product, such as GNSS or LTE downlink, is a performance problem rather than an FCC one. List your radios below to see which channel combinations need radiated testing with simultaneous transmission.</p>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <h3>Radios in the host</h3>
+    <table class="radios"><thead><tr><th>Radio</th><th>Transmits</th><th>Channel center (MHz)</th><th>Bandwidth</th><th>Cover whole band</th><th>Tx band / Rx band</th><th></th></tr></thead><tbody id="rows"></tbody></table>
+    <div class="toolbar">
+      <button id="add">Add radio</button>
+      <label class="row" style="flex:0 0 auto;gap:6px;margin:0"><span>Harmonics up to</span><select id="hmax" style="width:auto"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option selected>10</option></select></label>
+      <label class="row" style="flex:0 0 auto;gap:6px;margin:0"><input type="checkbox" id="im5" style="width:auto;flex:0 0 auto"> <span>Include 5th-order IM</span></label>
+      <label class="row" style="flex:0 0 auto;gap:6px;margin:0"><input type="checkbox" id="hitsOnly" checked style="width:auto;flex:0 0 auto"> <span>Only products that land in something</span></label>
+    </div>
+    <div class="hint">"Cover whole band" sweeps the radio across its entire band, so ranges show every channel combination at once. Use it for test planning; use a specific channel to check a known configuration.</div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <div class="stripwrap"><canvas id="cv" role="img" aria-label="Frequency map of transmitters, receivers, restricted bands and harmonic and intermod products"></canvas></div>
+    <div class="legend"><span><i style="background:var(--limit);opacity:.35"></i>Restricted band (§15.205)</span><span><i style="background:var(--mark)"></i>Host receiver</span><span><i style="background:var(--trace)"></i>Transmitter</span><span><i style="background:var(--fail)"></i>Product in a restricted band</span><span><i style="background:var(--mark);opacity:.8"></i>Product on a host receiver</span><span><i style="background:var(--muted)"></i>Product, no hit</span></div>
+    <div class="metrics">
+      <div class="m"><div class="l">Products computed</div><div class="v" id="mN">–</div><div class="n" id="mNN"></div></div>
+      <div class="m"><div class="l">In restricted bands</div><div class="v" id="mR">–</div><div class="n">Radiated test with simultaneous Tx</div></div>
+      <div class="m"><div class="l">On host receivers</div><div class="v" id="mX">–</div><div class="n">Desense check (not an FCC test); may overlap restricted hits</div></div>
+    </div>
+    <div class="toolbar"><button id="csv">Export test matrix (CSV)</button><button id="png">Save chart as PNG</button><button id="copy">Copy summary</button><span class="hint" id="copied"></span></div>
+    <div class="prodwrap"><table class="prods"><thead><tr><th>Product</th><th>Order</th><th>Frequency (MHz)</th><th>Lands in</th><th>Severity</th><th>Test action</th></tr></thead><tbody id="prods"></tbody></table></div>
+    <details><summary>Method notes</summary><ul class="notes">
+      <li>Ranges are exact for the occupied channels. A product a·f1 + b·f2 spans every combination of frequencies inside each channel, so a 20 MHz Wi-Fi channel widens a 3rd-order product to 40 MHz.</li>
+      <li>Orders computed: harmonics n·f (2nd to 10th); 2nd order f1 ± f2; 3rd order 2f1 ± f2 and 2f2 ± f1; optional 5th order 3f1 − 2f2 and 3f2 − 2f1. Lower orders are usually stronger, so the table sorts by severity, then order.</li>
+      <li>The planner predicts where products can fall, not how strong they are. Levels depend on PA linearity, antenna isolation and duty cycle, and only a radiated measurement settles them.</li>
+      <li>Harmonics go up to the 10th by default, matching the emission search range in §15.33(a) and §2.1057(a). Products from Part 15 radios are cut at 40 GHz; products from LTE/CBRS alone continue to the 10th harmonic.</li>
+      <li>Restricted bands are listed from 30 MHz up (§15.205); everything above 38.6 GHz is restricted. Receive bands are the host radios' own (for example LTE downlink and GNSS L1/L5).</li>
+    </ul></details>
+  </div>
+  <div class="card" id="exercises" style="margin-top:14px"></div>
+  <div class="card" id="rl-regs" style="margin-top:14px"></div>
+</main>
+<footer class="rl-footer" id="rl-footer"></footer>
+
+<script>
+(function () {
+  'use strict';
+  const { $, esc } = RF.util, F = RF.limits.fcc;
+  RF.page.init({ id: 'coloc-im' });
+  const RESTRICTED = F.restrictedBands15205.mhz;
+
+  const { TECH, txRange, combo } = RF.coloc;
+
+  let radios = [
+    { tech: 'halow', on: true, fc: 915, bw: 1, whole: false },
+    { tech: 'wifi24', on: true, fc: 2437, bw: 20, whole: false },
+    { tech: 'lteB13', on: true, fc: 782, bw: 10, whole: false },
+    { tech: 'gnss', on: false, fc: 1575.42, bw: 0, whole: false }
+  ];
+  let products = [];
+
+  /* ---------- radio table ---------- */
+  function renderRows() {
+    $('rows').innerHTML = radios.map((r, i) => {
+      const T = TECH[r.tech], rxOnly = !T.tx;
+      const techSel = `<select data-i="${i}" data-k="tech" aria-label="Radio ${i + 1} technology">${Object.entries(TECH).map(([k, t]) => `<option value="${k}"${k === r.tech ? ' selected' : ''}>${esc(t.label)}</option>`).join('')}</select>`;
+      const bands = `${T.tx ? `Tx ${T.tx[0]}–${T.tx[1]}` : 'Receive only'}<br><span class="hint">Rx ${T.rx.map((x) => `${x[0]}–${x[1]}`).join(', ')}</span>`;
+      return `<tr><td>${techSel}</td>
+        <td>${rxOnly ? '<span class="hint">—</span>' : `<input type="checkbox" data-i="${i}" data-k="on" ${r.on ? 'checked' : ''} aria-label="Radio ${i + 1} transmits" style="width:auto">`}</td>
+        <td>${rxOnly ? '<span class="hint">—</span>' : `<input type="number" data-i="${i}" data-k="fc" value="${r.fc}" step="0.5" ${r.whole ? 'disabled' : ''} aria-label="Radio ${i + 1} center frequency">`}</td>
+        <td>${rxOnly ? '<span class="hint">—</span>' : `<select data-i="${i}" data-k="bw" ${r.whole ? 'disabled' : ''} aria-label="Radio ${i + 1} bandwidth">${T.bws.map((w) => `<option value="${w}"${+w === +r.bw ? ' selected' : ''}>${w} MHz</option>`).join('')}</select>`}</td>
+        <td>${rxOnly ? '<span class="hint">—</span>' : `<input type="checkbox" data-i="${i}" data-k="whole" ${r.whole ? 'checked' : ''} aria-label="Radio ${i + 1} cover whole band" style="width:auto">`}</td>
+        <td class="hint" style="margin:0">${bands}</td>
+        <td><button data-del="${i}" aria-label="Remove radio ${i + 1}">Remove</button></td></tr>`;
+    }).join('');
+    $('rows').querySelectorAll('[data-k]').forEach((el) => el.addEventListener('change', () => {
+      const r = radios[+el.dataset.i], k = el.dataset.k;
+      if (k === 'tech') { const T = TECH[el.value]; Object.assign(r, { tech: el.value, fc: T.fc, bw: T.bw, on: !!T.tx, whole: false }); renderRows(); }
+      else if (k === 'on' || k === 'whole') { r[k] = el.checked; if (k === 'whole') renderRows(); }
+      else r[k] = +el.value;
+      update();
+    }));
+    $('rows').querySelectorAll('[data-del]').forEach((b) => b.onclick = () => { radios.splice(+b.dataset.del, 1); renderRows(); update(); });
+  }
+  $('add').onclick = () => { radios.push({ tech: 'wifi5', on: true, fc: 5500, bw: 20, whole: false }); renderRows(); update(); };
+
+  /* ---------- product math (shared/coloc.js) ---------- */
+  const name = (r, i) => RF.coloc.radioName(radios, r, i);
+  function compute() { return RF.coloc.products(radios, { hmax: +$('hmax').value, im5: $('im5').checked }); }
+
+  function action(p) { const a = baseAction(p); return p.licensed && p.sev ? a + ' LTE/CBRS source: also check the −13 dBm mask (Part 96: −25/−40 dBm/MHz).' : a; }
+  function baseAction(p) {
+    const both = p.srcs.length > 1;
+    if (p.sev === 2) return both ? 'Radiated spurious with both radios transmitting at max power on these channels; compare with §15.209 (54 dBµV/m avg, 74 peak at 3 m).' : 'Covered by this radio’s own spurious test; re-verify radiated in the host with the final antenna.';
+    if (p.sev === 1) return `Desense check: measure ${p.rx.map((b) => b.n).join(', ')} sensitivity with ${both ? 'both aggressors' : 'the aggressor'} transmitting.`;
+    return 'No action unless levels are high.';
+  }
+
+  /* ---------- chart ---------- */
+  const cv = $('cv'), ctx = cv.getContext('2d'), css = (n) => getComputedStyle(document.documentElement).getPropertyValue('--' + n).trim();
+  const FMIN = 100, FMAX = 40000;
+  function draw() {
+    const dpr = window.devicePixelRatio || 1, W = cv.parentElement.clientWidth, H = cv.parentElement.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = css('panel'); ctx.fillRect(0, 0, W, H);
+    const L = 150, R = 16, T = 10, B = 30, pw = W - L - R;
+    const X = (f) => L + (Math.log10(Math.max(FMIN, Math.min(FMAX, f))) - Math.log10(FMIN)) / (Math.log10(FMAX) - Math.log10(FMIN)) * pw;
+    const lanes = ['Restricted (§15.205)', 'Host receivers', 'Transmitters', 'Harmonics', '2nd-order IM', '3rd-order IM', '5th-order IM'];
+    const lh = (H - T - B) / lanes.length;
+    RESTRICTED.forEach((b) => { if (b[1] < FMIN || b[0] > FMAX) return; ctx.globalAlpha = 0.12; ctx.fillStyle = css('limit'); ctx.fillRect(X(b[0]), T, Math.max(1, X(b[1]) - X(b[0])), H - T - B); ctx.globalAlpha = 1; });
+    ctx.font = '11.5px sans-serif'; ctx.textAlign = 'right';
+    lanes.forEach((n, k) => { const y = T + k * lh; ctx.fillStyle = css('ink2'); ctx.fillText(n, L - 8, y + lh / 2 + 4); ctx.strokeStyle = css('grid'); ctx.beginPath(); ctx.moveTo(L, y + lh); ctx.lineTo(L + pw, y + lh); ctx.stroke(); });
+    const bar = (lane, lo, hi, color, alpha = 1, inset = 0.22) => { const y = T + lane * lh; ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.fillRect(X(lo), y + lh * inset, Math.max(2, X(hi) - X(lo)), lh * (1 - 2 * inset)); ctx.globalAlpha = 1; };
+    RESTRICTED.forEach((b) => bar(0, b[0], b[1], css('limit'), 0.55));
+    radios.forEach((r) => TECH[r.tech].rx.forEach(([lo, hi]) => bar(1, lo, hi, css('mark'), 0.85)));
+    radios.forEach((r) => { const g = txRange(r); if (g) bar(2, g[0], g[1], css('trace')); });
+    const laneOf = { 'Harmonic': 3, '2nd-order IM': 4, '3rd-order IM': 5, '5th-order IM': 6 };
+    products.forEach((p) => bar(laneOf[p.kind], p.rng[0], p.rng[1], p.sev === 2 ? css('fail') : p.sev === 1 ? css('mark') : css('muted'), p.sev ? 1 : 0.5, 0.3));
+    ctx.strokeStyle = css('axis'); ctx.strokeRect(L, T, pw, H - T - B);
+    ctx.fillStyle = css('muted'); ctx.textAlign = 'center';
+    [100, 200, 500, 1000, 2000, 5000, 10000, 20000, 40000].forEach((f) => { const x = X(f); ctx.fillText(f >= 1000 ? f / 1000 + ' GHz' : f + ' MHz', x, H - 10); ctx.strokeStyle = css('grid'); ctx.beginPath(); ctx.moveTo(x, T); ctx.lineTo(x, H - B); ctx.stroke(); });
+  }
+
+  /* ---------- table + metrics ---------- */
+  const ord = (n) => n + ({ 2: 'nd', 3: 'rd' }[n] || 'th');
+  const fmtR = (r) => r[1] - r[0] < 0.05 ? r[0].toFixed(1) : `${r[0].toFixed(1)}–${r[1].toFixed(1)}`;
+  const landsIn = (p) => [...p.restricted.map((b) => `Restricted ${b[0]}–${b[1]}`), ...p.rx.map((b) => `${b.n} receiver`)].join('; ') || '—';
+  function update() {
+    products = compute();
+    const shown = $('hitsOnly').checked ? products.filter((p) => p.sev > 0) : products;
+    $('prods').innerHTML = shown.map((p) => `<tr><td class="p">${esc(p.label)}</td><td>${p.order}</td><td>${fmtR(p.rng)}${p.clipped ? ' (cut at 40 GHz)' : ''}</td><td>${esc(landsIn(p))}</td>
+      <td><span class="sev ${p.sev === 2 ? 'hi' : p.sev === 1 ? 'md' : 'lo'}">${p.sev === 2 ? 'FCC: restricted' : p.sev === 1 ? 'Desense' : 'Clear'}</span></td><td>${esc(action(p))}</td></tr>`).join('') || '<tr><td colspan="6" class="hint">No products land in a restricted band or a host receiver.</td></tr>';
+    const nr = products.filter((p) => p.sev === 2).length, nx = products.filter((p) => p.rx.length > 0).length;
+    $('mN').textContent = products.length; $('mNN').textContent = `${radios.filter((r) => txRange(r)).length} transmitters, up to ${ord($('hmax').value)} harmonic${$('im5').checked ? ', IM up to 5th order' : ', IM up to 3rd order'}`;
+    $('mR').textContent = nr; $('mR').className = 'v ' + (nr ? 'fail' : 'pass');
+    $('mX').textContent = nx; $('mX').className = 'v ' + (nx ? '' : 'pass');
+    draw();
+  }
+  ['hmax', 'im5', 'hitsOnly'].forEach((k) => $(k).addEventListener('change', update));
+  window.addEventListener('resize', draw); matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw);
+
+  const config = () => radios.map((r, i) => `${name(r, i)}: ${TECH[r.tech].tx ? (r.on ? (r.whole ? 'whole band' : `${r.fc} MHz / ${r.bw} MHz`) : 'not transmitting') : 'receive only'}`).join('; ');
+  $('csv').onclick = () => {
+    const q = (s) => `"${String(s).replace(/"/g, '""')}"`;
+    let s = 'product,order,type,low_MHz,high_MHz,lands_in,severity,test_action\n';
+    products.filter((p) => p.sev > 0 || !$('hitsOnly').checked).forEach((p) => { s += [q(p.label), p.order, q(p.kind), p.rng[0].toFixed(2), p.rng[1].toFixed(2), q(landsIn(p)), q(p.sev === 2 ? 'FCC restricted' : p.sev === 1 ? 'Desense' : 'Clear'), q(action(p))].join(',') + '\n'; });
+    s += `\n${q('Configuration: ' + config())}\n${q('Generated ' + new Date().toLocaleString() + ' · RF Lab intermod planner')}\n`;
+    RF.util.downloadText(`coloc_test_matrix_${RF.util.stamp()}.csv`, s);
+  };
+  $('png').onclick = () => RF.util.download(`coloc_map_${RF.util.stamp()}.png`, cv.toDataURL('image/png'));
+  $('copy').onclick = async () => {
+    const hits = products.filter((p) => p.sev > 0).slice(0, 12).map((p) => `- ${p.label}: ${fmtR(p.rng)} MHz → ${landsIn(p)}`).join('\n');
+    await RF.util.copy(`Co-location intermod check\n${config()}\n${$('mR').textContent} restricted-band hits, ${$('mX').textContent} receiver hits\n${hits}`);
+    $('copied').textContent = 'Copied'; setTimeout(() => $('copied').textContent = '', 1500);
+  };
+
+  /* ---------- exercises (hidden unless manifest.showExercises) ---------- */
+  RF.ex.mount('exercises', 'coloc-im', [
+    { id: 'diff', type: 'number', title: 'The difference product',
+      prompt: 'HaLow on 915 MHz and Wi-Fi on channel 6 (2437 MHz) transmit together. Where does the 2nd-order difference product f(Wi-Fi) − f(HaLow) land?',
+      unit: 'MHz', tol: 1, hint: 'Subtract the two center frequencies.', answer: () => 2437 - 915,
+      explain: '1522 MHz falls inside the 1435–1626.5 MHz restricted band, so this pair needs a simultaneous-transmission radiated test.' },
+    { id: 'im3', type: 'number', title: 'A third-order product',
+      prompt: 'Same radios: where does 2·f(Wi-Fi) − f(HaLow) land?',
+      unit: 'MHz', tol: 1, hint: '2 × 2437 − 915.', answer: () => 2 * 2437 - 915,
+      explain: '3959 MHz is in the 3600–4400 MHz restricted band. Third-order products are often the strongest after the 2nd order.' },
+    { id: 'b13', type: 'choice', title: 'Why Band 13 has a GNSS rule',
+      prompt: 'Why does §27.53(f) add a special emission limit in 1559–1610 MHz for Band 13 devices?',
+      options: ['Band 13 uplink (777–787 MHz) doubled is 1554–1574 MHz, so its 2nd harmonic lands on GNSS L1', 'Band 13 downlink overlaps GNSS', 'GNSS satellites transmit in Band 13', 'It applies to all LTE bands equally'],
+      answer: 0, explain: 'Load LTE B13 with a GNSS receiver in the planner and the 2nd harmonic shows up as a GNSS L1 hit.' },
+    { id: 'whole', type: 'state', title: 'Plan for every channel',
+      prompt: 'Turn on <b>Cover whole band</b> for the HaLow and Wi-Fi 2.4 GHz radios, then press Check.',
+      hint: 'The checkbox is in each radio row.',
+      check: () => { const h = radios.find((r) => r.tech === 'halow'), w = radios.find((r) => r.tech === 'wifi24'); if (!h || !w) return { ok: false, msg: 'Keep a HaLow and a Wi-Fi 2.4 GHz radio in the list.' };
+        if (!h.whole || !w.whole) return { ok: false, msg: 'Tick Cover whole band on both rows.' };
+        return { ok: true, msg: `${products.filter((p) => p.sev === 2).length} restricted-band hits across all channel combinations.` }; },
+      explain: 'Whole-band ranges show which combinations can ever collide. Pick the worst-case channels from them for the lab test matrix.' },
+    { id: 'why', type: 'choice', title: 'Why the module grants aren’t enough',
+      prompt: 'Both modules already have FCC grants. Why does the host still need a simultaneous-transmission radiated test?',
+      options: ['Intermod products only exist when both radios transmit at once, so neither module’s own test report covers them', 'Module grants expire when installed in a host', 'The FCC requires every host to repeat all module tests', 'Only to measure the conducted power of each module'],
+      answer: 0, explain: 'KDB 996369 makes the host maker responsible for the final product, including co-location and simultaneous-transmission emissions.' }
+  ]);
+
+  /* ---------- known-answer tests ---------- */
+  RF.test.add('2·[2427, 2447] − [914.5, 915.5] = [3938.5, 3979.5]', () => { const r = combo(2, [2427, 2447], -1, [914.5, 915.5]); return { ok: Math.abs(r[0] - 3938.5) < 1e-9 && Math.abs(r[1] - 3979.5) < 1e-9, detail: r.join(' – ') }; });
+  RF.test.add('Difference folds to positive frequency', () => { const r = combo(1, [914.5, 915.5], -1, [2427, 2447]); return { ok: Math.abs(r[0] - 1511.5) < 1e-9 && Math.abs(r[1] - 1532.5) < 1e-9, detail: r.join(' – ') }; });
+  RF.test.add('Default: Wi-Fi − HaLow hits restricted 1435–1626.5', () => ({ ok: products.some((p) => p.order === 2 && p.label.includes('−') && p.restricted.some((b) => b[0] === 1435)), detail: products.filter((p) => p.sev === 2).length + ' restricted hits' }));
+  RF.test.add('B13 2nd harmonic hits GNSS L1 when a GNSS receiver is present', () => ({ ok: products.some((p) => p.kind === 'Harmonic' && p.label.startsWith('2·f(LTE B13') && p.rx.some((b) => b.n === 'GNSS L1')), detail: 'GNSS row present' }));
+  RF.test.add('HaLow 2nd harmonic 1829–1831 MHz is not in a restricted band', () => { const p = products.find((x) => x.label === '2·f(Wi-Fi HaLow)'); return { ok: !!p && Math.abs(p.rng[0] - 1829) < 1e-9 && p.restricted.length === 0, detail: p ? fmtR(p.rng) : 'missing' }; });
+
+  RF.test.add('10th harmonic of HaLow 915 MHz (9145–9155) hits restricted 9000–9200', () => { const p = products.find((x) => x.label === '10·f(Wi-Fi HaLow)'); return { ok: !!p && Math.abs(p.rng[0] - 9145) < 1e-9 && p.restricted.some((b) => b[0] === 9000), detail: p ? fmtR(p.rng) : 'missing' }; });
+  RF.test.add('Default harmonic setting is 10', () => ({ ok: $('hmax').value === '10', detail: $('hmax').value }));
+  RF.test.add('Wi-Fi 5 GHz harmonics stop at 40 GHz', () => { radios.push({ tech: 'wifi5', on: true, fc: 5500, bw: 20, whole: false }); update(); const h = products.filter((x) => x.kind === 'Harmonic' && x.label.includes('5 GHz')); const r = { ok: h.length > 0 && h.every((x) => x.rng[1] <= 40000) && !h.some((x) => x.label.startsWith('8·')), detail: h.map((x) => x.label.split('·')[0]).join(',') }; radios.pop(); update(); return r; });
+
+  renderRows(); update();
+})();
+</script>
+</body>
+</html>

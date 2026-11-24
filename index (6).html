@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simultaneous-transmission RF exposure · RF Lab</title>
+<link rel="stylesheet" href="../../shared/theme.css">
+<script src="../../manifest.js"></script>
+<script src="../../shared/rfmath.js"></script>
+<script src="../../shared/limits.js"></script>
+<script src="../../shared/rfplot.js"></script>
+<script src="../../shared/rflab.js"></script>
+<script src="../../shared/coloc.js"></script>
+<style>
+table.tbl{width:100%;border-collapse:collapse;font-size:13px}
+table.tbl th{text-align:left;font-weight:600;color:var(--ink2);padding:6px;border-bottom:1px solid var(--border);font-size:12px}
+table.tbl td{padding:6px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--ink2)}
+table.tbl input[type=number]{max-width:100px}
+.bar{height:8px;border-radius:4px;background:var(--trace);min-width:2px}
+.plotbox{position:relative;height:320px}
+.plotbox canvas{display:block;width:100%;height:100%}
+</style>
+</head>
+<body>
+<header class="rl-header" id="rl-header"></header>
+<main class="rl-main">
+  <div class="card concept">
+    <h2>Concept</h2>
+    <p>When radios transmit at the same time, their RF exposure adds up. The FCC rules don't judge each radio alone; they use a <b>sum of ratios</b>. Each transmitter's exposure is divided by its own limit, and the total must stay at or below 1.</p>
+    <p>How the ratio is computed depends on how close the product sits to people. <b>Mobile or fixed</b> products (20 cm or more) use power density against the MPE limit. <b>Portable</b> products (closer than 20 cm, handheld or body-worn) are exempt from SAR testing only if each radio's available power, as a fraction of the §1.1307 exemption threshold, still sums to 1 or less. Otherwise SAR must be measured, and measured SAR values are summed against 1.6 W/kg.</p>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <h3>Transmitters in the host</h3>
+    <table class="tbl"><thead><tr><th>Radio</th><th>Transmits at the same time</th><th>Max conducted power (dBm)</th><th>Antenna gain (dBi)</th><th>Duty cycle (%)</th><th>Measured SAR (W/kg, optional)</th><th></th></tr></thead><tbody id="rows"></tbody></table>
+    <div class="toolbar"><button id="add">Add radio</button></div>
+    <div class="row" style="max-width:640px;margin-top:10px">
+      <div><label for="mode">Use condition</label><select id="mode"><option value="mobile">Mobile or fixed (≥ 20 cm from people)</option><option value="portable">Portable (&lt; 20 cm, handheld or body-worn)</option></select></div>
+      <div><label for="dist">Separation distance (cm)</label><input type="number" id="dist" value="20" step="0.5" min="0.5"></div>
+    </div>
+    <div class="hint">Use the highest tune-up power each radio is certified for, and the worst-case duty cycle the product can actually run at. Frequencies use the lowest edge of each band, where limits are tightest.</div>
+  </div>
+
+  <div class="layout" style="margin-top:14px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
+    <div class="card">
+      <div class="plotbox"><canvas id="cv" role="img" aria-label="Sum of exposure ratios versus separation distance, with the 1.0 limit line"></canvas></div>
+      <div class="hint">Blue: mobile MPE sum (falls as 1/r²). Orange: portable SAR-exemption sum (0.5–40 cm). Above the red line = not compliant / not exempt.</div>
+    </div>
+    <div class="card">
+      <div class="metrics" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:0">
+        <div class="m"><div class="l">Sum of ratios</div><div class="v" id="mSum">–</div><div class="n" id="mSumN"></div></div>
+        <div class="m"><div class="l">Result</div><div class="v" id="mRes">–</div><div class="n" id="mResN"></div></div>
+        <div class="m"><div class="l">Minimum separation (MPE)</div><div class="v" id="mMin">–</div><div class="n">Where the mobile sum reaches 1</div></div>
+        <div class="m"><div class="l">Largest contributor</div><div class="v" id="mTop" style="font-size:15px">–</div><div class="n" id="mTopN"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <h3>Per-transmitter breakdown</h3>
+    <table class="tbl"><thead><tr><th>Radio</th><th>Frequency used</th><th>Time-avg conducted</th><th>Time-avg EIRP</th><th>Basis</th><th>Value vs limit</th><th>Ratio</th><th style="width:22%"></th></tr></thead><tbody id="brk"></tbody></table>
+    <div class="toolbar"><button id="copy">Copy summary</button><button id="csv">Export CSV</button><span class="hint" id="copied"></span></div>
+    <details><summary>Method notes</summary><ul class="notes">
+      <li>Mobile: S = EIRP / (4πr²) (far-field, no ground reflection), time-averaged by duty cycle, compared with §1.1310 Table 1 general-population limits at the lowest frequency of each radio.</li>
+      <li>Portable: available power is the greater of time-averaged conducted power and ERP (§1.1307(b)(3)(i)(B)). P_th = ERP₂₀cm·(d/20)^x for d ≤ 20 cm and ERP₂₀cm for 20–40 cm, with ERP₂₀cm = 2040·f (0.3–1.5 GHz) or 3060 mW (1.5–6 GHz) and x = −log10(60 / (ERP₂₀cm·√f)).</li>
+      <li>When a measured SAR is entered for a radio, it replaces that radio's exemption ratio with SAR ÷ 1.6 W/kg. If the measured SAR sum exceeds 1.6 W/kg, KDB 447498 allows the SAR-to-peak-location separation ratio (SPLSR) or a simultaneous SAR measurement; that step is not modeled here.</li>
+      <li>Radios that never transmit at the same time (for example, time-multiplexed by firmware) can be left out of the sum, but the lab will ask for evidence of the scheduling.</li>
+    </ul></details>
+  </div>
+  <div class="card" id="exercises" style="margin-top:14px"></div>
+  <div class="card" id="rl-regs" style="margin-top:14px"></div>
+</main>
+<footer class="rl-footer" id="rl-footer"></footer>
+
+<script>
+(function () {
+  'use strict';
+  const { $, esc } = RF.util, C = RF.coloc, M = RF.math;
+  RF.page.init({ id: 'coloc-mpe' });
+  const TX_TECH = Object.entries(C.TECH).filter(([, t]) => t.tx);
+  let radios = [C.newRadio('halow'), C.newRadio('wifi24'), C.newRadio('lteB13', { fc: 782 })];
+  let res = null;
+
+  function renderRows() {
+    $('rows').innerHTML = radios.map((r, i) => `<tr>
+      <td><select data-i="${i}" data-k="tech" aria-label="Radio ${i + 1}">${TX_TECH.map(([k, t]) => `<option value="${k}"${k === r.tech ? ' selected' : ''}>${esc(t.label)}</option>`).join('')}</select></td>
+      <td><input type="checkbox" data-i="${i}" data-k="on" ${r.on ? 'checked' : ''} style="width:auto" aria-label="Radio ${i + 1} transmits simultaneously"></td>
+      <td><input type="number" data-i="${i}" data-k="pwr" value="${r.pwr}" step="0.5" aria-label="Radio ${i + 1} conducted power"></td>
+      <td><input type="number" data-i="${i}" data-k="gain" value="${r.gain}" step="0.5" aria-label="Radio ${i + 1} antenna gain"></td>
+      <td><input type="number" data-i="${i}" data-k="duty" value="${r.duty}" step="1" min="0" max="100" aria-label="Radio ${i + 1} duty cycle"></td>
+      <td><input type="number" data-i="${i}" data-k="sar" value="${r.sar ?? ''}" step="0.01" min="0" placeholder="—" aria-label="Radio ${i + 1} measured SAR"></td>
+      <td><button data-del="${i}" aria-label="Remove radio ${i + 1}">Remove</button></td></tr>`).join('');
+    $('rows').querySelectorAll('[data-k]').forEach((el) => el.addEventListener('change', () => {
+      const i = +el.dataset.i, k = el.dataset.k;
+      if (k === 'tech') { radios[i] = C.newRadio(el.value); renderRows(); }
+      else if (k === 'on') radios[i].on = el.checked;
+      else radios[i][k] = el.value === '' ? undefined : +el.value;
+      update();
+    }));
+    $('rows').querySelectorAll('[data-del]').forEach((b) => b.onclick = () => { radios.splice(+b.dataset.del, 1); renderRows(); update(); });
+  }
+  $('add').onclick = () => { radios.push(C.newRadio('wifi5')); renderRows(); update(); };
+  $('mode').addEventListener('change', () => { $('dist').value = $('mode').value === 'mobile' ? 20 : 5; update(); });
+  $('dist').addEventListener('input', update);
+
+  /* ---------- chart: sum of ratios vs distance (log-log) ---------- */
+  const cv = $('cv'), ctx = cv.getContext('2d'), css = (n) => getComputedStyle(document.documentElement).getPropertyValue('--' + n).trim();
+  function draw(d, mode) {
+    const dpr = window.devicePixelRatio || 1, W = cv.parentElement.clientWidth, H = cv.parentElement.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = css('panel'); ctx.fillRect(0, 0, W, H);
+    const L = 52, R = 14, T = 14, B = 36, pw = W - L - R, ph = H - T - B, D0 = 0.5, D1 = 200, Y0 = 0.01, Y1 = 100;
+    const X = (x) => L + Math.log10(x / D0) / Math.log10(D1 / D0) * pw, Y = (y) => T + (1 - Math.log10(Math.max(Y0, Math.min(Y1, y)) / Y0) / Math.log10(Y1 / Y0)) * ph;
+    ctx.strokeStyle = css('grid'); ctx.fillStyle = css('muted'); ctx.font = '11px sans-serif';
+    [0.5, 1, 2, 5, 10, 20, 50, 100, 200].forEach((x) => { ctx.beginPath(); ctx.moveTo(X(x), T); ctx.lineTo(X(x), T + ph); ctx.stroke(); ctx.textAlign = 'center'; ctx.fillText(x + '', X(x), T + ph + 14); });
+    [0.01, 0.1, 1, 10, 100].forEach((y) => { ctx.beginPath(); ctx.moveTo(L, Y(y)); ctx.lineTo(L + pw, Y(y)); ctx.stroke(); ctx.textAlign = 'right'; ctx.fillText(y + '', L - 6, Y(y) + 4); });
+    ctx.textAlign = 'center'; ctx.fillText('Separation distance (cm)', L + pw / 2, H - 4);
+    ctx.save(); ctx.translate(12, T + ph / 2); ctx.rotate(-Math.PI / 2); ctx.fillText('Sum of ratios', 0, 0); ctx.restore();
+    ctx.strokeStyle = css('axis'); ctx.strokeRect(L, T, pw, ph);
+    ctx.strokeStyle = css('limit'); ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(L, Y(1)); ctx.lineTo(L + pw, Y(1)); ctx.stroke(); ctx.setLineDash([]);
+    const line = (fn, lo, hi, color) => { ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath(); let first = true;
+      for (let k = 0; k <= 200; k++) { const x = lo * Math.pow(hi / lo, k / 200), y = fn(x); if (!Number.isFinite(y)) continue; first ? ctx.moveTo(X(x), Y(y)) : ctx.lineTo(X(x), Y(y)); first = false; } ctx.stroke(); };
+    line((x) => C.exposure(radios, x, 'mobile').sum, D0, D1, css('trace'));
+    line((x) => C.exposure(radios.map((r) => ({ ...r, sar: undefined })), x, 'portable').sum, D0, 40, css('trace2'));
+    const cur = res.sum; ctx.fillStyle = css(cur <= 1 ? 'pass' : 'fail'); ctx.beginPath(); ctx.arc(X(Math.max(D0, Math.min(D1, d))), Y(cur), 5, 0, 6.283); ctx.fill();
+  }
+
+  function update() {
+    const d = Math.max(0.5, +$('dist').value || 20), mode = $('mode').value;
+    const r = res = C.exposure(radios, d, mode), ok = r.sum <= 1;
+    $('mSum').textContent = r.sum.toFixed(3); $('mSum').className = 'v ' + (ok ? 'pass' : 'fail');
+    $('mSumN').textContent = `${r.rows.length} simultaneous transmitter${r.rows.length === 1 ? '' : 's'} at ${d} cm (${mode === 'mobile' ? 'MPE' : 'SAR exemption / SAR'})`;
+    const anySar = r.rows.some((x) => x.basis === 'Measured SAR');
+    $('mRes').textContent = mode === 'mobile' ? (ok ? 'MPE compliant' : 'Exceeds MPE') : ok ? (anySar ? 'SAR sum OK' : 'SAR test exempt') : 'SAR evaluation needed';
+    $('mRes').className = 'v ' + (ok ? 'pass' : 'fail');
+    $('mResN').textContent = mode === 'mobile' ? (ok ? 'Document the calculation in the RF exposure report' : 'Increase separation, reduce power/duty, or stop simultaneous Tx') : ok ? 'Document the exemption calculation per §1.1307(b)(3)' : 'Measure SAR (KDB 865664), then sum measured values; likely a Class II change for modules';
+    if (mode === 'portable' && d >= 20) $('mResN').textContent += '. Note: at 20 cm or more, mobile (MPE) rules normally apply.';
+    $('mMin').textContent = C.mpeMinDistance(radios).toFixed(1) + ' cm';
+    const top = r.rows.slice().sort((a, b) => b.ratio - a.ratio)[0];
+    $('mTop').textContent = top ? top.name : '–'; $('mTopN').textContent = top ? `${(100 * top.ratio / (r.sum || 1)).toFixed(0)}% of the sum` : '';
+    const mw = (v) => v >= 1000 ? (v / 1000).toFixed(2) + ' W' : v.toFixed(v < 10 ? 2 : 0) + ' mW';
+    $('brk').innerHTML = r.rows.map((x) => {
+      const val = x.basis === 'MPE' ? `${x.s.toFixed(4)} / ${x.limit.toFixed(3)} mW/cm²` : x.basis === 'Measured SAR' ? `${x.sar.toFixed(2)} / 1.6 W/kg` : x.pth ? `${mw(x.pAvail)} / P_th ${mw(x.pth)}` : 'outside 0.3–6 GHz / 0.5–40 cm';
+      return `<tr><td>${esc(x.name)}</td><td>${x.f.toFixed(1)} MHz</td><td>${mw(x.condMw)}</td><td>${mw(x.eirpMw)}</td><td>${x.basis}</td><td>${val}</td>
+        <td class="${x.ratio > 1 ? 'fail' : ''}">${Number.isFinite(x.ratio) ? x.ratio.toFixed(3) : '∞'}</td><td><div class="bar" style="width:${Math.min(100, 100 * x.ratio / Math.max(1, r.sum))}%;background:${x.ratio > 1 ? 'var(--fail)' : 'var(--trace)'}"></div></td></tr>`;
+    }).join('') || '<tr><td colspan="8" class="hint">No radios are marked as transmitting at the same time.</td></tr>';
+    draw(d, mode);
+  }
+  window.addEventListener('resize', () => res && draw(+$('dist').value, $('mode').value));
+
+  const summary = () => [`Simultaneous-transmission RF exposure (${$('mode').value}, ${$('dist').value} cm): sum ${res.sum.toFixed(3)} → ${$('mRes').textContent}`,
+    ...res.rows.map((x) => `- ${x.name}: ratio ${x.ratio.toFixed(3)} (${x.basis})`), `Minimum MPE separation ${$('mMin').textContent} · Generated ${new Date().toLocaleString()} · RF Lab`].join('\n');
+  $('copy').onclick = async () => { await RF.util.copy(summary()); $('copied').textContent = 'Copied'; setTimeout(() => $('copied').textContent = '', 1500); };
+  $('csv').onclick = () => { let s = 'radio,frequency_MHz,conducted_mW,eirp_mW,basis,ratio\n'; res.rows.forEach((x) => { s += `"${x.name}",${x.f},${x.condMw.toFixed(2)},${x.eirpMw.toFixed(2)},${x.basis},${x.ratio.toFixed(4)}\n`; }); s += `sum,,,,,${res.sum.toFixed(4)}\n`; RF.util.downloadText(`rf_exposure_${RF.util.stamp()}.csv`, s); };
+
+  /* ---------- exercises (hidden unless manifest.showExercises) ---------- */
+  RF.ex.mount('exercises', 'coloc-mpe', [
+    { id: 'pd', type: 'number', title: 'Power density by hand',
+      prompt: 'A HaLow radio transmits 24 dBm into a 2 dBi antenna, 100% duty. What is the power density at 20 cm?',
+      unit: 'mW/cm²', tol: 0.003, hint: 'EIRP = 26 dBm ≈ 398 mW; S = EIRP / (4π·r²) with r in cm.',
+      answer: () => C.powerDensity(M.dbmToMw(26), 20), explain: 'About 0.079 mW/cm², against a 0.61 mW/cm² limit at 915 MHz, so a ratio of about 0.13.' },
+    { id: 'sum', type: 'choice', title: 'Why a sum of ratios?',
+      prompt: 'Why is simultaneous exposure judged by summing each radio’s fraction of its own limit, rather than adding power densities?',
+      options: ['Limits differ by frequency, so each exposure is normalized to its own limit before adding', 'Because power densities can’t be added', 'To give each radio its own full limit', 'It only applies to licensed radios'],
+      answer: 0, explain: 'Normalizing first lets a 900 MHz and a 2.4 GHz exposure be combined fairly, since the 900 MHz limit is lower.' },
+    { id: 'portable', type: 'state', title: 'Make a portable product SAR-exempt',
+      prompt: 'Switch to <b>Portable</b> at <b>5 cm</b>. The default radios are not exempt. Reduce power or duty cycle (not distance) until the sum is ≤ 1, then press Check.',
+      hint: 'HaLow alone is about 1.0 at 5 cm. Duty cycle is often the cheapest lever for sensor nodes.',
+      check: () => { if ($('mode').value !== 'portable' || +$('dist').value !== 5) return { ok: false, msg: 'Set Portable and 5 cm.' };
+        return res.sum <= 1 ? { ok: true, msg: `Sum ${res.sum.toFixed(2)}: exempt from SAR testing.` } : { ok: false, msg: `Sum is ${res.sum.toFixed(2)}; keep reducing.` }; },
+      explain: 'Firmware-enforced duty cycle or power back-off counts only if it can’t be overridden in use; the lab will ask how it is enforced.' },
+    { id: 'mind', type: 'number', title: 'Minimum separation',
+      prompt: 'With the default three radios in mobile mode, what is the minimum separation (cm) at which the MPE sum reaches 1?',
+      unit: 'cm', tol: 0.3, hint: 'Ratios fall as 1/r², so r_min = 20 cm × √(sum at 20 cm).',
+      answer: () => C.mpeMinDistance([C.newRadio('halow'), C.newRadio('wifi24'), C.newRadio('lteB13', { fc: 782 })]), explain: 'This is the distance you would state in the user manual for a mobile/fixed product.' }
+  ]);
+
+  /* ---------- known-answer tests ---------- */
+  RF.test.add('MPE limit at 915 MHz = 0.61 mW/cm²', () => RF.test.near(C.mpeLimit(915), 0.61, 0.001));
+  RF.test.add('Power density 398 mW EIRP at 20 cm = 0.0792 mW/cm²', () => RF.test.near(C.powerDensity(M.dbmToMw(26), 20), 0.0792, 0.0005));
+  RF.test.add('P_th = ERP₂₀cm at 20 and 40 cm (2450 MHz → 3060 mW)', () => ({ ok: Math.abs(C.sarExemptionMw(2450, 20) - 3060) < 1e-6 && Math.abs(C.sarExemptionMw(2450, 40) - 3060) < 1e-6, detail: C.sarExemptionMw(2450, 20).toFixed(1) }));
+  RF.test.add('P_th at 2450 MHz, 0.5 cm ≈ 2.7 mW', () => RF.test.near(C.sarExemptionMw(2450, 0.5), 2.73, 0.1));
+  RF.test.add('Mobile sum scales as 1/r² (20 cm → 40 cm = ÷4)', () => { const a = C.exposure(radios, 20, 'mobile').sum, b = C.exposure(radios, 40, 'mobile').sum; return RF.test.near(a / b, 4, 1e-6); });
+  RF.test.add('Default radios: mobile at 20 cm compliant, portable at 5 cm not exempt', () => { const a = C.exposure(radios, 20, 'mobile').sum, b = C.exposure(radios, 5, 'portable').sum; return { ok: a <= 1 && b > 1, detail: `${a.toFixed(2)} / ${b.toFixed(2)}` }; });
+  RF.test.add('Duty cycle 50% halves a ratio', () => { const one = [C.newRadio('wifi24')], half = [C.newRadio('wifi24', { duty: 50 })]; return RF.test.near(C.exposure(half, 20, 'mobile').sum / C.exposure(one, 20, 'mobile').sum, 0.5, 1e-9); });
+
+  renderRows(); update();
+})();
+</script>
+</body>
+</html>

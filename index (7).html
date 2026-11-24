@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6 dB bandwidth · RF Lab</title>
+<link rel="stylesheet" href="../../shared/theme.css">
+<script src="../../manifest.js"></script>
+<script src="../../shared/rfmath.js"></script>
+<script src="../../shared/limits.js"></script>
+<script src="../../shared/rfplot.js"></script>
+<script src="../../shared/rflab.js"></script>
+</head>
+<body>
+<header class="rl-header" id="rl-header"></header>
+<main class="rl-main">
+
+  <div class="card concept">
+    <h2>Concept</h2>
+    <p>Under §15.247(a)(2), a digitally modulated system in 902–928 MHz must have a <b>6 dB bandwidth of at least 500 kHz</b>: the distance between the two points where the spectrum falls 6 dB below its peak. Passing lets the radio transmit continuously at up to 1 W without frequency hopping. The rule makes sure the bulk of the energy is spread out; the separate 8 dBm/3 kHz PSD limit caps how much power lands in any narrow slice.</p>
+    <p>Measure with RBW 100 kHz, VBW ≥ 3× RBW, peak detector, max hold (KDB 558074). Watch how changing the RBW changes the answer, which is why the procedure fixes it.</p>
+  </div>
+
+  <div class="layout" style="margin-top:14px">
+    <section>
+      <div class="card">
+        <div class="tabs"><button id="tabSim" class="on">Simulate</button><button id="tabCsv">Load trace</button></div>
+        <div id="simPane">
+          <label for="preset">Signal preset</label><select id="preset"></select>
+          <label for="fc">Center frequency (MHz)</label><input type="number" id="fc" value="915" step="0.5" min="902" max="928">
+          <label for="pwr">Conducted power (dBm)</label>
+          <div class="row"><input type="range" id="pwr" min="0" max="33" step="0.5" value="30"><span class="val" id="pwrV"></span></div>
+          <label for="rip">In-band ripple (dB p-p)</label>
+          <div class="row"><input type="range" id="rip" min="0" max="10" step="0.5" value="2"><span class="val" id="ripV"></span></div>
+          <label for="steep">Edge roll-off steepness</label>
+          <div class="row"><input type="range" id="steep" min="1" max="14" step="1" value="8"><span class="val" id="steepV"></span></div>
+          <label for="rbwSim">Analyzer RBW</label>
+          <select id="rbwSim"><option value="3000">3 kHz</option><option value="10000">10 kHz</option><option value="30000">30 kHz</option>
+            <option value="100000" selected>100 kHz (KDB 558074 for 6 dB BW)</option><option value="300000">300 kHz</option></select>
+          <label for="nf">Noise floor (dBm in RBW)</label><input type="number" id="nf" value="-70" step="1">
+          <div class="toolbar"><button id="resweep">Re-sweep</button></div>
+        </div>
+        <div id="csvPane" class="hidden">
+          <label for="file">Trace file (CSV / TXT: frequency, amplitude dBm)</label><input type="file" id="file" accept=".csv,.txt,.dat,.tsv">
+          <label for="paste">…or paste data</label><textarea id="paste" rows="5" placeholder="915.00, -12.3&#10;915.01, -12.1&#10;..."></textarea>
+          <label for="units">Frequency units</label>
+          <select id="units"><option value="auto">Auto-detect</option><option value="1">Hz</option><option value="1e3">kHz</option><option value="1e6">MHz</option><option value="1e9">GHz</option></select>
+          <label for="rbwCsv">RBW used for the trace (kHz)</label><input type="number" id="rbwCsv" value="100" step="1" min="0.1">
+          <label for="offset">Reference offset (dB, added to trace: cable/attenuator loss)</label><input type="number" id="offset" value="0" step="0.1">
+          <div class="toolbar"><button class="primary" id="loadPaste">Load pasted data</button></div>
+          <div class="err" id="csvErr"></div>
+          <div class="hint">Header lines and extra columns are ignored; the first two numbers on each line are used.</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Measurement settings</h3>
+        <label for="ndb">n dB down for bandwidth</label>
+        <select id="ndb"><option value="6" selected>6 dB (§15.247 DTS)</option><option value="20">20 dB (FHSS / §15.215)</option><option value="26">26 dB (U-NII reference)</option></select>
+        <label for="minbw">Minimum bandwidth limit (kHz)</label><input type="number" id="minbw" step="10">
+        <label for="psdLim">PSD limit (dBm / 3 kHz)</label><input type="number" id="psdLim" step="0.5">
+        <label for="beLim">Band-edge requirement (dBc)</label><select id="beLim"></select>
+        <label class="row" style="gap:6px"><input type="checkbox" id="showObw" checked style="flex:0 0 auto;width:auto"> <span>Show 99% OBW markers</span></label>
+      </div>
+    </section>
+
+    <section>
+      <div class="card">
+        <div class="plotwrap"><canvas id="cv" role="img" aria-label="Spectrum trace with bandwidth markers"></canvas><div class="readout" id="readout"></div></div>
+        <div class="metrics">
+          <div class="m"><div class="l" id="bwLabel">6 dB bandwidth</div><div class="v" id="mBw">–</div><div class="n" id="mBwN"></div></div>
+          <div class="m"><div class="l">Result vs minimum</div><div class="v" id="mRes">–</div><div class="n" id="mResN"></div></div>
+          <div class="m"><div class="l">99% occupied bandwidth</div><div class="v" id="mObw">–</div><div class="n">Reported, no limit (ISED RSS-Gen)</div></div>
+          <div class="m"><div class="l">Peak PSD (scaled to 3 kHz)</div><div class="v" id="mPsd">–</div><div class="n" id="mPsdN"></div></div>
+          <div class="m"><div class="l">Integrated channel power</div><div class="v" id="mPow">–</div><div class="n">Sum of trace ÷ RBW (approx.)</div></div>
+          <div class="m"><div class="l">Band edge (902 / 928 MHz)</div><div class="v" id="mBe">–</div><div class="n" id="mBeN"></div></div>
+        </div>
+        <div class="toolbar"><button id="png">Save plot as PNG</button><button id="copy">Copy results</button><button id="csvOut">Export trace CSV</button><span class="hint" id="copied"></span></div>
+        <details><summary>Method notes</summary><ul class="notes">
+          <li>n dB bandwidth: outermost points where the trace falls to (peak − n dB), linearly interpolated.</li>
+          <li>99% OBW: frequencies enclosing 99% of the integrated trace power.</li>
+          <li>Peak PSD: highest trace point scaled to 3 kHz, P<sub>3k</sub> = P<sub>RBW</sub> − 10·log<sub>10</sub>(RBW/3 kHz). Valid with an average (RMS) detector and a signal wider than the RBW.</li>
+          <li>Band edge: highest level outside 902–928 MHz relative to the in-band peak; restricted-band emissions need separate field-strength limits.</li>
+          <li>Simulator shapes are idealized; use them for training, not as a substitute for lab data.</li>
+        </ul></details>
+      </div>
+      <div class="card" id="exercises"></div>
+    </section>
+  </div>
+  <div class="card" id="rl-regs" style="margin-top:14px"></div>
+</main>
+<footer class="rl-footer" id="rl-footer"></footer>
+
+<script>
+(function () {
+  'use strict';
+  const { $ } = RF.util, M = RF.math, LIM = RF.limits.fcc.ism900;
+  RF.page.init({ id: 'bandwidth' });
+
+  const PRESETS = [
+    { k: 'HaLow 1 MHz (OFDM)', occ: 0.84, n: 8, ripple: true },
+    { k: 'HaLow 2 MHz (OFDM)', occ: 1.75, n: 8, ripple: true },
+    { k: 'HaLow 4 MHz (OFDM)', occ: 3.5, n: 9, ripple: true },
+    { k: 'HaLow 8 MHz (OFDM)', occ: 7.0, n: 10, ripple: true },
+    { k: 'HaLow 16 MHz (OFDM)', occ: 14.0, n: 10, ripple: true },
+    { k: 'Narrowband FSK, 200 kHz', occ: 0.17, n: 2, ripple: false },
+    { k: 'Narrowband LoRa-like, 500 kHz', occ: 0.46, n: 5, ripple: false }
+  ];
+  PRESETS.forEach((p, i) => $('preset').add(new Option(p.k, i)));
+  $('minbw').value = LIM.dts.min6dBBwKHz; $('psdLim').value = LIM.dts.psdDbmPer3kHz;
+  $('beLim').add(new Option(`${LIM.dts.bandEdgeDbc.peakMethod} dB (peak power method)`, LIM.dts.bandEdgeDbc.peakMethod));
+  $('beLim').add(new Option(`${LIM.dts.bandEdgeDbc.averageMethod} dB (average power method)`, LIM.dts.bandEdgeDbc.averageMethod));
+
+  const plot = RF.plot.create($('cv'), { readoutEl: $('readout') });
+  let mode = 'sim', seed = 11, trace = null, csvTrace = null, res = null;
+
+  function simulate() {
+    const pi = +$('preset').value, p = PRESETS[pi], steep = +$('steep').value;
+    const t = M.simulateSignal({
+      fcMHz: +$('fc').value || 915, occMHz: p.occ, spanMHz: Math.max(1, p.occ * 2.4), powerDbm: +$('pwr').value,
+      order: p.ripple ? steep : Math.max(1, Math.round(steep / 3)), rippleDb: p.ripple ? +$('rip').value : 0,
+      rbwHz: +$('rbwSim').value, noiseDbm: +$('nf').value, seed: seed * 7919 + pi * 31
+    });
+    t.source = `Simulated: ${p.k} @ ${$('fc').value} MHz, ${$('pwr').value} dBm, RBW ${M.fmtHz(t.rbw)}`;
+    return t;
+  }
+
+  function measure(t) {
+    const nd = +$('ndb').value, bw = M.nDbBandwidth(t.f, t.a, nd), ob = M.obw(t.f, t.a, 0.99);
+    return {
+      ...bw, obw: ob.bwHz, oL: ob.oL, oR: ob.oR, rbw: t.rbw,
+      psd: M.scaleToBw(bw.pk, t.rbw, 3000), powDbm: M.channelPower(t.f, t.a, t.rbw),
+      be: (t.f[0] < LIM.band.loMHz || t.f[t.f.length - 1] > LIM.band.hiMHz) ? M.bandEdge(t.f, t.a, LIM.band.loMHz, LIM.band.hiMHz) : null
+    };
+  }
+
+  function update() {
+    ['pwr', 'rip', 'steep'].forEach((k) => { $(k + 'V').textContent = $(k).value + (k === 'pwr' ? ' dBm' : k === 'rip' ? ' dB' : ''); });
+    trace = mode === 'sim' ? simulate() : csvTrace;
+    if (!trace) { res = null; plot.draw({ traces: [], empty: 'Load a trace to begin' }); ['mBw', 'mRes', 'mObw', 'mPsd', 'mPow', 'mBe'].forEach((k) => { $(k).textContent = '–'; $(k).className = 'v'; }); return; }
+    const r = res = measure(trace), minbw = (+$('minbw').value || 0) * 1e3, ok = r.bwHz >= minbw, fcen = (r.fL + r.fR) / 2;
+    $('bwLabel').textContent = `${r.n} dB bandwidth`; $('mBw').textContent = M.fmtHz(r.bwHz);
+    $('mBwN').textContent = `M1 ${r.fL.toFixed(4)} · M2 ${r.fR.toFixed(4)} MHz` + (r.clipped ? ' · widen span!' : '');
+    $('mRes').textContent = ok ? 'Pass' : 'Fail'; $('mRes').className = 'v ' + (ok ? 'pass' : 'fail');
+    $('mResN').textContent = `${ok ? '+' : ''}${((r.bwHz - minbw) / 1e3).toFixed(0)} kHz vs ${(minbw / 1e3).toFixed(0)} kHz`;
+    $('mObw').textContent = M.fmtHz(r.obw);
+    const lim = +$('psdLim').value; $('mPsd').textContent = r.psd.toFixed(2) + ' dBm'; $('mPsd').className = 'v ' + (r.psd <= lim ? 'pass' : 'fail');
+    $('mPsdN').textContent = `Margin ${(lim - r.psd).toFixed(2)} dB to ${lim} dBm`;
+    $('mPow').textContent = r.powDbm.toFixed(2) + ' dBm';
+    const req = +$('beLim').value;
+    if (r.be) {
+      const parts = [], vals = [];
+      if (r.be.lo !== null) { parts.push('902: ' + r.be.lo.toFixed(1) + ' dBc'); vals.push(r.be.lo); }
+      if (r.be.hi !== null) { parts.push('928: ' + r.be.hi.toFixed(1) + ' dBc'); vals.push(r.be.hi); }
+      const okb = Math.min(...vals) >= req; $('mBe').textContent = okb ? 'Pass' : 'Fail'; $('mBe').className = 'v ' + (okb ? 'pass' : 'fail');
+      $('mBeN').textContent = parts.join(' · ') + ` (need ≥ ${req})`;
+    } else { $('mBe').textContent = 'n/a'; $('mBe').className = 'v'; $('mBeN').textContent = 'Trace does not cross 902 or 928 MHz'; }
+    const f0 = trace.f[0], f1 = trace.f[trace.f.length - 1], mb = minbw / 1e6;
+    plot.draw({
+      traces: [{ f: trace.f, a: trace.a }], rbw: trace.rbw,
+      shades: mb > 0 && mb < f1 - f0 ? [{ x0: fcen - mb / 2, x1: fcen + mb / 2, label: `${$('minbw').value} kHz minimum`, color: 'limit', alpha: 0.07 }] : [],
+      hLines: [{ y: r.pk, label: `Peak ${r.pk.toFixed(2)} dBm @ ${trace.f[r.pi].toFixed(4)} MHz` }, { y: r.th, label: `Peak − ${r.n} dB`, labelBelow: true }],
+      vLines: [{ x: r.fL, fromY: r.th }, { x: r.fR, fromY: r.th },
+        ...($('showObw').checked ? [{ x: r.oL, color: 'muted', dash: [1, 3] }, { x: r.oR, color: 'muted', dash: [1, 3] }] : []),
+        { x: LIM.band.loMHz, label: '902 MHz', color: 'limit', dash: [2, 3] }, { x: LIM.band.hiMHz, label: '928 MHz', color: 'limit', dash: [2, 3] }],
+      markers: [{ x: r.fL, y: r.th, label: 'M1' }, { x: r.fR, y: r.th, label: 'M2' }],
+      spans: [{ x0: r.fL, x1: r.fR, y: r.th - 9, label: `${r.n} dB BW = ${M.fmtHz(r.bwHz)}` }]
+    });
+  }
+
+  function setMode(m) { mode = m; $('tabSim').classList.toggle('on', m === 'sim'); $('tabCsv').classList.toggle('on', m === 'csv'); $('simPane').classList.toggle('hidden', m !== 'sim'); $('csvPane').classList.toggle('hidden', m !== 'csv'); update(); }
+  $('tabSim').onclick = () => setMode('sim'); $('tabCsv').onclick = () => setMode('csv');
+  function loadText(text, name) {
+    try { const t = M.parseTrace(text, $('units').value, +$('offset').value || 0); t.rbw = (+$('rbwCsv').value || 100) * 1e3; t.source = 'Trace: ' + name; csvTrace = t; $('csvErr').textContent = ''; update(); }
+    catch (e) { $('csvErr').textContent = e.message; }
+  }
+  const reload = () => { const fl = $('file').files[0]; if ($('paste').value.trim()) loadText($('paste').value, 'pasted data'); else if (fl) { const rd = new FileReader(); rd.onload = () => loadText(rd.result, fl.name); rd.readAsText(fl); } };
+  $('file').onchange = () => { $('paste').value = ''; reload(); };
+  $('loadPaste').onclick = () => loadText($('paste').value, 'pasted data');
+  ['units', 'rbwCsv', 'offset'].forEach((k) => $(k).addEventListener('change', () => { if (mode === 'csv') reload(); }));
+  ['preset', 'fc', 'pwr', 'rip', 'steep', 'rbwSim', 'nf', 'ndb', 'minbw', 'psdLim', 'beLim', 'showObw'].forEach((k) => { $(k).addEventListener('input', update); $(k).addEventListener('change', update); });
+  $('resweep').onclick = () => { seed++; update(); };
+
+  const resultsText = () => !res ? '' : [trace.source,
+    `${res.n} dB BW: ${M.fmtHz(res.bwHz)} (M1 ${res.fL.toFixed(4)}, M2 ${res.fR.toFixed(4)} MHz) — ${$('mRes').textContent} vs ${$('minbw').value} kHz`,
+    `99% OBW ${M.fmtHz(res.obw)} · Peak ${res.pk.toFixed(2)} dBm · PSD ${res.psd.toFixed(2)} dBm/3 kHz · Channel power ${res.powDbm.toFixed(2)} dBm`,
+    `Band edge: ${$('mBe').textContent} ${$('mBeN').textContent}`, `Generated ${new Date().toLocaleString()} · RF Lab`].join('\n');
+  $('png').onclick = () => plot.exportPNG(`bw_measurement_${RF.util.stamp()}.png`, resultsText().split('\n').slice(0, 3).join('   |   '));
+  $('copy').onclick = async () => { await RF.util.copy(resultsText()); $('copied').textContent = 'Copied'; setTimeout(() => $('copied').textContent = '', 1500); };
+  $('csvOut').onclick = () => { if (!trace) return; let s = 'frequency_MHz,amplitude_dBm\n'; for (let i = 0; i < trace.f.length; i++) s += trace.f[i].toFixed(6) + ',' + trace.a[i].toFixed(3) + '\n'; RF.util.downloadText(`trace_${RF.util.stamp()}.csv`, s); };
+
+  /* ---------- exercises ---------- */
+  const st = () => ({ preset: +$('preset').value, rbw: +$('rbwSim').value, pwr: +$('pwr').value, sim: mode === 'sim' });
+  RF.ex.mount('exercises', 'bandwidth', [
+    { id: 'rbw-inflate', type: 'state', title: 'Why the RBW is fixed',
+      prompt: 'Select the <b>Narrowband FSK, 200 kHz</b> preset with RBW 100 kHz and note the 6 dB bandwidth. Then change the RBW to <b>300 kHz</b> and press Check.',
+      hint: 'Simulate tab → Signal preset, then Analyzer RBW.',
+      check: () => { const s = st(); if (!s.sim || s.preset !== 5) return { ok: false, msg: 'Select the Narrowband FSK preset on the Simulate tab first.' };
+        if (s.rbw !== 300000) return { ok: false, msg: 'Now set the RBW to 300 kHz.' };
+        return { ok: true, msg: `The measured width grew to ${M.fmtHz(res.bwHz)}.` }; },
+      explain: 'A wide RBW smears a narrow signal across the filter width, so it looks wider than it is. That is why KDB 558074 fixes the RBW at 100 kHz for this test.' },
+    { id: 'avg-psd', type: 'number', title: 'Average PSD by hand',
+      prompt: 'Select <b>HaLow 1 MHz</b> at 30 dBm, RBW 100 kHz. If the full conducted power were spread evenly across the measured 6 dB bandwidth, what is the average PSD per 3 kHz?',
+      unit: 'dBm', tol: 0.15, hint: 'PSD = P − 10·log10(BW ÷ 3 kHz). Use the 6 dB bandwidth shown in the readout.',
+      answer: () => M.avgPsd(+$('pwr').value, res ? res.bwHz : 1e6),
+      explain: 'The real measured PSD is higher because the test reports the highest 3 kHz slice, and in-band ripple adds directly to it.' },
+    { id: 'ripple-psd', type: 'state', title: 'Ripple eats PSD margin',
+      prompt: 'With <b>HaLow 1 MHz</b> at <b>30 dBm</b>, increase the in-band ripple until the peak PSD fails the 8 dBm limit, then press Check.',
+      hint: 'Drag the in-band ripple slider to the right and watch the PSD card.',
+      check: () => { const s = st(); if (!s.sim || s.preset !== 0) return { ok: false, msg: 'Select the HaLow 1 MHz preset first.' };
+        if (s.pwr !== 30) return { ok: false, msg: 'Set conducted power to 30 dBm.' };
+        return res.psd > +$('psdLim').value ? { ok: true, msg: `PSD fails at ${$('rip').value} dB ripple (${res.psd.toFixed(2)} dBm).` } : { ok: false, msg: `PSD is ${res.psd.toFixed(2)} dBm, still passing. Add more ripple.` }; },
+      explain: 'The 1 MHz channel is where PSD most often limits output; many certifications back conducted power off a dB or two.' },
+    { id: 'why-6db', type: 'choice', title: 'Why 6 dB and not 20 dB?',
+      prompt: 'Why does §15.247 measure bandwidth at the 6 dB points rather than further down the skirts?',
+      options: ['A narrow, concentrated signal with wide low-level skirts could otherwise qualify as "wideband"', '6 dB is half the voltage, which makes the math easier', 'Spectrum analyzers cannot measure 20 dB down accurately', 'It is required to match ISED rules'],
+      answer: 0, hint: 'Think about where the bulk of the power sits.',
+      explain: 'Measuring near the top forces the width to come from where the power actually is, not from low-level spillover.' }
+  ]);
+
+  /* ---------- known-answer tests (run by tests/run_tests.js; also callable from the console: RF.test.runAll()) ---------- */
+  RF.test.add('avgPsd: 30 dBm over 500 kHz = 7.78 dBm/3kHz', () => RF.test.near(M.avgPsd(30, 500e3), 7.78, 0.01));
+  RF.test.add('nDbBandwidth: ideal 1.000 MHz rectangle', () => {
+    const N = 2001, f = new Float64Array(N), a = new Float64Array(N);
+    for (let i = 0; i < N; i++) { f[i] = 914 + 2 * i / (N - 1); a[i] = Math.abs(f[i] - 915) <= 0.5 ? 0 : -60; }
+    return RF.test.near(M.nDbBandwidth(f, a, 6).bwHz / 1e3, 1000, 2);
+  });
+  RF.test.add('Simulated HaLow 1 MHz passes with 850–920 kHz', () => { setMode('sim'); $('preset').value = 0; $('rbwSim').value = 100000; $('pwr').value = 30; update(); return { ok: res.bwHz > 850e3 && res.bwHz < 920e3, detail: M.fmtHz(res.bwHz) }; });
+  RF.test.add('Simulated narrowband FSK fails 500 kHz', () => { $('preset').value = 5; update(); const r = { ok: res.bwHz < 500e3, detail: M.fmtHz(res.bwHz) }; $('preset').value = 0; update(); return r; });
+  RF.test.add('Channel power recovers the set 30 dBm', () => RF.test.near(res.powDbm, 30, 0.2));
+  RF.test.add('parseTrace auto-detects Hz', () => { let s = ''; for (let i = 0; i < 20; i++) s += `${915e6 + i * 1e3},${-20 + i * 0}\n`; const t = M.parseTrace(s); return RF.test.near(t.f[0], 915, 1e-9); });
+
+  update();
+})();
+</script>
+</body>
+</html>

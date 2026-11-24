@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wi-Fi 5 GHz U-NII power and PSD · RF Lab</title>
+<link rel="stylesheet" href="../../shared/theme.css">
+<script src="../../manifest.js"></script>
+<script src="../../shared/rfmath.js"></script>
+<script src="../../shared/limits.js"></script>
+<script src="../../shared/rfplot.js"></script>
+<script src="../../shared/rflab.js"></script>
+</head>
+<body>
+<header class="rl-header" id="rl-header"></header>
+<main class="rl-main">
+  <div class="card concept">
+    <h2>Concept</h2>
+    <p>5 GHz Wi-Fi falls under §15.407, not §15.247. The limits depend on the <b>sub-band</b> and, in U-NII-1, on the <b>device class</b> (access point or client). Instead of a minimum bandwidth there's a <b>26 dB emission bandwidth (B)</b>. In U-NII-2A and 2C, the power limit is the lesser of 250 mW or 11 dBm + 10·log10(B), so a wider signal is allowed more power. PSD is limited per MHz.</p>
+    <p>Outside the sub-band, emissions are limited in absolute EIRP per MHz: −27 dBm/MHz, a stepped mask for U-NII-3, and about −41 dBm/MHz where the neighbor is a restricted band. U-NII-2A and 2C share spectrum with radar, so devices there also need <b>DFS</b> and, at higher power, <b>TPC</b>.</p>
+  </div>
+
+  <div class="layout" style="margin-top:14px">
+    <section>
+      <div class="card">
+        <h3>Signal</h3>
+        <label for="sb">Sub-band</label><select id="sb"></select>
+        <label for="cls">Device class</label><select id="cls"></select>
+        <label for="bw">Channel width</label><select id="bw"></select>
+        <label for="ch">Channel</label><select id="ch"></select>
+        <label for="pwr">Conducted power (dBm)</label>
+        <div class="row"><input type="range" id="pwr" min="0" max="30" step="0.5" value="18"><span class="val" id="pwrV"></span></div>
+        <label for="lin">PA spectral regrowth (shoulder, dBc)</label>
+        <div class="row"><input type="range" id="lin" min="-50" max="-20" step="1" value="-35"><span class="val" id="linV"></span></div>
+        <label for="rbw">Analyzer RBW</label>
+        <select id="rbw"><option value="300000" selected>300 kHz (26 dB EBW, ~1% of B)</option><option value="1000000">1 MHz (PSD, unwanted emissions)</option></select>
+      </div>
+      <div class="card">
+        <h3>Antenna</h3>
+        <label for="gain">Antenna gain (dBi)</label><input type="number" id="gain" value="3" step="0.5">
+        <div class="hint" id="gainNote"></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="card">
+        <div class="plotwrap"><canvas id="cv" role="img" aria-label="5 GHz spectrum with sub-band edges and out-of-band limit lines"></canvas><div class="readout" id="readout"></div></div>
+        <div class="metrics">
+          <div class="m"><div class="l">26 dB emission bandwidth (B)</div><div class="v" id="mEbw">–</div><div class="n" id="mEbwN"></div></div>
+          <div class="m"><div class="l">Conducted power vs limit</div><div class="v" id="mPow">–</div><div class="n" id="mPowN"></div></div>
+          <div class="m"><div class="l" id="mPsdL">Peak PSD</div><div class="v" id="mPsd">–</div><div class="n" id="mPsdN"></div></div>
+          <div class="m"><div class="l">Out-of-band emissions (EIRP)</div><div class="v" id="mOob">–</div><div class="n" id="mOobN"></div></div>
+          <div class="m"><div class="l">EIRP and TPC</div><div class="v" id="mEirp">–</div><div class="n" id="mEirpN"></div></div>
+          <div class="m"><div class="l">DFS</div><div class="v" id="mDfs">–</div><div class="n" id="mDfsN"></div></div>
+        </div>
+        <div class="toolbar"><button id="png">Save plot as PNG</button><button id="copy">Copy results</button><span class="hint" id="copied"></span></div>
+        <details><summary>Method notes</summary><ul class="notes">
+          <li>26 dB EBW: outermost points 26 dB below the peak, with RBW about 1% of the EBW (KDB 789033). B in MHz feeds the U-NII-2A/2C power formula.</li>
+          <li>PSD: highest trace point scaled to 1 MHz (500 kHz for U-NII-3) assuming a flat, noise-like spectrum. Labs use 1 MHz RBW with an average detector.</li>
+          <li>Out-of-band: trace converted to EIRP per MHz (+10·log10(1 MHz ÷ RBW) + antenna gain). Limit: −27 dBm/MHz, the U-NII-3 mask by distance from the band edge, or −41.2 dBm/MHz in restricted bands (54 dBµV/m at 3 m).</li>
+          <li>Antenna gain above 6 dBi reduces power and PSD limits dB for dB. The fixed point-to-point exceptions (U-NII-1 up to 23 dBi, U-NII-3) and the outdoor-AP elevation limit are noted but not modeled.</li>
+          <li>U-NII-1 and U-NII-2A share one out-of-band boundary (5150–5350 MHz), so emissions from channel 48 into U-NII-2A are not out-of-band. Channels that straddle two sub-bands (for example 160 MHz channel 50) are omitted for clarity.</li>
+        </ul></details>
+      </div>
+      <div class="card" id="exercises"></div>
+    </section>
+  </div>
+  <div class="card" id="rl-regs" style="margin-top:14px"></div>
+</main>
+<footer class="rl-footer" id="rl-footer"></footer>
+
+<script>
+(function () {
+  'use strict';
+  const { $ } = RF.util, M = RF.math, U = RF.limits.fcc.unii, G = RF.limits.fcc.generalLimits15209;
+  RF.page.init({ id: 'wifi-unii' });
+  const RESTRICT_EIRP = M.fieldDbuvToEirp(G.above960MHz.avgDbuvPerM, G.distanceM);
+  const CH = {
+    'U-NII-1': { 20: [36, 40, 44, 48], 40: [38, 46], 80: [42] },
+    'U-NII-2A': { 20: [52, 56, 60, 64], 40: [54, 62], 80: [58] },
+    'U-NII-2C': { 20: [100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140], 40: [102, 110, 118, 126, 134], 80: [106, 122], 160: [114] },
+    'U-NII-3': { 20: [149, 153, 157, 161, 165], 40: [151, 159], 80: [155] }
+  };
+  const OCC = { 20: 0.85, 40: 0.88, 80: 0.92, 160: 0.95 };
+  Object.keys(U.subbands).forEach((k) => $('sb').add(new Option(`${k} (${U.subbands[k].loMHz}–${U.subbands[k].hiMHz} MHz)`, k)));
+
+  function fillSub() {
+    const sb = U.subbands[$('sb').value];
+    $('cls').innerHTML = ''; Object.entries(sb.classes).forEach(([k, c]) => $('cls').add(new Option(c.label, k)));
+    const prevBw = $('bw').value; $('bw').innerHTML = ''; Object.keys(CH[$('sb').value]).forEach((w) => $('bw').add(new Option(w + ' MHz', w)));
+    if ([...$('bw').options].some((o) => o.value === prevBw)) $('bw').value = prevBw;
+    fillCh();
+  }
+  function fillCh() {
+    const list = CH[$('sb').value][$('bw').value]; $('ch').innerHTML = '';
+    list.forEach((c) => $('ch').add(new Option(`${c} (${U.channelCenterMHz(c)} MHz)`, c)));
+  }
+  fillSub();
+
+  const plot = RF.plot.create($('cv'), { readoutEl: $('readout') });
+  let seed = 9, trace = null, res = null;
+
+  /** Out-of-band EIRP limit (dBm/MHz) at frequency f for the selected sub-band; null inside the band. */
+  function oobLimit(f, sb) {
+    const [olo, ohi] = sb.oob.outsideMHz; // U-NII-1 and 2A share one 5150–5350 MHz emission region (§15.407(b)(1)–(2))
+    if (f >= olo && f <= ohi) return null;
+    if (U.restricted.some(([lo, hi]) => f >= lo && f <= hi)) return RESTRICT_EIRP;
+    if (sb.oob.type === 'mask') return M.interp(sb.oob.points, f < olo ? olo - f : f - ohi);
+    return sb.oob.eirpDbmPerMHz;
+  }
+  /** Conducted power limit per §15.407(a) for sub-band/class and 26 dB EBW B (MHz), before antenna-gain reduction. */
+  function powerLimit(sbKey, cls, B) {
+    const c = U.subbands[sbKey].classes[cls];
+    return c.powerFormula ? Math.min(c.powerDbm, 11 + 10 * Math.log10(B)) : c.powerDbm;
+  }
+
+  function simulate() {
+    const W = +$('bw').value, fc = U.channelCenterMHz(+$('ch').value), sb = U.subbands[$('sb').value];
+    const [olo, ohi] = sb.oob.outsideMHz, lo = Math.min(fc - 2.5 * W, Math.max(olo - 0.75 * W, fc - W - 60)), hi = Math.max(fc + 2.5 * W, Math.min(ohi + 0.75 * W, fc + W + 60));
+    const view = [Math.max(lo, fc - 3 * W - 40), Math.min(hi, fc + 3 * W + 40)];
+    const t = M.simulateSignal({ fcMHz: fc, occMHz: W * OCC[W], startMHz: view[0], stopMHz: view[1], points: 4001, powerDbm: +$('pwr').value,
+      order: 14, rippleDb: 1, rbwHz: +$('rbw').value, noiseDbm: -90 + 10 * Math.log10(+$('rbw').value / 1e6), seed: seed * 17 + +$('ch').value,
+      shoulderDbc: +$('lin').value, shoulderWidth: 1.45, shoulderOrder: 3 });
+    t.fc = fc; t.W = W; t.source = `Simulated: ${$('sb').value} ch ${$('ch').value} (${W} MHz), ${$('pwr').value} dBm, ${$('gain').value} dBi`;
+    return t;
+  }
+
+  function measure(t) {
+    const sbKey = $('sb').value, sb = U.subbands[sbKey], cls = $('cls').value, c = sb.classes[cls], gain = +$('gain').value || 0;
+    const excess = Math.max(0, gain - U.antennaGainRefDbi);
+    const ebw = M.nDbBandwidth(t.f, t.a, 26), bw6 = M.nDbBandwidth(t.f, t.a, 6), ob = M.obw(t.f, t.a, 0.99), B = ebw.bwHz / 1e6;
+    const pow = M.channelPower(t.f, t.a, t.rbw, sb.loMHz, sb.hiMHz), powLim = powerLimit(sbKey, cls, B) - excess;
+    const psdRef = c.psdDbmPer500kHz !== undefined ? 5e5 : 1e6, psdLim = (c.psdDbmPer500kHz ?? c.psdDbmPerMHz) - excess;
+    const psd = M.scaleToBw(bw6.pk, t.rbw, psdRef);
+    const oob = M.worstMargin(t.f, t.a, (f) => oobLimit(f, sb), (v) => v + 10 * Math.log10(1e6 / t.rbw) + gain);
+    const eirp = pow + gain;
+    return { sbKey, sb, c, gain, excess, B, ebw, bw6, ob, pow, powLim, psd, psdLim, psdRef, oob, eirp,
+      tpc: sb.dfs && eirp >= U.tpc.requiredAtEirpDbm };
+  }
+
+  const setCard = (id, ok, text, note) => { $(id).textContent = text; $(id).className = 'v ' + (ok === null ? '' : ok ? 'pass' : 'fail'); if (note !== undefined) $(id + 'N').textContent = note; };
+
+  function update() {
+    $('pwrV').textContent = $('pwr').value + ' dBm'; $('linV').textContent = $('lin').value + ' dBc';
+    trace = simulate(); const r = res = measure(trace);
+    $('gainNote').textContent = r.excess > 0 ? `Gain is ${r.excess.toFixed(1)} dB over 6 dBi: power and PSD limits drop by ${r.excess.toFixed(1)} dB.` : 'Gain at or below 6 dBi: no reduction.';
+    const formula = r.c.powerFormula ? `min(${r.c.powerDbm}, 11 + 10·log10(${r.B.toFixed(1)})) = ${(r.powLim + r.excess).toFixed(2)} dBm` : `${r.c.powerDbm} dBm (${r.c.label.toLowerCase()})`;
+    const u3 = r.sbKey === 'U-NII-3' ? ` · 6 dB BW ${M.fmtHz(r.bw6.bwHz)} (≥ 500 kHz)` : '';
+    setCard('mEbw', r.sbKey === 'U-NII-3' ? r.bw6.bwHz >= 5e5 : null, r.B.toFixed(2) + ' MHz', `99% OBW ${M.fmtHz(r.ob.bwHz)}${u3}`);
+    setCard('mPow', r.pow <= r.powLim + 1e-9, r.pow.toFixed(2) + ' dBm', `Limit ${r.powLim.toFixed(2)} dBm: ${formula}${r.excess ? ` − ${r.excess.toFixed(1)}` : ''}`);
+    $('mPsdL').textContent = r.psdRef === 5e5 ? 'Peak PSD (per 500 kHz)' : 'Peak PSD (per MHz)';
+    setCard('mPsd', r.psd <= r.psdLim, r.psd.toFixed(2) + ' dBm', `Limit ${r.psdLim.toFixed(1)} dBm · margin ${(r.psdLim - r.psd).toFixed(2)} dB`);
+    if (r.oob) setCard('mOob', r.oob.margin >= 0, (r.oob.margin >= 0 ? '+' : '') + r.oob.margin.toFixed(1) + ' dB', `Worst ${r.oob.level.toFixed(1)} dBm/MHz at ${r.oob.at.toFixed(1)} MHz vs ${r.oob.limit.toFixed(1)}`);
+    else setCard('mOob', null, 'n/a', 'View does not extend outside the sub-band');
+    setCard('mEirp', r.tpc ? null : true, r.eirp.toFixed(1) + ' dBm', r.sb.dfs ? (r.tpc ? `≥ 27 dBm: TPC required (${U.tpc.cite})` : 'Below 27 dBm: TPC not required') : 'TPC applies only in U-NII-2A/2C');
+    if (r.tpc) $('mEirp').className = 'v fail';
+    const lowP = r.eirp < U.dfs.lowPowerCondition.eirpBelowDbm && (r.psd + r.gain) < U.dfs.lowPowerCondition.psdBelowDbmPerMHz;
+    setCard('mDfs', null, r.sb.dfs ? 'Required' : 'Not required', r.sb.dfs ? `Detect radar at ${lowP ? U.dfs.thresholdDbm.lowPower : U.dfs.thresholdDbm.other} dBm${lowP ? ' (EIRP < 200 mW, PSD < 10 dBm/MHz)' : ''}; ${U.dfs.cacS} s check; stop traffic in ${U.dfs.closingTxMs} ms, all Tx in ${U.dfs.channelMoveS} s` : `${r.sbKey} does not share with radar`);
+    if (r.c.note) $('mEirpN').textContent += ' · ' + r.c.note;
+
+    const conv = 10 * Math.log10(1e6 / trace.rbw) + r.gain, f0 = trace.f[0], f1 = trace.f[trace.f.length - 1];
+    const segs = [];
+    // build limit polyline outside the band in trace units
+    const below = [], above = [];
+    for (let i = 0; i < trace.f.length; i += 8) { const f = trace.f[i], lim = oobLimit(f, r.sb); if (lim === null) continue; (f < r.sb.oob.outsideMHz[0] ? below : above).push([f, lim - conv]); }
+    if (below.length) segs.push({ y: below, label: 'Out-of-band limit' }); if (above.length) segs.push({ y: above, label: below.length ? '' : 'Out-of-band limit' });
+    plot.draw({
+      traces: [{ f: trace.f, a: trace.a }], rbw: trace.rbw,
+      shades: U.restricted.filter(([lo, hi]) => hi > f0 && lo < f1).map(([lo, hi]) => ({ x0: Math.max(lo, f0), x1: Math.min(hi, f1), color: 'limit', alpha: 0.08 })),
+      vLines: [{ x: r.sb.loMHz, label: String(r.sb.loMHz), color: 'limit', dash: [2, 3] }, { x: r.sb.hiMHz, label: String(r.sb.hiMHz), color: 'limit', dash: [2, 3] }, { x: r.ebw.fL, fromY: r.ebw.th }, { x: r.ebw.fR, fromY: r.ebw.th }],
+      hLines: [{ y: r.ebw.pk, label: `Peak ${r.ebw.pk.toFixed(1)} dBm` }, { y: r.ebw.th, label: 'Peak − 26 dB', labelBelow: true }],
+      segments: segs,
+      markers: [{ x: r.ebw.fL, y: r.ebw.th, label: 'M1' }, { x: r.ebw.fR, y: r.ebw.th, label: 'M2' }]
+    });
+  }
+
+  $('sb').addEventListener('change', () => { fillSub(); update(); });
+  $('bw').addEventListener('change', () => { fillCh(); update(); });
+  ['cls', 'ch', 'pwr', 'lin', 'rbw', 'gain'].forEach((k) => { $(k).addEventListener('input', update); $(k).addEventListener('change', update); });
+
+  const resultsText = () => !res ? '' : [trace.source,
+    `B (26 dB) ${res.B.toFixed(2)} MHz · Power ${res.pow.toFixed(2)} dBm (limit ${res.powLim.toFixed(2)}) · PSD ${res.psd.toFixed(2)} dBm (limit ${res.psdLim.toFixed(1)}) · EIRP ${res.eirp.toFixed(1)} dBm`,
+    `Out-of-band ${$('mOob').textContent} · DFS ${$('mDfs').textContent} · ${$('mEirpN').textContent}`, `Generated ${new Date().toLocaleString()} · RF Lab`].join('\n');
+  $('png').onclick = () => plot.exportPNG(`unii_${RF.util.stamp()}.png`, resultsText().split('\n').slice(0, 3).join('   |   '));
+  $('copy').onclick = async () => { await RF.util.copy(resultsText()); $('copied').textContent = 'Copied'; setTimeout(() => $('copied').textContent = '', 1500); };
+
+  /* ---------- exercises ---------- */
+  const set = (o) => { if (o.sb) { $('sb').value = o.sb; fillSub(); } if (o.bw) { $('bw').value = o.bw; fillCh(); } Object.entries(o).forEach(([k, v]) => { if (!['sb', 'bw'].includes(k)) $(k).value = v; }); update(); };
+  RF.ex.mount('exercises', 'wifi-unii', [
+    { id: 'b-formula', type: 'number', title: 'Power limit from the 26 dB bandwidth',
+      prompt: 'Select <b>U-NII-2A</b>, <b>20 MHz</b>. Using the measured 26 dB bandwidth B, what is the maximum conducted power limit (antenna gain ≤ 6 dBi)?',
+      unit: 'dBm', tol: 0.2, hint: 'Lesser of 24 dBm (250 mW) and 11 + 10·log10(B in MHz).',
+      answer: () => powerLimit('U-NII-2A', 'any', res.B),
+      explain: 'For 20 MHz and wider, 11 + 10·log10(B) exceeds 24 dBm, so 250 mW is the binding limit. Narrow signals (B below ~20 MHz) get less.' },
+    { id: 'gain-9', type: 'state', title: 'High-gain antenna in U-NII-2C',
+      prompt: 'Select <b>U-NII-2C</b>, 20 MHz, antenna gain <b>9 dBi</b>. Set the conducted power so that power and PSD both pass, within 1 dB of the power limit, then press Check.',
+      hint: '3 dB of excess gain lowers both limits by 3 dB. PSD may become the binding limit.',
+      check: () => { if ($('sb').value !== 'U-NII-2C' || $('bw').value !== '20') return { ok: false, msg: 'Select U-NII-2C at 20 MHz.' }; if (+$('gain').value !== 9) return { ok: false, msg: 'Set antenna gain to 9 dBi.' };
+        if (res.pow > res.powLim + 1e-9 || res.psd > res.psdLim) return { ok: false, msg: 'Power or PSD is failing; lower the power.' };
+        if (res.powLim - res.pow > 1 && res.psdLim - res.psd > 1) return { ok: false, msg: `Passing with ${(res.powLim - res.pow).toFixed(1)} dB of power margin; raise the power.` };
+        return { ok: true, msg: `${$('pwr').value} dBm conducted, ${res.eirp.toFixed(1)} dBm EIRP.` }; },
+      explain: 'The gain reduction keeps EIRP roughly constant. Swapping in a higher-gain antenna without lowering power is a common certification failure.' },
+    { id: 'ch36', type: 'state', title: 'Channel 36 and the restricted band below 5150 MHz',
+      prompt: 'Select <b>U-NII-1</b>, client, <b>40 MHz channel 38</b>, RBW 1 MHz, 3 dBi, shoulder −35 dBc. Find the highest power (within 1 dB) that passes the out-of-band check, then press Check.',
+      hint: 'Below 5150 MHz is restricted (≈ −41 dBm/MHz EIRP). The out-of-band margin moves dB for dB with power.',
+      check: () => { if ($('sb').value !== 'U-NII-1' || $('bw').value !== '40' || +$('ch').value !== 38) return { ok: false, msg: 'Select U-NII-1, 40 MHz, channel 38.' };
+        if (+$('rbw').value !== 1e6 || +$('gain').value !== 3 || +$('lin').value !== -35) return { ok: false, msg: 'Set RBW 1 MHz, gain 3 dBi and shoulder −35 dBc.' };
+        const m = res.oob.margin; if (m < 0) return { ok: false, msg: `Failing by ${(-m).toFixed(1)} dB.` }; if (m > 1.5) return { ok: false, msg: `${m.toFixed(1)} dB to spare; raise the power.` };
+        return { ok: true, msg: `Channel 38 tops out near ${$('pwr').value} dBm.` }; },
+      explain: 'Like channels 1 and 11 at 2.4 GHz, the 5 GHz channels next to restricted bands (36/38/42, 64, 100) usually ship with reduced power.' },
+    { id: 'dfs-why', type: 'choice', title: 'Why DFS?',
+      prompt: 'Why must U-NII-2A and U-NII-2C devices implement DFS?',
+      options: ['Those bands are shared with radar (weather, military and airport radar), which has priority', 'To reduce interference between neighboring Wi-Fi networks', 'Because the power limit there is higher than U-NII-1', 'To meet the restricted-band limits at 5350 and 5460 MHz'],
+      answer: 0, explain: 'The device must check for radar before transmitting (60 s), stop within 10 s of detecting it, and avoid that channel for 30 minutes.' }
+  ]);
+
+  /* ---------- known-answer tests ---------- */
+  RF.test.add('U-NII-2A limit, B = 10 MHz → 21 dBm', () => RF.test.near(powerLimit('U-NII-2A', 'any', 10), 21, 0.01));
+  RF.test.add('U-NII-2A limit, B = 22 MHz → 24 dBm (250 mW cap)', () => RF.test.near(powerLimit('U-NII-2A', 'any', 22), 24, 0.01));
+  RF.test.add('U-NII-3 mask at 50 MHz from edge = −8.5 dBm/MHz', () => RF.test.near(M.interp(U.subbands['U-NII-3'].oob.points, 50), -8.5, 0.01));
+  RF.test.add('Channel 36 center = 5180 MHz', () => RF.test.near(U.channelCenterMHz(36), 5180, 0));
+  RF.test.add('U-NII-2C ch 100, 20 MHz, 18 dBm passes power, PSD and OOB', () => { set({ sb: 'U-NII-2C', bw: '20', ch: 100, pwr: 18, gain: 3, lin: -35, rbw: 1e6 }); return { ok: res.pow <= res.powLim && res.psd <= res.psdLim && res.oob.margin > 0, detail: `P ${res.pow.toFixed(1)}/${res.powLim.toFixed(1)}, PSD ${res.psd.toFixed(1)}/${res.psdLim}, OOB ${res.oob.margin.toFixed(1)}` }; });
+  RF.test.add('Conducted power recovers 18 dBm', () => RF.test.near(res.pow, 18, 0.3));
+  RF.test.add('20 MHz 26 dB EBW between 18 and 23 MHz', () => { set({ rbw: 300000 }); return { ok: res.B > 18 && res.B < 23, detail: res.B.toFixed(2) + ' MHz' }; });
+  RF.test.add('TPC flagged at 25 dBm + 3 dBi in U-NII-2C', () => { set({ pwr: 25 }); const r = { ok: res.tpc === true, detail: 'EIRP ' + res.eirp.toFixed(1) }; set({ sb: 'U-NII-1', bw: '20', pwr: 18 }); return r; });
+
+  update();
+})();
+</script>
+</body>
+</html>
