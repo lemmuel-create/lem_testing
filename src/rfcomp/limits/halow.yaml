@@ -48,3 +48,20 @@ sections:
     lowPower15249:
       cite: §15.249
       fieldMvPerM3m: 50
+functions:
+  dtsBandwidth:
+    cite: §15.247(a)(2)
+    note: >-
+      DTS minimum bandwidth is measured at the 6 dB points; the minimum is
+      sections.ism900.dts.min6dBBwKHz. Other n-dB widths are reported for information only.
+    nDb: 6
+  bwContainment:
+    cite: §15.215(c)
+    note: >-
+      The 20 dB bandwidth (M1–M2) must lie within the authorized band: M1 >= band.loMHz and
+      M2 <= band.hiMHz. Band edges are referenced, not copied, from sections.ism900.band.
+      Not in the legacy bandwidth tool; an intentional rfcomp addition.
+    nDb: 20
+    bandRef: ism900.band
+    review: true
+    reviewNote: New check with no legacy equivalent; needs RF engineer sign-off.

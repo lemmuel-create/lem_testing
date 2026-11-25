@@ -44,6 +44,19 @@ GNSS has no standalone legacy tool; its limits live in limits.js and are applied
 ## Golden-test approach
 For each legacy tool, export 3–5 sample traces and the numbers the HTML page displays (bandwidth, OBW, PSD, band-edge margin, verdict) into `tests/golden/<tech>/*.json`. Python must reproduce them within tolerance. This is the proof the port is correct before RF sign-off.
 
+## Precision
+Checks compare at full floating-point precision, exactly as the legacy pages do (e.g. 19.99 dBc fails a 20 dBc requirement, and a PSD of 7.999999999999998 dBm/3 kHz passes 8). Reports and the dashboard display dB values to at least 0.01 dB, so a failing margin is never shown rounded to the limit.
+
+## Intentional differences from the legacy tools
+| Module | Difference | Legacy behaviour | Tested by |
+|---|---|---|---|
+| `techs/halow.py` | Adds a conducted-power check: integrated channel power vs 30 dBm (§15.247(b)(3)), reduced by (gain − 6) dB above 6 dBi (§15.247(b)(4)). Labelled "Channel power (integrated, pre-compliance estimate; KDB 558074 methods for certification)". | The bandwidth page reports channel power with no limit. | `tests/test_halow_power.py` (hand-computed; no legacy golden) |
+| `techs/halow.py` | Adds a §15.215(c) check: the 20 dB bandwidth is always computed (whatever n the bandwidth check uses) and passes when M1 ≥ 902.000 and M2 ≤ 928.000 MHz. Band edges come from `ism900.band`; the rule is `functions.bwContainment` in `halow.yaml` with `review: true`. | The page shows 20 dB M1/M2 markers with no verdict. | `tests/test_halow_15215.py` (the `edge20-*` golden markers) |
+| `techs/halow.py` | Limits come only from `halow.yaml`; there is no per-run limit override. | The page lets the user edit the minimum-bandwidth, PSD and band-edge limit fields. Golden case `psd-sim-halow1-limit-6` (PSD field set to 6 dBm) fails on the page and passes in rfcomp (6.40 ≤ 8 dBm/3 kHz). | `tests/test_golden_halow.py` (`KNOWN_DIFFERENCES`) |
+| `techs/halow.py` | The 500 kHz DTS minimum is always checked on the 6 dB width (`functions.dtsBandwidth.nDb` in `halow.yaml`). Any other selected n-dB width (20, 26) is reported for information only. | The page compares whichever n-dB width is selected against the 500 kHz minimum. | `tests/test_golden_halow.py` (n ≠ 6 golden values; hand case: 6 dB 492 kHz fails while 20 dB is 520 kHz) |
+| `techs/halow.py` | Antenna gain is a required input; the conducted-power limit is reduced dB-for-dB above 6 dBi (e.g. 23.5 dBm at 12.5 dBi). | No antenna-gain input. | `tests/test_halow_power.py` |
+| all | Display precision ≥ 0.01 dB. | Pages show band edge to 0.1 dB, so 19.99 dBc reads "20.0 dBc" next to a Fail. | report/dashboard tests |
+
 ## Open items
 - Analyzer export formats in use (Keysight CSV, R&S .dat, Anritsu?) — collect one sample of each.
 - Auth for the dashboard (office LAN only vs. SSO).
