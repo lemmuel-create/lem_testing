@@ -51,9 +51,9 @@ Checks compare at full floating-point precision, exactly as the legacy pages do 
 | Module | Difference | Legacy behaviour | Tested by |
 |---|---|---|---|
 | `techs/halow.py` | Adds a conducted-power check: integrated channel power vs 30 dBm (§15.247(b)(3)), reduced by (gain − 6) dB above 6 dBi (§15.247(b)(4)). Labelled "Channel power (integrated, pre-compliance estimate; KDB 558074 methods for certification)". | The bandwidth page reports channel power with no limit. | `tests/test_halow_power.py` (hand-computed; no legacy golden) |
+| `techs/halow.py` | Adds a §15.215(c) check: the 20 dB bandwidth is always computed (whatever n the bandwidth check uses) and passes when M1 ≥ 902.000 and M2 ≤ 928.000 MHz. Band edges come from `ism900.band`; the rule is `functions.bwContainment` in `halow.yaml` with `review: true`. | The page shows 20 dB M1/M2 markers with no verdict. | `tests/test_halow_15215.py` (the `edge20-*` golden markers) |
 | all | Display precision ≥ 0.01 dB. | Pages show band edge to 0.1 dB, so 19.99 dBc reads "20.0 dBc" next to a Fail. | report/dashboard tests |
 
 ## Open items
 - Analyzer export formats in use (Keysight CSV, R&S .dat, Anritsu?) — collect one sample of each.
 - Auth for the dashboard (office LAN only vs. SSO).
-- §15.215(c) containment of the 20 dB bandwidth at edge channels: the legacy bandwidth page shows the 20 dB M1/M2 markers but gives no verdict, and `limits.js` has no §15.215 entry. Golden cases pin the markers (`edge20-*` in `tests/golden/halow/bandwidth.json`); a verdict needs a limits entry and RF sign-off.

@@ -120,6 +120,17 @@ class TotalEirp(_Model):
     perMHz: float
 
 
+class BwContainment(_Model):
+    """Occupied-bandwidth containment (e.g. §15.215(c)): the n-dB bandwidth must lie in a band."""
+
+    cite: str
+    note: str
+    nDb: float
+    bandRef: str  # "<section>.<key>" of a {loMHz, hiMHz} block in sections
+    review: bool
+    reviewNote: str
+
+
 class LimitsFile(_Model):
     meta: LimitsMeta
     root: LimitsRoot | None = None
@@ -137,6 +148,7 @@ class Limits(_Model):
     unii_channel_center: ChannelPlan
     lte_mask_attenuation: MaskAttenuation
     cbrs_total_eirp: TotalEirp
+    bw_containment: BwContainment
 
     @property
     def version(self) -> str:
@@ -181,6 +193,12 @@ class Limits(_Model):
         """Total EIRP allowed for a bw_mhz channel given a per-10 MHz EIRP limit."""
         return eirp_dbm_per_10mhz + 10 * math.log10(bw_mhz / self.cbrs_total_eirp.perMHz)
 
+    def bw_containment_band(self) -> tuple[float, float]:
+        """(loMHz, hiMHz) of the band the bw-containment rule references."""
+        section, key = self.bw_containment.bandRef.split(".")
+        band = self.fcc[section][key]
+        return band["loMHz"], band["hiMHz"]
+
 
 def _read(name: str) -> LimitsFile:
     with open(LIMITS_DIR / f"{name}.yaml", encoding="utf-8") as fh:
@@ -210,6 +228,7 @@ def load() -> Limits:
         unii_channel_center=ChannelPlan.model_validate(fn["channelCenter"]),
         lte_mask_attenuation=MaskAttenuation.model_validate(fn["maskAttenuation"]),
         cbrs_total_eirp=TotalEirp.model_validate(fn["totalEirp"]),
+        bw_containment=BwContainment.model_validate(fn["bwContainment"]),
     )
 
 

@@ -7,9 +7,9 @@ the dashboard show at least 0.01 dB.
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Check(BaseModel):
@@ -25,9 +25,13 @@ class Check(BaseModel):
     cite: str
     unit: str
     sense: Literal["max", "min"]
+    review: bool = False  # the limit is flagged `review: true` (RF sign-off pending)
+    detail: dict[str, float | bool | str | None] = Field(default_factory=dict)
 
     @classmethod
-    def at_most(cls, label: str, value: float, limit: float, cite: str, unit: str) -> Check:
+    def at_most(
+        cls, label: str, value: float, limit: float, cite: str, unit: str, **extra: Any
+    ) -> Check:
         """Pass when value <= limit (e.g. power, PSD)."""
         return cls(
             label=label,
@@ -38,10 +42,13 @@ class Check(BaseModel):
             cite=cite,
             unit=unit,
             sense="max",
+            **extra,
         )
 
     @classmethod
-    def at_least(cls, label: str, value: float, limit: float, cite: str, unit: str) -> Check:
+    def at_least(
+        cls, label: str, value: float, limit: float, cite: str, unit: str, **extra: Any
+    ) -> Check:
         """Pass when value >= limit (e.g. 6 dB bandwidth, band-edge dBc)."""
         return cls(
             label=label,
@@ -52,4 +59,5 @@ class Check(BaseModel):
             cite=cite,
             unit=unit,
             sense="min",
+            **extra,
         )

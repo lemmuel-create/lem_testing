@@ -62,5 +62,13 @@ def test_formula_parameters_have_cites() -> None:
         limits.unii_channel_center,
         limits.lte_mask_attenuation,
         limits.cbrs_total_eirp,
+        limits.bw_containment,
     ):
         assert p.cite.strip()
+
+
+def test_bw_containment_references_ism900_band() -> None:
+    limits = load()
+    band = limits.fcc["ism900"]["band"]
+    assert limits.bw_containment_band() == (band["loMHz"], band["hiMHz"])
+    assert limits.bw_containment.review is True
