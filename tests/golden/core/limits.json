@@ -602,6 +602,59 @@
         "tol": 0,
         "ok": true
       }
+    },
+    {
+      "id": "x.mpe.100MHz",
+      "fn": "mpe",
+      "source": "extra",
+      "args": [100],
+      "note": "RF.limits.fcc.rfExposure.mpe",
+      "result": 0.06666666666666667
+    },
+    {
+      "id": "x.mpe.915MHz",
+      "fn": "mpe",
+      "source": "extra",
+      "args": [915],
+      "note": "RF.limits.fcc.rfExposure.mpe",
+      "result": 0.61
+    },
+    {
+      "id": "x.mpe.boundary_1500MHz",
+      "fn": "mpe",
+      "source": "extra",
+      "args": [1500],
+      "note": "RF.limits.fcc.rfExposure.mpe",
+      "result": 1
+    },
+    {
+      "id": "x.mpe.2450MHz",
+      "fn": "mpe",
+      "source": "extra",
+      "args": [2450],
+      "note": "RF.limits.fcc.rfExposure.mpe",
+      "result": 1
+    },
+    {
+      "id": "x.channelCenterMHz.ch1",
+      "fn": "channelCenterMHz",
+      "source": "extra",
+      "args": [1],
+      "result": 5005
+    },
+    {
+      "id": "x.channelCenterMHz.ch100",
+      "fn": "channelCenterMHz",
+      "source": "extra",
+      "args": [100],
+      "result": 5500
+    },
+    {
+      "id": "x.channelCenterMHz.ch165",
+      "fn": "channelCenterMHz",
+      "source": "extra",
+      "args": [165],
+      "result": 5825
     }
   ]
 }

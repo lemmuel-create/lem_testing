@@ -281,6 +281,10 @@ for (const [id, v] of [['simple', [-10, -3, -7]], ['tie_first_wins', [1, 5, 5, 2
   X('nDbBandwidth', 'clipped_span', [clip.f, clip.a, 6], () => M.nDbBandwidth(f64(clip.f), f64(clip.a), 6), { note: 'signal wider than span: clipped=true' });
   const tri = { f: lin(914, 916, 201) }; tri.a = tri.f.map((x) => -20 * Math.abs(x - 915));
   X('nDbBandwidth', 'triangle_20dB', [tri.f, tri.a, 20], () => M.nDbBandwidth(f64(tri.f), f64(tri.a), 20));
+  // samples exactly at peak − n outside the main lobe: crossings are the OUTERMOST points ≥ threshold
+  const out = { f: [914, 914.5, 915, 915.5, 916, 916.5, 917], a: [-6, -60, -6, 0, -6, -60, -6] };
+  X('nDbBandwidth', 'boundary_outermost_at_threshold', [out.f, out.a, 6], () => M.nDbBandwidth(f64(out.f), f64(out.a), 6),
+    { boundary: { limit: -6, expect: 'edge samples equal to the threshold count as inside: fL = 914, fR = 917, clipped' } });
   const s = sim({ fcMHz: 915, occMHz: 1, spanMHz: 3, powerDbm: 30, order: 6, rippleDb: 1, rbwHz: 100e3, noiseDbm: -70, seed: 7, points: 401 });
   X('nDbBandwidth', 'sim_halow_1MHz', [s.f, s.a, 6], () => M.nDbBandwidth(f64(s.f), f64(s.a), 6));
 }
@@ -388,6 +392,8 @@ for (const seed of [1, 0, 42, 2 ** 32 + 5, -1]) {
     ['start_stop_no_ripple', { fcMHz: 3610, occMHz: 18, startMHz: 3580, stopMHz: 3640, powerDbm: 23, order: 10, rippleDb: 0, rbwHz: 1e6, noiseDbm: -65, seed: 11, points: 151 }],
     ['default_seed_noise', { fcMHz: 782, occMHz: 9, spanMHz: 30, powerDbm: 23, order: 8, rippleDb: 0.5, rbwHz: 100e3, points: 101 }]
   ];
+  // rbwHz/df/2 = 2.5 exactly: Math.round rounds half up (3 bins), not half-to-even
+  cases.push(['boundary_round_half_bins', { fcMHz: 915, occMHz: 1, spanMHz: 2, powerDbm: 10, order: 4, rippleDb: 0, rbwHz: 50000, noiseDbm: -80, seed: 5, points: 201 }]);
   for (const [id, o] of cases) X('simulateSignal', id, [o], () => M.simulateSignal(o));
 }
 
@@ -398,6 +404,76 @@ X('fmtDb', 'digits_unit', [7.777, 1, 'dBm'], () => M.fmtDb(7.777, 1, 'dBm'));
 X('fmtDb', 'nan', [NaN], () => M.fmtDb(NaN));
 X('fmtDb', 'infinity', [Infinity, 2, 'dBc'], () => M.fmtDb(Infinity, 2, 'dBc'));
 X('fmtDb', 'round_half', [1.005, 2], () => M.fmtDb(1.005, 2));
+// exact binary ties: toFixed rounds half away from zero (not half-to-even)
+for (const [id, v] of [['tie_0p125', 0.125], ['tie_minus_0p125', -0.125], ['tie_2p5_d0', 2.5]]) {
+  const d = id.endsWith('_d0') ? 0 : 2;
+  X('fmtDb', id, [v, d], () => M.fmtDb(v, d));
+}
+X('fmtHz', 'tie_2p5Hz', [2.5], () => M.fmtHz(2.5));
+X('fmtHz', 'tie_102p5kHz', [102500], () => M.fmtHz(102500));
+
+/* =====================================================================================================
+ * 2b. Extra cases for RF.coloc and the RF.limits functions
+ * ===================================================================================================== */
+const XC = (fn, id, args, call, opts) => rec('coloc', fn, `x.${fn}.${id}`, enc(args), call, opts);
+const XL = (fn, id, args, call, opts) => rec('limits', fn, `x.${fn}.${id}`, enc(args), call, opts);
+const R = (tech, over) => C.newRadio(tech, over);
+
+XC('TECH', 'all_presets', [], () => C.TECH, { note: 'radio preset table, including the generated lte<band> entries' });
+for (const [id, tech, over] of [['halow', 'halow'], ['gnss_receive_only', 'gnss'], ['lteB13_override', 'lteB13', { fc: 782, duty: 30 }], ['wifi5_whole', 'wifi5', { whole: true, pwr: 15 }]]) {
+  XC('newRadio', id, [tech, over || {}], () => C.newRadio(tech, over));
+}
+for (const [id, tech] of [['halow', 'halow'], ['cbrs', 'cbrs'], ['lteB66', 'lteB66'], ['unknown_tech', 'nope']]) {
+  XC('isLicensed', id, [{ tech }], () => C.isLicensed({ tech }));
+}
+{
+  const radios = [R('halow'), R('wifi24'), R('halow', { fc: 920 })];
+  for (const i of [0, 1, 2]) XC('radioName', `dup_index_${i}`, [radios, i], () => C.radioName(radios, radios[i], i));
+}
+for (const [id, r] of [['channel', R('wifi24', { fc: 2412 })], ['whole_band', R('halow', { whole: true })], ['off', R('cbrs', { on: false })], ['receive_only', R('gnss')]]) {
+  XC('txRange', id, [r], () => C.txRange(r));
+}
+for (const [id, p, b] of [['touching_edge', [10, 20], [20, 30]], ['disjoint', [10, 20], [20.001, 30]], ['contained', [12, 13], [10, 20]], ['spanning', [5, 50], [10, 20]]]) {
+  XC('overlap', id, [p, b], () => C.overlap(p, b));
+}
+XC('combo', 'harmonic_no_r2', [3, [902, 928]], () => C.combo(3, [902, 928]));
+XC('combo', 'straddles_zero', [1, [10, 30], -1, [20, 25]], () => C.combo(1, [10, 30], -1, [20, 25]), { note: 'lo < 0 < hi folds to [0, max]' });
+XC('combo', 'both_negative', [-2, [100, 110], 1, [50, 60]], () => C.combo(-2, [100, 110], 1, [50, 60]));
+{
+  const sets = [
+    ['halow_wifi24', [R('halow'), R('wifi24')], {}],
+    ['halow_wifi24_lteB13_gnss', [R('halow'), R('wifi24'), R('lteB13', { fc: 782 }), R('gnss')], {}],
+    ['wifi24_wifi5_im5', [R('wifi24'), R('wifi5')], { im5: true }],
+    ['licensed_only_hmax3', [R('cbrs'), R('lteB66')], { hmax: 3 }],
+    ['whole_band_and_off', [R('halow', { whole: true }), R('wifi24', { on: false }), R('lteB71')], { hmax: 4 }]
+  ];
+  for (const [id, radios, opts] of sets) XC('products', id, [radios, opts], () => C.products(radios, opts));
+}
+for (const [id, f] of [['10MHz', 10], ['boundary_30MHz', 30], ['100MHz', 100], ['boundary_300MHz', 300], ['boundary_1500MHz', 1500], ['2450MHz', 2450]]) {
+  XC('mpeLimit', id, [f], () => C.mpeLimit(f));
+}
+XC('powerDensity', '1W_20cm', [1000, 20], () => C.powerDensity(1000, 20));
+XC('powerDensity', '100mW_1cm', [100, 1], () => C.powerDensity(100, 1));
+for (const [id, f, d] of [['below_range_f', 299, 10], ['above_range_d', 2450, 40.1], ['boundary_split_1500', 1500, 10], ['900MHz_5cm', 900, 5],
+  ['boundary_20cm', 915, 20], ['just_over_20cm', 915, 20.5], ['boundary_0p5cm_6GHz', 6000, 0.5]]) {
+  XC('sarExemptionMw', id, [f, d], () => C.sarExemptionMw(f, d));
+}
+{
+  const def = [R('halow'), R('wifi24'), R('lteB13', { fc: 782 })];
+  XC('exposure', 'mobile_20cm', [def, 20, 'mobile'], () => C.exposure(def, 20, 'mobile'));
+  XC('exposure', 'portable_5cm', [def, 5, 'portable'], () => C.exposure(def, 5, 'portable'));
+  const withSar = [R('halow'), R('wifi24', { sar: 0.8 }), R('cbrs', { on: false })];
+  XC('exposure', 'portable_measured_sar', [withSar, 5, 'portable'], () => C.exposure(withSar, 5, 'portable'));
+  const outOfRange = [R('wifi5', { fc: 5500 }), R('halow', { duty: 150 })];
+  XC('exposure', 'portable_out_of_range_45cm', [outOfRange, 45, 'portable'], () => C.exposure(outOfRange, 45, 'portable'), { note: 'P_th null beyond 40 cm: ratio Infinity; duty clamped to 100' });
+  XC('mpeMinDistance', 'default_three', [def], () => C.mpeMinDistance(def));
+  XC('mpeMinDistance', 'single_halow', [[R('halow')]], () => C.mpeMinDistance([R('halow')]));
+  XC('mpeMinDistance', 'with_off_radio', [[R('wifi24'), R('cbrs', { on: false })]], () => C.mpeMinDistance([R('wifi24'), R('cbrs', { on: false })]));
+}
+for (const [id, f] of [['100MHz', 100], ['915MHz', 915], ['boundary_1500MHz', 1500], ['2450MHz', 2450]]) {
+  XL('mpe', id, [f], () => F.rfExposure.mpe(f), { note: 'RF.limits.fcc.rfExposure.mpe' });
+}
+for (const ch of [1, 100, 165]) XL('channelCenterMHz', `ch${ch}`, [ch], () => F.unii.channelCenterMHz(ch));
 
 /* =====================================================================================================
  * 3. Cases that need the browser, DOM, page state or page-local helpers: listed, not captured
@@ -467,7 +543,7 @@ const ka = Object.values(book).flat().filter((c) => c.source === 'known-answer')
 console.log(`limits ${L.version}`);
 const kaTests = new Set(Object.values(book).flat().filter((c) => c.source === 'known-answer').map((c) => `${c.page}|${c.name}`)).size;
 console.log(`RF.test.add cases: ${kaTests + skipped.length} total, ${kaTests} captured (as ${ka} golden cases), ${skipped.length} skipped`);
-for (const [lib, fns] of [['RF.math', fnsOf(M)], ['RF.limits', ['fcc.unii.channelCenterMHz', 'fcc.rfExposure.mpe']], ['RF.coloc', fnsOf(C)]]) {
+for (const [lib, fns] of [['RF.math', fnsOf(M)], ['RF.limits', ['fcc.unii.channelCenterMHz', 'fcc.rfExposure.mpe']], ['RF.coloc', ['TECH', ...fnsOf(C)]]]) {
   const key = lib === 'RF.math' ? 'rfmath' : lib === 'RF.limits' ? 'limits' : 'coloc';
   const n = count(book[key]);
   console.log(`\n${lib}`);

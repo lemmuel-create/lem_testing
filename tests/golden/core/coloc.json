@@ -207,6 +207,2762 @@
       "legacyCheck": {
         "ok": true
       }
+    },
+    {
+      "id": "x.TECH.all_presets",
+      "fn": "TECH",
+      "source": "extra",
+      "args": [],
+      "note": "radio preset table, including the generated lte<band> entries",
+      "result": {
+        "halow": {
+          "label": "Wi-Fi HaLow",
+          "part": "15",
+          "rule": "§15.247",
+          "tx": [902,928],
+          "rx": [
+            [
+              902,
+              928,
+              "HaLow"
+            ]
+          ],
+          "bws": [1,2,4,8],
+          "fc": 915,
+          "bw": 1,
+          "pwr": 24,
+          "gain": 2,
+          "duty": 100
+        },
+        "wifi24": {
+          "label": "Wi-Fi 2.4 GHz",
+          "part": "15",
+          "rule": "§15.247",
+          "tx": [2400,2483.5],
+          "rx": [
+            [
+              2400,
+              2483.5,
+              "Wi-Fi 2.4 GHz"
+            ]
+          ],
+          "bws": [20,40],
+          "fc": 2437,
+          "bw": 20,
+          "pwr": 20,
+          "gain": 3,
+          "duty": 100
+        },
+        "wifi5": {
+          "label": "Wi-Fi 5 GHz",
+          "part": "15",
+          "rule": "§15.407",
+          "tx": [5150,5850],
+          "rx": [
+            [
+              5150,
+              5850,
+              "Wi-Fi 5 GHz"
+            ]
+          ],
+          "bws": [20,40,80],
+          "fc": 5500,
+          "bw": 20,
+          "pwr": 18,
+          "gain": 4,
+          "duty": 100
+        },
+        "cbrs": {
+          "label": "CBRS (B48)",
+          "part": "96",
+          "rule": "Part 96",
+          "tx": [3550,3700],
+          "rx": [
+            [
+              3550,
+              3700,
+              "CBRS"
+            ]
+          ],
+          "bws": [10,20],
+          "fc": 3625,
+          "bw": 20,
+          "pwr": 23,
+          "gain": 3,
+          "duty": 100,
+          "licensed": true
+        },
+        "gnss": {
+          "label": "GNSS receiver",
+          "part": null,
+          "tx": null,
+          "rx": [
+            [
+              1559,
+              1610,
+              "GNSS L1"
+            ],
+            [
+              1164,
+              1215,
+              "GNSS L5"
+            ]
+          ],
+          "bws": [],
+          "fc": 1575.42,
+          "bw": 0
+        },
+        "lteB2": {
+          "label": "LTE B2 (PCS)",
+          "part": "24",
+          "rule": "Part 24 Subpart E",
+          "tx": [1850,1910],
+          "rx": [
+            [
+              1930,
+              1990,
+              "LTE B2 downlink"
+            ]
+          ],
+          "bws": [5,10,15,20],
+          "fc": 1880,
+          "bw": 10,
+          "pwr": 23,
+          "gain": 2,
+          "duty": 100,
+          "licensed": true,
+          "lteBand": "B2"
+        },
+        "lteB4": {
+          "label": "LTE B4 (AWS-1)",
+          "part": "27",
+          "rule": "Part 27",
+          "tx": [1710,1755],
+          "rx": [
+            [
+              2110,
+              2155,
+              "LTE B4 downlink"
+            ]
+          ],
+          "bws": [5,10,15,20],
+          "fc": 1732.5,
+          "bw": 10,
+          "pwr": 23,
+          "gain": 2,
+          "duty": 100,
+          "licensed": true,
+          "lteBand": "B4"
+        },
+        "lteB5": {
+          "label": "LTE B5 (Cellular 850)",
+          "part": "22",
+          "rule": "Part 22 Subpart H",
+          "tx": [824,849],
+          "rx": [
+            [
+              869,
+              894,
+              "LTE B5 downlink"
+            ]
+          ],
+          "bws": [5,10],
+          "fc": 836.5,
+          "bw": 10,
+          "pwr": 23,
+          "gain": 2,
+          "duty": 100,
+          "licensed": true,
+          "lteBand": "B5"
+        },
+        "lteB12": {
+          "label": "LTE B12 (Lower 700)",
+          "part": "27",
+          "rule": "Part 27",
+          "tx": [699,716],
+          "rx": [
+            [
+              729,
+              746,
+              "LTE B12 downlink"
+            ]
+          ],
+          "bws": [5,10],
+          "fc": 707.5,
+          "bw": 10,
+          "pwr": 23,
+          "gain": 2,
+          "duty": 100,
+          "licensed": true,
+          "lteBand": "B12"
+        },
+        "lteB13": {
+          "label": "LTE B13 (Upper 700 C)",
+          "part": "27",
+          "rule": "Part 27",
+          "tx": [777,787],
+          "rx": [
+            [
+              746,
+              756,
+              "LTE B13 downlink"
+            ]
+          ],
+          "bws": [5,10],
+          "fc": 782,
+          "bw": 10,
+          "pwr": 23,
+          "gain": 2,
+          "duty": 100,
+          "licensed": true,
+          "lteBand": "B13"
+        },
+        "lteB66": {
+          "label": "LTE B66 (AWS-1/3)",
+          "part": "27",
+          "rule": "Part 27",
+          "tx": [1710,1780],
+          "rx": [
+            [
+              2110,
+              2200,
+              "LTE B66 downlink"
+            ]
+          ],
+          "bws": [5,10,15,20],
+          "fc": 1745,
+          "bw": 10,
+          "pwr": 23,
+          "gain": 2,
+          "duty": 100,
+          "licensed": true,
+          "lteBand": "B66"
+        },
+        "lteB71": {
+          "label": "LTE B71 (600 MHz)",
+          "part": "27",
+          "rule": "Part 27",
+          "tx": [663,698],
+          "rx": [
+            [
+              617,
+              652,
+              "LTE B71 downlink"
+            ]
+          ],
+          "bws": [5,10,15,20],
+          "fc": 680.5,
+          "bw": 10,
+          "pwr": 23,
+          "gain": 2,
+          "duty": 100,
+          "licensed": true,
+          "lteBand": "B71"
+        }
+      }
+    },
+    {
+      "id": "x.newRadio.halow",
+      "fn": "newRadio",
+      "source": "extra",
+      "args": [
+        "halow",
+        {}
+      ],
+      "result": {
+        "tech": "halow",
+        "on": true,
+        "fc": 915,
+        "bw": 1,
+        "whole": false,
+        "pwr": 24,
+        "gain": 2,
+        "duty": 100
+      }
+    },
+    {
+      "id": "x.newRadio.gnss_receive_only",
+      "fn": "newRadio",
+      "source": "extra",
+      "args": [
+        "gnss",
+        {}
+      ],
+      "result": {
+        "tech": "gnss",
+        "on": false,
+        "fc": 1575.42,
+        "bw": 0,
+        "whole": false,
+        "pwr": null,
+        "gain": null,
+        "duty": null
+      }
+    },
+    {
+      "id": "x.newRadio.lteB13_override",
+      "fn": "newRadio",
+      "source": "extra",
+      "args": [
+        "lteB13",
+        {
+          "fc": 782,
+          "duty": 30
+        }
+      ],
+      "result": {
+        "tech": "lteB13",
+        "on": true,
+        "fc": 782,
+        "bw": 10,
+        "whole": false,
+        "pwr": 23,
+        "gain": 2,
+        "duty": 30
+      }
+    },
+    {
+      "id": "x.newRadio.wifi5_whole",
+      "fn": "newRadio",
+      "source": "extra",
+      "args": [
+        "wifi5",
+        {
+          "whole": true,
+          "pwr": 15
+        }
+      ],
+      "result": {
+        "tech": "wifi5",
+        "on": true,
+        "fc": 5500,
+        "bw": 20,
+        "whole": true,
+        "pwr": 15,
+        "gain": 4,
+        "duty": 100
+      }
+    },
+    {
+      "id": "x.isLicensed.halow",
+      "fn": "isLicensed",
+      "source": "extra",
+      "args": [
+        {
+          "tech": "halow"
+        }
+      ],
+      "result": false
+    },
+    {
+      "id": "x.isLicensed.cbrs",
+      "fn": "isLicensed",
+      "source": "extra",
+      "args": [
+        {
+          "tech": "cbrs"
+        }
+      ],
+      "result": true
+    },
+    {
+      "id": "x.isLicensed.lteB66",
+      "fn": "isLicensed",
+      "source": "extra",
+      "args": [
+        {
+          "tech": "lteB66"
+        }
+      ],
+      "result": true
+    },
+    {
+      "id": "x.isLicensed.unknown_tech",
+      "fn": "isLicensed",
+      "source": "extra",
+      "args": [
+        {
+          "tech": "nope"
+        }
+      ],
+      "result": false
+    },
+    {
+      "id": "x.radioName.dup_index_0",
+      "fn": "radioName",
+      "source": "extra",
+      "args": [
+        [
+          {
+            "tech": "halow",
+            "on": true,
+            "fc": 915,
+            "bw": 1,
+            "whole": false,
+            "pwr": 24,
+            "gain": 2,
+            "duty": 100
+          },
+          {
+            "tech": "wifi24",
+            "on": true,
+            "fc": 2437,
+            "bw": 20,
+            "whole": false,
+            "pwr": 20,
+            "gain": 3,
+            "duty": 100
+          },
+          {
+            "tech": "halow",
+            "on": true,
+            "fc": 920,
+            "bw": 1,
+            "whole": false,
+            "pwr": 24,
+            "gain": 2,
+            "duty": 100
+          }
+        ],
+        0
+      ],
+      "result": "Wi-Fi HaLow #1"
+    },
+    {
+      "id": "x.radioName.dup_index_1",
+      "fn": "radioName",
+      "source": "extra",
+      "args": [
+        [
+          {
+            "tech": "halow",
+            "on": true,
+            "fc": 915,
+            "bw": 1,
+            "whole": false,
+            "pwr": 24,
+            "gain": 2,
+            "duty": 100
+          },
+          {
+            "tech": "wifi24",
+            "on": true,
+            "fc": 2437,
+            "bw": 20,
+            "whole": false,
+            "pwr": 20,
+            "gain": 3,
+            "duty": 100
+          },
+          {
+            "tech": "halow",
+            "on": true,
+            "fc": 920,
+            "bw": 1,
+            "whole": false,
+            "pwr": 24,
+            "gain": 2,
+            "duty": 100
+          }
+        ],
+        1
+      ],
+      "result": "Wi-Fi 2.4 GHz"
+    },
+    {
+      "id": "x.radioName.dup_index_2",
+      "fn": "radioName",
+      "source": "extra",
+      "args": [
+        [
+          {
+            "tech": "halow",
+            "on": true,
+            "fc": 915,
+            "bw": 1,
+            "whole": false,
+            "pwr": 24,
+            "gain": 2,
+            "duty": 100
+          },
+          {
+            "tech": "wifi24",
+            "on": true,
+            "fc": 2437,
+            "bw": 20,
+            "whole": false,
+            "pwr": 20,
+            "gain": 3,
+            "duty": 100
+          },
+          {
+            "tech": "halow",
+            "on": true,
+            "fc": 920,
+            "bw": 1,
+            "whole": false,
+            "pwr": 24,
+            "gain": 2,
+            "duty": 100
+          }
+        ],
+        2
+      ],
+      "result": "Wi-Fi HaLow #3"
+    },
+    {
+      "id": "x.txRange.channel",
+      "fn": "txRange",
+      "source": "extra",
+      "args": [
+        {
+          "tech": "wifi24",
+          "on": true,
+          "fc": 2412,
+          "bw": 20,
+          "whole": false,
+          "pwr": 20,
+          "gain": 3,
+          "duty": 100
+        }
+      ],
+      "result": [2402,2422]
+    },
+    {
+      "id": "x.txRange.whole_band",
+      "fn": "txRange",
+      "source": "extra",
+      "args": [
+        {
+          "tech": "halow",
+          "on": true,
+          "fc": 915,
+          "bw": 1,
+          "whole": true,
+          "pwr": 24,
+          "gain": 2,
+          "duty": 100
+        }
+      ],
+      "result": [902,928]
+    },
+    {
+      "id": "x.txRange.off",
+      "fn": "txRange",
+      "source": "extra",
+      "args": [
+        {
+          "tech": "cbrs",
+          "on": false,
+          "fc": 3625,
+          "bw": 20,
+          "whole": false,
+          "pwr": 23,
+          "gain": 3,
+          "duty": 100
+        }
+      ],
+      "result": null
+    },
+    {
+      "id": "x.txRange.receive_only",
+      "fn": "txRange",
+      "source": "extra",
+      "args": [
+        {
+          "tech": "gnss",
+          "on": false,
+          "fc": 1575.42,
+          "bw": 0,
+          "whole": false,
+          "pwr": null,
+          "gain": null,
+          "duty": null
+        }
+      ],
+      "result": null
+    },
+    {
+      "id": "x.overlap.touching_edge",
+      "fn": "overlap",
+      "source": "extra",
+      "args": [
+        [10,20],
+        [20,30]
+      ],
+      "result": true
+    },
+    {
+      "id": "x.overlap.disjoint",
+      "fn": "overlap",
+      "source": "extra",
+      "args": [
+        [10,20],
+        [20.001,30]
+      ],
+      "result": false
+    },
+    {
+      "id": "x.overlap.contained",
+      "fn": "overlap",
+      "source": "extra",
+      "args": [
+        [12,13],
+        [10,20]
+      ],
+      "result": true
+    },
+    {
+      "id": "x.overlap.spanning",
+      "fn": "overlap",
+      "source": "extra",
+      "args": [
+        [5,50],
+        [10,20]
+      ],
+      "result": true
+    },
+    {
+      "id": "x.combo.harmonic_no_r2",
+      "fn": "combo",
+      "source": "extra",
+      "args": [
+        3,
+        [902,928]
+      ],
+      "result": [2706,2784]
+    },
+    {
+      "id": "x.combo.straddles_zero",
+      "fn": "combo",
+      "source": "extra",
+      "args": [
+        1,
+        [10,30],
+        -1,
+        [20,25]
+      ],
+      "note": "lo < 0 < hi folds to [0, max]",
+      "result": [0,15]
+    },
+    {
+      "id": "x.combo.both_negative",
+      "fn": "combo",
+      "source": "extra",
+      "args": [
+        -2,
+        [100,110],
+        1,
+        [50,60]
+      ],
+      "result": [140,170]
+    },
+    {
+      "id": "x.products.halow_wifi24",
+      "fn": "products",
+      "source": "extra",
+      "args": [
+        [
+          {
+            "tech": "halow",
+            "on": true,
+            "fc": 915,
+            "bw": 1,
+            "whole": false,
+            "pwr": 24,
+            "gain": 2,
+            "duty": 100
+          },
+          {
+            "tech": "wifi24",
+            "on": true,
+            "fc": 2437,
+            "bw": 20,
+            "whole": false,
+            "pwr": 20,
+            "gain": 3,
+            "duty": 100
+          }
+        ],
+        {}
+      ],
+      "result": [
+        {
+          "label": "f(Wi-Fi HaLow) − f(Wi-Fi 2.4 GHz)",
+          "order": 2,
+          "kind": "2nd-order IM",
+          "rng": [1511.5,1532.5],
+          "srcs": [0,1],
+          "restricted": [
+            [1435,1626.5]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "f(Wi-Fi HaLow) + f(Wi-Fi 2.4 GHz)",
+          "order": 2,
+          "kind": "2nd-order IM",
+          "rng": [3341.5,3362.5],
+          "srcs": [0,1],
+          "restricted": [
+            [3345.8,3358]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "2·f(Wi-Fi 2.4 GHz)",
+          "order": 2,
+          "kind": "Harmonic",
+          "rng": [4854,4894],
+          "srcs": [1],
+          "restricted": [
+            [4500,5150]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "2·f(Wi-Fi HaLow) − f(Wi-Fi 2.4 GHz)",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [596,618],
+          "srcs": [0,1],
+          "restricted": [
+            [608,614]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "3·f(Wi-Fi HaLow)",
+          "order": 3,
+          "kind": "Harmonic",
+          "rng": [2743.5,2746.5],
+          "srcs": [0],
+          "restricted": [
+            [2690,2900]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "2·f(Wi-Fi 2.4 GHz) − f(Wi-Fi HaLow)",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [3938.5,3979.5],
+          "srcs": [0,1],
+          "restricted": [
+            [3600,4400]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "2·f(Wi-Fi HaLow) + f(Wi-Fi 2.4 GHz)",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [4256,4278],
+          "srcs": [0,1],
+          "restricted": [
+            [3600,4400]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "3·f(Wi-Fi 2.4 GHz)",
+          "order": 3,
+          "kind": "Harmonic",
+          "rng": [7281,7341],
+          "srcs": [1],
+          "restricted": [
+            [7250,7750]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "4·f(Wi-Fi HaLow)",
+          "order": 4,
+          "kind": "Harmonic",
+          "rng": [3658,3662],
+          "srcs": [0],
+          "restricted": [
+            [3600,4400]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "5·f(Wi-Fi HaLow)",
+          "order": 5,
+          "kind": "Harmonic",
+          "rng": [4572.5,4577.5],
+          "srcs": [0],
+          "restricted": [
+            [4500,5150]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "5·f(Wi-Fi 2.4 GHz)",
+          "order": 5,
+          "kind": "Harmonic",
+          "rng": [12135,12235],
+          "srcs": [1],
+          "restricted": [
+            [10600,12700]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "8·f(Wi-Fi HaLow)",
+          "order": 8,
+          "kind": "Harmonic",
+          "rng": [7316,7324],
+          "srcs": [0],
+          "restricted": [
+            [7250,7750]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "8·f(Wi-Fi 2.4 GHz)",
+          "order": 8,
+          "kind": "Harmonic",
+          "rng": [19416,19576],
+          "srcs": [1],
+          "restricted": [
+            [17700,21400]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "9·f(Wi-Fi HaLow)",
+          "order": 9,
+          "kind": "Harmonic",
+          "rng": [8230.5,8239.5],
+          "srcs": [0],
+          "restricted": [
+            [8025,8500]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "9·f(Wi-Fi 2.4 GHz)",
+          "order": 9,
+          "kind": "Harmonic",
+          "rng": [21843,22023],
+          "srcs": [1],
+          "restricted": [
+            [22010,23120]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "10·f(Wi-Fi HaLow)",
+          "order": 10,
+          "kind": "Harmonic",
+          "rng": [9145,9155],
+          "srcs": [0],
+          "restricted": [
+            [9000,9200]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "2·f(Wi-Fi HaLow)",
+          "order": 2,
+          "kind": "Harmonic",
+          "rng": [1829,1831],
+          "srcs": [0],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "f(Wi-Fi HaLow) + 2·f(Wi-Fi 2.4 GHz)",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [5768.5,5809.5],
+          "srcs": [0,1],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "4·f(Wi-Fi 2.4 GHz)",
+          "order": 4,
+          "kind": "Harmonic",
+          "rng": [9708,9788],
+          "srcs": [1],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "6·f(Wi-Fi HaLow)",
+          "order": 6,
+          "kind": "Harmonic",
+          "rng": [5487,5493],
+          "srcs": [0],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "6·f(Wi-Fi 2.4 GHz)",
+          "order": 6,
+          "kind": "Harmonic",
+          "rng": [14562,14682],
+          "srcs": [1],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "7·f(Wi-Fi HaLow)",
+          "order": 7,
+          "kind": "Harmonic",
+          "rng": [6401.5,6408.5],
+          "srcs": [0],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "7·f(Wi-Fi 2.4 GHz)",
+          "order": 7,
+          "kind": "Harmonic",
+          "rng": [16989,17129],
+          "srcs": [1],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "10·f(Wi-Fi 2.4 GHz)",
+          "order": 10,
+          "kind": "Harmonic",
+          "rng": [24270,24470],
+          "srcs": [1],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        }
+      ]
+    },
+    {
+      "id": "x.products.halow_wifi24_lteB13_gnss",
+      "fn": "products",
+      "source": "extra",
+      "args": [
+        [
+          {
+            "tech": "halow",
+            "on": true,
+            "fc": 915,
+            "bw": 1,
+            "whole": false,
+            "pwr": 24,
+            "gain": 2,
+            "duty": 100
+          },
+          {
+            "tech": "wifi24",
+            "on": true,
+            "fc": 2437,
+            "bw": 20,
+            "whole": false,
+            "pwr": 20,
+            "gain": 3,
+            "duty": 100
+          },
+          {
+            "tech": "lteB13",
+            "on": true,
+            "fc": 782,
+            "bw": 10,
+            "whole": false,
+            "pwr": 23,
+            "gain": 2,
+            "duty": 100
+          },
+          {
+            "tech": "gnss",
+            "on": false,
+            "fc": 1575.42,
+            "bw": 0,
+            "whole": false,
+            "pwr": null,
+            "gain": null,
+            "duty": null
+          }
+        ],
+        {}
+      ],
+      "result": [
+        {
+          "label": "f(Wi-Fi HaLow) − f(LTE B13 (Upper 700 C))",
+          "order": 2,
+          "kind": "2nd-order IM",
+          "rng": [127.5,138.5],
+          "srcs": [0,2],
+          "restricted": [
+            [123,138]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "f(Wi-Fi HaLow) − f(Wi-Fi 2.4 GHz)",
+          "order": 2,
+          "kind": "2nd-order IM",
+          "rng": [1511.5,1532.5],
+          "srcs": [0,1],
+          "restricted": [
+            [1435,1626.5]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "2·f(LTE B13 (Upper 700 C))",
+          "order": 2,
+          "kind": "Harmonic",
+          "rng": [1554,1574],
+          "srcs": [2],
+          "restricted": [
+            [1435,1626.5]
+          ],
+          "rx": [
+            {
+              "lo": 1559,
+              "hi": 1610,
+              "n": "GNSS L1",
+              "i": 3
+            }
+          ],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "f(Wi-Fi 2.4 GHz) − f(LTE B13 (Upper 700 C))",
+          "order": 2,
+          "kind": "2nd-order IM",
+          "rng": [1640,1670],
+          "srcs": [1,2],
+          "restricted": [
+            [1645.5,1646.5],
+            [1660,1710]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "f(Wi-Fi HaLow) + f(LTE B13 (Upper 700 C))",
+          "order": 2,
+          "kind": "2nd-order IM",
+          "rng": [1691.5,1702.5],
+          "srcs": [0,2],
+          "restricted": [
+            [1660,1710]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "f(Wi-Fi HaLow) + f(Wi-Fi 2.4 GHz)",
+          "order": 2,
+          "kind": "2nd-order IM",
+          "rng": [3341.5,3362.5],
+          "srcs": [0,1],
+          "restricted": [
+            [3345.8,3358]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "2·f(Wi-Fi 2.4 GHz)",
+          "order": 2,
+          "kind": "Harmonic",
+          "rng": [4854,4894],
+          "srcs": [1],
+          "restricted": [
+            [4500,5150]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "2·f(Wi-Fi HaLow) − f(Wi-Fi 2.4 GHz)",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [596,618],
+          "srcs": [0,1],
+          "restricted": [
+            [608,614]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "2·f(Wi-Fi HaLow) − f(LTE B13 (Upper 700 C))",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [1042,1054],
+          "srcs": [0,2],
+          "restricted": [
+            [960,1240]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "3·f(LTE B13 (Upper 700 C))",
+          "order": 3,
+          "kind": "Harmonic",
+          "rng": [2331,2361],
+          "srcs": [2],
+          "restricted": [
+            [2310,2390]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "f(Wi-Fi HaLow) + 2·f(LTE B13 (Upper 700 C))",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [2468.5,2489.5],
+          "srcs": [0,2],
+          "restricted": [
+            [2483.5,2500]
+          ],
+          "rx": [
+            {
+              "lo": 2400,
+              "hi": 2483.5,
+              "n": "Wi-Fi 2.4 GHz",
+              "i": 1
+            }
+          ],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "3·f(Wi-Fi HaLow)",
+          "order": 3,
+          "kind": "Harmonic",
+          "rng": [2743.5,2746.5],
+          "srcs": [0],
+          "restricted": [
+            [2690,2900]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "2·f(Wi-Fi 2.4 GHz) − f(Wi-Fi HaLow)",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [3938.5,3979.5],
+          "srcs": [0,1],
+          "restricted": [
+            [3600,4400]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "f(Wi-Fi 2.4 GHz) + 2·f(LTE B13 (Upper 700 C))",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [3981,4021],
+          "srcs": [1,2],
+          "restricted": [
+            [3600,4400]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "2·f(Wi-Fi 2.4 GHz) − f(LTE B13 (Upper 700 C))",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [4067,4117],
+          "srcs": [1,2],
+          "restricted": [
+            [3600,4400]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "2·f(Wi-Fi HaLow) + f(Wi-Fi 2.4 GHz)",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [4256,4278],
+          "srcs": [0,1],
+          "restricted": [
+            [3600,4400]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "3·f(Wi-Fi 2.4 GHz)",
+          "order": 3,
+          "kind": "Harmonic",
+          "rng": [7281,7341],
+          "srcs": [1],
+          "restricted": [
+            [7250,7750]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "4·f(Wi-Fi HaLow)",
+          "order": 4,
+          "kind": "Harmonic",
+          "rng": [3658,3662],
+          "srcs": [0],
+          "restricted": [
+            [3600,4400]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "5·f(LTE B13 (Upper 700 C))",
+          "order": 5,
+          "kind": "Harmonic",
+          "rng": [3885,3935],
+          "srcs": [2],
+          "restricted": [
+            [3600,4400]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "5·f(Wi-Fi HaLow)",
+          "order": 5,
+          "kind": "Harmonic",
+          "rng": [4572.5,4577.5],
+          "srcs": [0],
+          "restricted": [
+            [4500,5150]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "5·f(Wi-Fi 2.4 GHz)",
+          "order": 5,
+          "kind": "Harmonic",
+          "rng": [12135,12235],
+          "srcs": [1],
+          "restricted": [
+            [10600,12700]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "6·f(LTE B13 (Upper 700 C))",
+          "order": 6,
+          "kind": "Harmonic",
+          "rng": [4662,4722],
+          "srcs": [2],
+          "restricted": [
+            [4500,5150]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "7·f(LTE B13 (Upper 700 C))",
+          "order": 7,
+          "kind": "Harmonic",
+          "rng": [5439,5509],
+          "srcs": [2],
+          "restricted": [
+            [5350,5460]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "8·f(Wi-Fi HaLow)",
+          "order": 8,
+          "kind": "Harmonic",
+          "rng": [7316,7324],
+          "srcs": [0],
+          "restricted": [
+            [7250,7750]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "8·f(Wi-Fi 2.4 GHz)",
+          "order": 8,
+          "kind": "Harmonic",
+          "rng": [19416,19576],
+          "srcs": [1],
+          "restricted": [
+            [17700,21400]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "9·f(Wi-Fi HaLow)",
+          "order": 9,
+          "kind": "Harmonic",
+          "rng": [8230.5,8239.5],
+          "srcs": [0],
+          "restricted": [
+            [8025,8500]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "9·f(Wi-Fi 2.4 GHz)",
+          "order": 9,
+          "kind": "Harmonic",
+          "rng": [21843,22023],
+          "srcs": [1],
+          "restricted": [
+            [22010,23120]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "10·f(Wi-Fi HaLow)",
+          "order": 10,
+          "kind": "Harmonic",
+          "rng": [9145,9155],
+          "srcs": [0],
+          "restricted": [
+            [9000,9200]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "2·f(Wi-Fi HaLow)",
+          "order": 2,
+          "kind": "Harmonic",
+          "rng": [1829,1831],
+          "srcs": [0],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "f(Wi-Fi 2.4 GHz) + f(LTE B13 (Upper 700 C))",
+          "order": 2,
+          "kind": "2nd-order IM",
+          "rng": [3204,3234],
+          "srcs": [1,2],
+          "restricted": [],
+          "rx": [],
+          "licensed": true,
+          "sev": 0
+        },
+        {
+          "label": "2·f(LTE B13 (Upper 700 C)) − f(Wi-Fi HaLow)",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [638.5,659.5],
+          "srcs": [0,2],
+          "restricted": [],
+          "rx": [],
+          "licensed": true,
+          "sev": 0
+        },
+        {
+          "label": "2·f(LTE B13 (Upper 700 C)) − f(Wi-Fi 2.4 GHz)",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [853,893],
+          "srcs": [1,2],
+          "restricted": [],
+          "rx": [],
+          "licensed": true,
+          "sev": 0
+        },
+        {
+          "label": "2·f(Wi-Fi HaLow) + f(LTE B13 (Upper 700 C))",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [2606,2618],
+          "srcs": [0,2],
+          "restricted": [],
+          "rx": [],
+          "licensed": true,
+          "sev": 0
+        },
+        {
+          "label": "2·f(Wi-Fi 2.4 GHz) + f(LTE B13 (Upper 700 C))",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [5631,5681],
+          "srcs": [1,2],
+          "restricted": [],
+          "rx": [],
+          "licensed": true,
+          "sev": 0
+        },
+        {
+          "label": "f(Wi-Fi HaLow) + 2·f(Wi-Fi 2.4 GHz)",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [5768.5,5809.5],
+          "srcs": [0,1],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "4·f(LTE B13 (Upper 700 C))",
+          "order": 4,
+          "kind": "Harmonic",
+          "rng": [3108,3148],
+          "srcs": [2],
+          "restricted": [],
+          "rx": [],
+          "licensed": true,
+          "sev": 0
+        },
+        {
+          "label": "4·f(Wi-Fi 2.4 GHz)",
+          "order": 4,
+          "kind": "Harmonic",
+          "rng": [9708,9788],
+          "srcs": [1],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "6·f(Wi-Fi HaLow)",
+          "order": 6,
+          "kind": "Harmonic",
+          "rng": [5487,5493],
+          "srcs": [0],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "6·f(Wi-Fi 2.4 GHz)",
+          "order": 6,
+          "kind": "Harmonic",
+          "rng": [14562,14682],
+          "srcs": [1],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "7·f(Wi-Fi HaLow)",
+          "order": 7,
+          "kind": "Harmonic",
+          "rng": [6401.5,6408.5],
+          "srcs": [0],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "7·f(Wi-Fi 2.4 GHz)",
+          "order": 7,
+          "kind": "Harmonic",
+          "rng": [16989,17129],
+          "srcs": [1],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "8·f(LTE B13 (Upper 700 C))",
+          "order": 8,
+          "kind": "Harmonic",
+          "rng": [6216,6296],
+          "srcs": [2],
+          "restricted": [],
+          "rx": [],
+          "licensed": true,
+          "sev": 0
+        },
+        {
+          "label": "9·f(LTE B13 (Upper 700 C))",
+          "order": 9,
+          "kind": "Harmonic",
+          "rng": [6993,7083],
+          "srcs": [2],
+          "restricted": [],
+          "rx": [],
+          "licensed": true,
+          "sev": 0
+        },
+        {
+          "label": "10·f(LTE B13 (Upper 700 C))",
+          "order": 10,
+          "kind": "Harmonic",
+          "rng": [7770,7870],
+          "srcs": [2],
+          "restricted": [],
+          "rx": [],
+          "licensed": true,
+          "sev": 0
+        },
+        {
+          "label": "10·f(Wi-Fi 2.4 GHz)",
+          "order": 10,
+          "kind": "Harmonic",
+          "rng": [24270,24470],
+          "srcs": [1],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        }
+      ]
+    },
+    {
+      "id": "x.products.wifi24_wifi5_im5",
+      "fn": "products",
+      "source": "extra",
+      "args": [
+        [
+          {
+            "tech": "wifi24",
+            "on": true,
+            "fc": 2437,
+            "bw": 20,
+            "whole": false,
+            "pwr": 20,
+            "gain": 3,
+            "duty": 100
+          },
+          {
+            "tech": "wifi5",
+            "on": true,
+            "fc": 5500,
+            "bw": 20,
+            "whole": false,
+            "pwr": 18,
+            "gain": 4,
+            "duty": 100
+          }
+        ],
+        {
+          "im5": true
+        }
+      ],
+      "result": [
+        {
+          "label": "2·f(Wi-Fi 2.4 GHz)",
+          "order": 2,
+          "kind": "Harmonic",
+          "rng": [4854,4894],
+          "srcs": [0],
+          "restricted": [
+            [4500,5150]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "2·f(Wi-Fi 5 GHz)",
+          "order": 2,
+          "kind": "Harmonic",
+          "rng": [10980,11020],
+          "srcs": [1],
+          "restricted": [
+            [10600,12700]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "2·f(Wi-Fi 2.4 GHz) − f(Wi-Fi 5 GHz)",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [596,656],
+          "srcs": [0,1],
+          "restricted": [
+            [608,614]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "3·f(Wi-Fi 2.4 GHz)",
+          "order": 3,
+          "kind": "Harmonic",
+          "rng": [7281,7341],
+          "srcs": [0],
+          "restricted": [
+            [7250,7750]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "4·f(Wi-Fi 5 GHz)",
+          "order": 4,
+          "kind": "Harmonic",
+          "rng": [21960,22040],
+          "srcs": [1],
+          "restricted": [
+            [22010,23120]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "3·f(Wi-Fi 2.4 GHz) − 2·f(Wi-Fi 5 GHz)",
+          "order": 5,
+          "kind": "5th-order IM",
+          "rng": [3639,3739],
+          "srcs": [0,1],
+          "restricted": [
+            [3600,4400]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "3·f(Wi-Fi 5 GHz) − 2·f(Wi-Fi 2.4 GHz)",
+          "order": 5,
+          "kind": "5th-order IM",
+          "rng": [11576,11676],
+          "srcs": [0,1],
+          "restricted": [
+            [10600,12700]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "5·f(Wi-Fi 2.4 GHz)",
+          "order": 5,
+          "kind": "Harmonic",
+          "rng": [12135,12235],
+          "srcs": [0],
+          "restricted": [
+            [10600,12700]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "8·f(Wi-Fi 2.4 GHz)",
+          "order": 8,
+          "kind": "Harmonic",
+          "rng": [19416,19576],
+          "srcs": [0],
+          "restricted": [
+            [17700,21400]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "9·f(Wi-Fi 2.4 GHz)",
+          "order": 9,
+          "kind": "Harmonic",
+          "rng": [21843,22023],
+          "srcs": [0],
+          "restricted": [
+            [22010,23120]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "f(Wi-Fi 2.4 GHz) − f(Wi-Fi 5 GHz)",
+          "order": 2,
+          "kind": "2nd-order IM",
+          "rng": [3043,3083],
+          "srcs": [0,1],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "f(Wi-Fi 2.4 GHz) + f(Wi-Fi 5 GHz)",
+          "order": 2,
+          "kind": "2nd-order IM",
+          "rng": [7917,7957],
+          "srcs": [0,1],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "2·f(Wi-Fi 5 GHz) − f(Wi-Fi 2.4 GHz)",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [8533,8593],
+          "srcs": [0,1],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "2·f(Wi-Fi 2.4 GHz) + f(Wi-Fi 5 GHz)",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [10344,10404],
+          "srcs": [0,1],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "f(Wi-Fi 2.4 GHz) + 2·f(Wi-Fi 5 GHz)",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [13407,13467],
+          "srcs": [0,1],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "3·f(Wi-Fi 5 GHz)",
+          "order": 3,
+          "kind": "Harmonic",
+          "rng": [16470,16530],
+          "srcs": [1],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "4·f(Wi-Fi 2.4 GHz)",
+          "order": 4,
+          "kind": "Harmonic",
+          "rng": [9708,9788],
+          "srcs": [0],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "5·f(Wi-Fi 5 GHz)",
+          "order": 5,
+          "kind": "Harmonic",
+          "rng": [27450,27550],
+          "srcs": [1],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "6·f(Wi-Fi 2.4 GHz)",
+          "order": 6,
+          "kind": "Harmonic",
+          "rng": [14562,14682],
+          "srcs": [0],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "6·f(Wi-Fi 5 GHz)",
+          "order": 6,
+          "kind": "Harmonic",
+          "rng": [32940,33060],
+          "srcs": [1],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "7·f(Wi-Fi 2.4 GHz)",
+          "order": 7,
+          "kind": "Harmonic",
+          "rng": [16989,17129],
+          "srcs": [0],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "7·f(Wi-Fi 5 GHz)",
+          "order": 7,
+          "kind": "Harmonic",
+          "rng": [38430,38570],
+          "srcs": [1],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "10·f(Wi-Fi 2.4 GHz)",
+          "order": 10,
+          "kind": "Harmonic",
+          "rng": [24270,24470],
+          "srcs": [0],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        }
+      ]
+    },
+    {
+      "id": "x.products.licensed_only_hmax3",
+      "fn": "products",
+      "source": "extra",
+      "args": [
+        [
+          {
+            "tech": "cbrs",
+            "on": true,
+            "fc": 3625,
+            "bw": 20,
+            "whole": false,
+            "pwr": 23,
+            "gain": 3,
+            "duty": 100
+          },
+          {
+            "tech": "lteB66",
+            "on": true,
+            "fc": 1745,
+            "bw": 10,
+            "whole": false,
+            "pwr": 23,
+            "gain": 2,
+            "duty": 100
+          }
+        ],
+        {
+          "hmax": 3
+        }
+      ],
+      "result": [
+        {
+          "label": "f(CBRS (B48)) + f(LTE B66 (AWS-1/3))",
+          "order": 2,
+          "kind": "2nd-order IM",
+          "rng": [5355,5385],
+          "srcs": [0,1],
+          "restricted": [
+            [5350,5460]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "2·f(CBRS (B48))",
+          "order": 2,
+          "kind": "Harmonic",
+          "rng": [7230,7270],
+          "srcs": [0],
+          "restricted": [
+            [7250,7750]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "2·f(LTE B66 (AWS-1/3)) − f(CBRS (B48))",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [115,155],
+          "srcs": [0,1],
+          "restricted": [
+            [108,121.94],
+            [123,138],
+            [149.9,150.05]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "2·f(CBRS (B48)) + f(LTE B66 (AWS-1/3))",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [8970,9020],
+          "srcs": [0,1],
+          "restricted": [
+            [9000,9200]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "3·f(CBRS (B48))",
+          "order": 3,
+          "kind": "Harmonic",
+          "rng": [10845,10905],
+          "srcs": [0],
+          "restricted": [
+            [10600,12700]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "f(CBRS (B48)) − f(LTE B66 (AWS-1/3))",
+          "order": 2,
+          "kind": "2nd-order IM",
+          "rng": [1865,1895],
+          "srcs": [0,1],
+          "restricted": [],
+          "rx": [],
+          "licensed": true,
+          "sev": 0
+        },
+        {
+          "label": "2·f(LTE B66 (AWS-1/3))",
+          "order": 2,
+          "kind": "Harmonic",
+          "rng": [3480,3500],
+          "srcs": [1],
+          "restricted": [],
+          "rx": [],
+          "licensed": true,
+          "sev": 0
+        },
+        {
+          "label": "3·f(LTE B66 (AWS-1/3))",
+          "order": 3,
+          "kind": "Harmonic",
+          "rng": [5220,5250],
+          "srcs": [1],
+          "restricted": [],
+          "rx": [],
+          "licensed": true,
+          "sev": 0
+        },
+        {
+          "label": "2·f(CBRS (B48)) − f(LTE B66 (AWS-1/3))",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [5480,5530],
+          "srcs": [0,1],
+          "restricted": [],
+          "rx": [],
+          "licensed": true,
+          "sev": 0
+        },
+        {
+          "label": "f(CBRS (B48)) + 2·f(LTE B66 (AWS-1/3))",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [7095,7135],
+          "srcs": [0,1],
+          "restricted": [],
+          "rx": [],
+          "licensed": true,
+          "sev": 0
+        }
+      ]
+    },
+    {
+      "id": "x.products.whole_band_and_off",
+      "fn": "products",
+      "source": "extra",
+      "args": [
+        [
+          {
+            "tech": "halow",
+            "on": true,
+            "fc": 915,
+            "bw": 1,
+            "whole": true,
+            "pwr": 24,
+            "gain": 2,
+            "duty": 100
+          },
+          {
+            "tech": "wifi24",
+            "on": false,
+            "fc": 2437,
+            "bw": 20,
+            "whole": false,
+            "pwr": 20,
+            "gain": 3,
+            "duty": 100
+          },
+          {
+            "tech": "lteB71",
+            "on": true,
+            "fc": 680.5,
+            "bw": 10,
+            "whole": false,
+            "pwr": 23,
+            "gain": 2,
+            "duty": 100
+          }
+        ],
+        {
+          "hmax": 4
+        }
+      ],
+      "result": [
+        {
+          "label": "f(Wi-Fi HaLow) − f(LTE B71 (600 MHz))",
+          "order": 2,
+          "kind": "2nd-order IM",
+          "rng": [216.5,252.5],
+          "srcs": [0,2],
+          "restricted": [
+            [240,285]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "2·f(LTE B71 (600 MHz))",
+          "order": 2,
+          "kind": "Harmonic",
+          "rng": [1351,1371],
+          "srcs": [2],
+          "restricted": [
+            [1300,1427]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "f(Wi-Fi HaLow) + f(LTE B71 (600 MHz))",
+          "order": 2,
+          "kind": "2nd-order IM",
+          "rng": [1577.5,1613.5],
+          "srcs": [0,2],
+          "restricted": [
+            [1435,1626.5]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "2·f(Wi-Fi HaLow) − f(LTE B71 (600 MHz))",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [1118.5,1180.5],
+          "srcs": [0,2],
+          "restricted": [
+            [960,1240]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "f(Wi-Fi HaLow) + 2·f(LTE B71 (600 MHz))",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [2253,2299],
+          "srcs": [0,2],
+          "restricted": [
+            [2200,2300]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "2·f(Wi-Fi HaLow) + f(LTE B71 (600 MHz))",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [2479.5,2541.5],
+          "srcs": [0,2],
+          "restricted": [
+            [2483.5,2500]
+          ],
+          "rx": [
+            {
+              "lo": 2400,
+              "hi": 2483.5,
+              "n": "Wi-Fi 2.4 GHz",
+              "i": 1
+            }
+          ],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "3·f(Wi-Fi HaLow)",
+          "order": 3,
+          "kind": "Harmonic",
+          "rng": [2706,2784],
+          "srcs": [0],
+          "restricted": [
+            [2690,2900]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "4·f(LTE B71 (600 MHz))",
+          "order": 4,
+          "kind": "Harmonic",
+          "rng": [2702,2742],
+          "srcs": [2],
+          "restricted": [
+            [2690,2900]
+          ],
+          "rx": [],
+          "licensed": true,
+          "sev": 2
+        },
+        {
+          "label": "4·f(Wi-Fi HaLow)",
+          "order": 4,
+          "kind": "Harmonic",
+          "rng": [3608,3712],
+          "srcs": [0],
+          "restricted": [
+            [3600,4400]
+          ],
+          "rx": [],
+          "licensed": false,
+          "sev": 2
+        },
+        {
+          "label": "2·f(Wi-Fi HaLow)",
+          "order": 2,
+          "kind": "Harmonic",
+          "rng": [1804,1856],
+          "srcs": [0],
+          "restricted": [],
+          "rx": [],
+          "licensed": false,
+          "sev": 0
+        },
+        {
+          "label": "2·f(LTE B71 (600 MHz)) − f(Wi-Fi HaLow)",
+          "order": 3,
+          "kind": "3rd-order IM",
+          "rng": [423,469],
+          "srcs": [0,2],
+          "restricted": [],
+          "rx": [],
+          "licensed": true,
+          "sev": 0
+        },
+        {
+          "label": "3·f(LTE B71 (600 MHz))",
+          "order": 3,
+          "kind": "Harmonic",
+          "rng": [2026.5,2056.5],
+          "srcs": [2],
+          "restricted": [],
+          "rx": [],
+          "licensed": true,
+          "sev": 0
+        }
+      ]
+    },
+    {
+      "id": "x.mpeLimit.10MHz",
+      "fn": "mpeLimit",
+      "source": "extra",
+      "args": [10],
+      "result": 1.8
+    },
+    {
+      "id": "x.mpeLimit.boundary_30MHz",
+      "fn": "mpeLimit",
+      "source": "extra",
+      "args": [30],
+      "result": 0.2
+    },
+    {
+      "id": "x.mpeLimit.100MHz",
+      "fn": "mpeLimit",
+      "source": "extra",
+      "args": [100],
+      "result": 0.2
+    },
+    {
+      "id": "x.mpeLimit.boundary_300MHz",
+      "fn": "mpeLimit",
+      "source": "extra",
+      "args": [300],
+      "result": 0.2
+    },
+    {
+      "id": "x.mpeLimit.boundary_1500MHz",
+      "fn": "mpeLimit",
+      "source": "extra",
+      "args": [1500],
+      "result": 1
+    },
+    {
+      "id": "x.mpeLimit.2450MHz",
+      "fn": "mpeLimit",
+      "source": "extra",
+      "args": [2450],
+      "result": 1
+    },
+    {
+      "id": "x.powerDensity.1W_20cm",
+      "fn": "powerDensity",
+      "source": "extra",
+      "args": [1000,20],
+      "result": 0.19894367886486916
+    },
+    {
+      "id": "x.powerDensity.100mW_1cm",
+      "fn": "powerDensity",
+      "source": "extra",
+      "args": [100,1],
+      "result": 7.957747154594767
+    },
+    {
+      "id": "x.sarExemptionMw.below_range_f",
+      "fn": "sarExemptionMw",
+      "source": "extra",
+      "args": [299,10],
+      "result": null
+    },
+    {
+      "id": "x.sarExemptionMw.above_range_d",
+      "fn": "sarExemptionMw",
+      "source": "extra",
+      "args": [2450,40.1],
+      "result": null
+    },
+    {
+      "id": "x.sarExemptionMw.boundary_split_1500",
+      "fn": "sarExemptionMw",
+      "source": "extra",
+      "args": [1500,10],
+      "result": 881.4287424820756
+    },
+    {
+      "id": "x.sarExemptionMw.900MHz_5cm",
+      "fn": "sarExemptionMw",
+      "source": "extra",
+      "args": [900,5],
+      "result": 241.63154172230375
+    },
+    {
+      "id": "x.sarExemptionMw.boundary_20cm",
+      "fn": "sarExemptionMw",
+      "source": "extra",
+      "args": [915,20],
+      "result": 1866.6000000000001
+    },
+    {
+      "id": "x.sarExemptionMw.just_over_20cm",
+      "fn": "sarExemptionMw",
+      "source": "extra",
+      "args": [915,20.5],
+      "result": 1866.6000000000001
+    },
+    {
+      "id": "x.sarExemptionMw.boundary_0p5cm_6GHz",
+      "fn": "sarExemptionMw",
+      "source": "extra",
+      "args": [6000,0.5],
+      "result": 1.3389645294296877
+    },
+    {
+      "id": "x.exposure.mobile_20cm",
+      "fn": "exposure",
+      "source": "extra",
+      "args": [
+        [
+          {
+            "tech": "halow",
+            "on": true,
+            "fc": 915,
+            "bw": 1,
+            "whole": false,
+            "pwr": 24,
+            "gain": 2,
+            "duty": 100
+          },
+          {
+            "tech": "wifi24",
+            "on": true,
+            "fc": 2437,
+            "bw": 20,
+            "whole": false,
+            "pwr": 20,
+            "gain": 3,
+            "duty": 100
+          },
+          {
+            "tech": "lteB13",
+            "on": true,
+            "fc": 782,
+            "bw": 10,
+            "whole": false,
+            "pwr": 23,
+            "gain": 2,
+            "duty": 100
+          }
+        ],
+        20,
+        "mobile"
+      ],
+      "result": {
+        "rows": [
+          {
+            "i": 0,
+            "name": "Wi-Fi HaLow",
+            "f": 914.5,
+            "condMw": 251.18864315095797,
+            "eirpMw": 398.1071705534973,
+            "erpMw": 242.66100950824168,
+            "s": 0.07920090509239668,
+            "limit": 0.6096666666666667,
+            "ratio": 0.12990853760371243,
+            "basis": "MPE"
+          },
+          {
+            "i": 1,
+            "name": "Wi-Fi 2.4 GHz",
+            "f": 2427,
+            "condMw": 100,
+            "eirpMw": 199.52623149688787,
+            "erpMw": 121.6186000646368,
+            "s": 0.0396944825240344,
+            "limit": 1,
+            "ratio": 0.0396944825240344,
+            "basis": "MPE"
+          },
+          {
+            "i": 2,
+            "name": "LTE B13 (Upper 700 C)",
+            "f": 777,
+            "condMw": 199.52623149688787,
+            "eirpMw": 316.2277660168379,
+            "erpMw": 192.75249131909368,
+            "s": 0.06291151513060879,
+            "limit": 0.518,
+            "ratio": 0.12145080141044168,
+            "basis": "MPE"
+          }
+        ],
+        "sum": 0.2910538215381885
+      }
+    },
+    {
+      "id": "x.exposure.portable_5cm",
+      "fn": "exposure",
+      "source": "extra",
+      "args": [
+        [
+          {
+            "tech": "halow",
+            "on": true,
+            "fc": 915,
+            "bw": 1,
+            "whole": false,
+            "pwr": 24,
+            "gain": 2,
+            "duty": 100
+          },
+          {
+            "tech": "wifi24",
+            "on": true,
+            "fc": 2437,
+            "bw": 20,
+            "whole": false,
+            "pwr": 20,
+            "gain": 3,
+            "duty": 100
+          },
+          {
+            "tech": "lteB13",
+            "on": true,
+            "fc": 782,
+            "bw": 10,
+            "whole": false,
+            "pwr": 23,
+            "gain": 2,
+            "duty": 100
+          }
+        ],
+        5,
+        "portable"
+      ],
+      "result": {
+        "rows": [
+          {
+            "i": 0,
+            "name": "Wi-Fi HaLow",
+            "f": 914.5,
+            "condMw": 251.18864315095797,
+            "eirpMw": 398.1071705534973,
+            "erpMw": 242.66100950824168,
+            "pAvail": 251.18864315095797,
+            "pth": 242.00609096753772,
+            "limit": 242.00609096753772,
+            "ratio": 1.0379434754997634,
+            "basis": "SAR exemption"
+          },
+          {
+            "i": 1,
+            "name": "Wi-Fi 2.4 GHz",
+            "f": 2427,
+            "condMw": 100,
+            "eirpMw": 199.52623149688787,
+            "erpMw": 121.6186000646368,
+            "pAvail": 121.6186000646368,
+            "pth": 219.65656508522235,
+            "limit": 219.65656508522235,
+            "ratio": 0.5536761444733109,
+            "basis": "SAR exemption"
+          },
+          {
+            "i": 2,
+            "name": "LTE B13 (Upper 700 C)",
+            "f": 777,
+            "condMw": 199.52623149688787,
+            "eirpMw": 316.2277660168379,
+            "erpMw": 192.75249131909368,
+            "pAvail": 199.52623149688787,
+            "pth": 238.21476886574578,
+            "limit": 238.21476886574578,
+            "ratio": 0.8375896777808005,
+            "basis": "SAR exemption"
+          }
+        ],
+        "sum": 2.429209297753875
+      }
+    },
+    {
+      "id": "x.exposure.portable_measured_sar",
+      "fn": "exposure",
+      "source": "extra",
+      "args": [
+        [
+          {
+            "tech": "halow",
+            "on": true,
+            "fc": 915,
+            "bw": 1,
+            "whole": false,
+            "pwr": 24,
+            "gain": 2,
+            "duty": 100
+          },
+          {
+            "tech": "wifi24",
+            "on": true,
+            "fc": 2437,
+            "bw": 20,
+            "whole": false,
+            "pwr": 20,
+            "gain": 3,
+            "duty": 100,
+            "sar": 0.8
+          },
+          {
+            "tech": "cbrs",
+            "on": false,
+            "fc": 3625,
+            "bw": 20,
+            "whole": false,
+            "pwr": 23,
+            "gain": 3,
+            "duty": 100
+          }
+        ],
+        5,
+        "portable"
+      ],
+      "result": {
+        "rows": [
+          {
+            "i": 0,
+            "name": "Wi-Fi HaLow",
+            "f": 914.5,
+            "condMw": 251.18864315095797,
+            "eirpMw": 398.1071705534973,
+            "erpMw": 242.66100950824168,
+            "pAvail": 251.18864315095797,
+            "pth": 242.00609096753772,
+            "limit": 242.00609096753772,
+            "ratio": 1.0379434754997634,
+            "basis": "SAR exemption"
+          },
+          {
+            "i": 1,
+            "name": "Wi-Fi 2.4 GHz",
+            "f": 2427,
+            "condMw": 100,
+            "eirpMw": 199.52623149688787,
+            "erpMw": 121.6186000646368,
+            "sar": 0.8,
+            "limit": 1.6,
+            "ratio": 0.5,
+            "basis": "Measured SAR"
+          }
+        ],
+        "sum": 1.5379434754997634
+      }
+    },
+    {
+      "id": "x.exposure.portable_out_of_range_45cm",
+      "fn": "exposure",
+      "source": "extra",
+      "args": [
+        [
+          {
+            "tech": "wifi5",
+            "on": true,
+            "fc": 5500,
+            "bw": 20,
+            "whole": false,
+            "pwr": 18,
+            "gain": 4,
+            "duty": 100
+          },
+          {
+            "tech": "halow",
+            "on": true,
+            "fc": 915,
+            "bw": 1,
+            "whole": false,
+            "pwr": 24,
+            "gain": 2,
+            "duty": 150
+          }
+        ],
+        45,
+        "portable"
+      ],
+      "note": "P_th null beyond 40 cm: ratio Infinity; duty clamped to 100",
+      "result": {
+        "rows": [
+          {
+            "i": 0,
+            "name": "Wi-Fi 5 GHz",
+            "f": 5490,
+            "condMw": 63.09573444801933,
+            "eirpMw": 158.48931924611142,
+            "erpMw": 96.60508789898137,
+            "pAvail": 96.60508789898137,
+            "pth": null,
+            "limit": null,
+            "ratio": "Infinity",
+            "basis": "SAR exemption"
+          },
+          {
+            "i": 1,
+            "name": "Wi-Fi HaLow",
+            "f": 914.5,
+            "condMw": 251.18864315095797,
+            "eirpMw": 398.1071705534973,
+            "erpMw": 242.66100950824168,
+            "pAvail": 251.18864315095797,
+            "pth": null,
+            "limit": null,
+            "ratio": "Infinity",
+            "basis": "SAR exemption"
+          }
+        ],
+        "sum": "Infinity"
+      }
+    },
+    {
+      "id": "x.mpeMinDistance.default_three",
+      "fn": "mpeMinDistance",
+      "source": "extra",
+      "args": [
+        [
+          {
+            "tech": "halow",
+            "on": true,
+            "fc": 915,
+            "bw": 1,
+            "whole": false,
+            "pwr": 24,
+            "gain": 2,
+            "duty": 100
+          },
+          {
+            "tech": "wifi24",
+            "on": true,
+            "fc": 2437,
+            "bw": 20,
+            "whole": false,
+            "pwr": 20,
+            "gain": 3,
+            "duty": 100
+          },
+          {
+            "tech": "lteB13",
+            "on": true,
+            "fc": 782,
+            "bw": 10,
+            "whole": false,
+            "pwr": 23,
+            "gain": 2,
+            "duty": 100
+          }
+        ]
+      ],
+      "result": 10.789880843423406
+    },
+    {
+      "id": "x.mpeMinDistance.single_halow",
+      "fn": "mpeMinDistance",
+      "source": "extra",
+      "args": [
+        [
+          {
+            "tech": "halow",
+            "on": true,
+            "fc": 915,
+            "bw": 1,
+            "whole": false,
+            "pwr": 24,
+            "gain": 2,
+            "duty": 100
+          }
+        ]
+      ],
+      "result": 7.208565394132522
+    },
+    {
+      "id": "x.mpeMinDistance.with_off_radio",
+      "fn": "mpeMinDistance",
+      "source": "extra",
+      "args": [
+        [
+          {
+            "tech": "wifi24",
+            "on": true,
+            "fc": 2437,
+            "bw": 20,
+            "whole": false,
+            "pwr": 20,
+            "gain": 3,
+            "duty": 100
+          },
+          {
+            "tech": "cbrs",
+            "on": false,
+            "fc": 3625,
+            "bw": 20,
+            "whole": false,
+            "pwr": 23,
+            "gain": 3,
+            "duty": 100
+          }
+        ]
+      ],
+      "result": 3.984694845231409
     }
   ]
 }
