@@ -1,0 +1,3754 @@
+{
+  "meta": {
+    "generator": "scripts/capture_halow.js",
+    "page": "legacy/halow_bandwidth_tool.html",
+    "sources": {
+      "legacy/rf-lab/tools/bandwidth/index.html": "65d7df37cd288baa6d6fea2863b23cd915812e9e93bcaafea81e30126d9ce209",
+      "legacy/halow_bandwidth_tool.html": "0b6c85a1f311e8645c2f2050152d3114e5c46b1c5f8ac06e17a838b6c3d8be70",
+      "legacy/rf-lab/shared/rfmath.js": "267a50e241ca764fb5e1d2623aeb55a431e0f915991594603f514fd1ccbb8f59",
+      "legacy/rf-lab/shared/limits.js": "d9d4ddb8049aa6b04bc4ddd70184fe9c3b1dba1d1b4c0dbc1e58860719ba4724"
+    },
+    "captured": "Playwright, headless Chromium, file://",
+    "status": "superseded (cross-check only)"
+  },
+  "cases": [
+    {
+      "id": "sim-halow1-default",
+      "mode": "sim",
+      "knownAnswer": "Simulated HaLow 1 MHz passes with 850–920 kHz",
+      "settings": {
+        "preset": 0,
+        "fc": 915,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 6,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "885 kHz",
+        "mBwN": "M1 914.5563 · M2 915.4417 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+385 kHz vs 500 kHz",
+        "mObw": "969 kHz",
+        "mPsd": {
+          "text": "6.40 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 1.60 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 21.63230257203218,
+        "pi": 877,
+        "th": 15.63230257203218,
+        "fL": 914.5562790439591,
+        "fR": 915.441677240098,
+        "bw": 885398.1961389082,
+        "oL": 914.5159465071936,
+        "oR": 915.4847080720693,
+        "obw": 968761.5648757628,
+        "powDbm": 30.000275242975306,
+        "psd": 6.403515119228805,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 839.9999999999844,
+        "be": null
+      }
+    },
+    {
+      "id": "sim-fsk200-fails",
+      "mode": "sim",
+      "knownAnswer": "Simulated narrowband FSK fails 500 kHz",
+      "settings": {
+        "preset": 5,
+        "fc": 915,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 6,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "228 kHz",
+        "mBwN": "M1 914.8862 · M2 915.1141 MHz",
+        "mRes": {
+          "text": "Fail",
+          "cls": "fail"
+        },
+        "mResN": "-272 kHz vs 500 kHz",
+        "mObw": "334 kHz",
+        "mPsd": {
+          "text": "12.36 dBm",
+          "cls": "fail"
+        },
+        "mPsdN": "Margin -4.36 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 27.593396845671656,
+        "pi": 1201,
+        "th": 21.593396845671656,
+        "fL": 914.886221791464,
+        "fR": 915.1141111485517,
+        "bw": 227889.35708774716,
+        "oL": 914.832827239037,
+        "oR": 915.1672084997878,
+        "obw": 334381.26075077435,
+        "powDbm": 30.00391785016735,
+        "psd": 12.36460939286828,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 416.6666666666667,
+        "be": null
+      }
+    },
+    {
+      "id": "sim-halow1-chpower",
+      "mode": "sim",
+      "knownAnswer": "Channel power recovers the set 30 dBm",
+      "settings": {
+        "preset": 0,
+        "fc": 915,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 6,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "885 kHz",
+        "mBwN": "M1 914.5563 · M2 915.4417 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+385 kHz vs 500 kHz",
+        "mObw": "969 kHz",
+        "mPsd": {
+          "text": "6.40 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 1.60 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 21.63230257203218,
+        "pi": 877,
+        "th": 15.63230257203218,
+        "fL": 914.5562790439591,
+        "fR": 915.441677240098,
+        "bw": 885398.1961389082,
+        "oL": 914.5159465071936,
+        "oR": 915.4847080720693,
+        "obw": 968761.5648757628,
+        "powDbm": 30.000275242975306,
+        "psd": 6.403515119228805,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 839.9999999999844,
+        "be": null
+      }
+    },
+    {
+      "id": "sim-halow2",
+      "mode": "sim",
+      "settings": {
+        "preset": 1,
+        "fc": 915,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 6,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "1.833 MHz",
+        "mBwN": "M1 914.0768 · M2 915.9101 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+1333 kHz vs 500 kHz",
+        "mObw": "1.994 MHz",
+        "mPsd": {
+          "text": "3.47 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 4.53 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 18.695156285292487,
+        "pi": 1170,
+        "th": 12.695156285292487,
+        "fL": 914.0767766953406,
+        "fR": 915.910138984326,
+        "bw": 1833362.2889853131,
+        "oL": 914.0091210292424,
+        "oR": 916.0035024319035,
+        "obw": 1994381.4026611336,
+        "powDbm": 30.003345461600187,
+        "psd": 3.4663688324891115,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 1750.0000000000189,
+        "be": null
+      }
+    },
+    {
+      "id": "sim-halow4",
+      "mode": "sim",
+      "settings": {
+        "preset": 2,
+        "fc": 915,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 6,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "3.575 MHz",
+        "mBwN": "M1 913.2154 · M2 916.7905 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+3075 kHz vs 500 kHz",
+        "mObw": "3.935 MHz",
+        "mPsd": {
+          "text": "0.71 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 7.29 dB to 8 dBm",
+        "mPow": "30.01 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 15.939099172668673,
+        "pi": 937,
+        "th": 9.939099172668673,
+        "fL": 913.2153584484171,
+        "fR": 916.7904998148362,
+        "bw": 3575141.366419075,
+        "oL": 913.0294802748296,
+        "oR": 916.9641436900887,
+        "obw": 3934663.4152591377,
+        "powDbm": 30.005505387196795,
+        "psd": 0.7103117198652971,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 3499.9999999999905,
+        "be": null
+      }
+    },
+    {
+      "id": "sim-halow8",
+      "mode": "sim",
+      "settings": {
+        "preset": 3,
+        "fc": 915,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 6,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "7.302 MHz",
+        "mBwN": "M1 911.3264 · M2 918.6285 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+6802 kHz vs 500 kHz",
+        "mObw": "7.960 MHz",
+        "mPsd": {
+          "text": "-2.65 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 10.65 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 12.577367639539206,
+        "pi": 891,
+        "th": 6.577367639539206,
+        "fL": 911.3263666311677,
+        "fR": 918.6284617458099,
+        "bw": 7302095.114642156,
+        "oL": 911.0331722569924,
+        "oR": 918.9926858801672,
+        "obw": 7959513.623174758,
+        "powDbm": 29.998998462807883,
+        "psd": -2.6514198132641695,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 6999.999999999981,
+        "be": null
+      }
+    },
+    {
+      "id": "sim-halow16-crosses-both-edges",
+      "mode": "sim",
+      "note": "span 898.2–931.8 MHz: band edge evaluated at 902 and 928",
+      "settings": {
+        "preset": 4,
+        "fc": 915,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 6,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "14.421 MHz",
+        "mBwN": "M1 907.8328 · M2 922.2542 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+13921 kHz vs 500 kHz",
+        "mObw": "15.768 MHz",
+        "mPsd": {
+          "text": "-5.59 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 13.59 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mBeN": "902: 44.0 dBc · 928: 43.8 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 9.637541057268805,
+        "pi": 1013,
+        "th": 3.6375410572688054,
+        "fL": 907.8327879658196,
+        "fR": 922.2541668026503,
+        "bw": 14421378.836830627,
+        "oL": 907.0799617250308,
+        "oR": 922.8478747386519,
+        "obw": 15767913.01362107,
+        "powDbm": 30.00383517088433,
+        "psd": -5.59124639553457,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 14000.00000000001,
+        "be": {
+          "lo": 44.039765154086915,
+          "hi": 43.841782777858135
+        }
+      }
+    },
+    {
+      "id": "sim-lora500-marginal",
+      "mode": "sim",
+      "settings": {
+        "preset": 6,
+        "fc": 915,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 6,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "561 kHz",
+        "mBwN": "M1 914.7200 · M2 915.2807 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+61 kHz vs 500 kHz",
+        "mObw": "806 kHz",
+        "mPsd": {
+          "text": "8.07 dBm",
+          "cls": "fail"
+        },
+        "mPsdN": "Margin -0.07 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 23.301875913005787,
+        "pi": 1232,
+        "th": 17.301875913005787,
+        "fL": 914.7200175444463,
+        "fR": 915.2807124045164,
+        "bw": 560694.8600701571,
+        "oL": 914.5971178260188,
+        "oR": 915.4028368334201,
+        "obw": 805719.0074013078,
+        "powDbm": 29.996982641789415,
+        "psd": 8.073088460202412,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 460.0000000000174,
+        "be": null
+      }
+    },
+    {
+      "id": "sim-fsk200-rbw300k",
+      "mode": "sim",
+      "note": "RBW inflation exercise",
+      "settings": {
+        "preset": 5,
+        "fc": 915,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 300000,
+        "nf": -70,
+        "ndb": 6,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "389 kHz",
+        "mBwN": "M1 914.8053 · M2 915.1939 MHz",
+        "mRes": {
+          "text": "Fail",
+          "cls": "fail"
+        },
+        "mResN": "-111 kHz vs 500 kHz",
+        "mObw": "478 kHz",
+        "mPsd": {
+          "text": "10.07 dBm",
+          "cls": "fail"
+        },
+        "mPsdN": "Margin -2.07 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 30.070329128188682,
+        "pi": 1201,
+        "th": 24.070329128188682,
+        "fL": 914.8053389176455,
+        "fR": 915.1938861072085,
+        "bw": 388547.18956304167,
+        "oL": 914.7607437499815,
+        "oR": 915.2392367952564,
+        "obw": 478493.0452748313,
+        "powDbm": 30.003262497062188,
+        "psd": 10.070329128188682,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 300000,
+        "dfHz": 416.6666666666667,
+        "be": null
+      }
+    },
+    {
+      "id": "sim-halow1-rbw3k",
+      "mode": "sim",
+      "settings": {
+        "preset": 0,
+        "fc": 915,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 3000,
+        "nf": -70,
+        "ndb": 6,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "876 kHz",
+        "mBwN": "M1 914.5616 · M2 915.4376 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+376 kHz vs 500 kHz",
+        "mObw": "945 kHz",
+        "mPsd": {
+          "text": "6.57 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 1.43 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 6.5709167268166855,
+        "pi": 855,
+        "th": 0.5709167268166855,
+        "fL": 914.561634060812,
+        "fR": 915.4375693927681,
+        "bw": 875935.3319560433,
+        "oL": 914.5283612960161,
+        "oR": 915.4728906432589,
+        "obw": 944529.347242792,
+        "powDbm": 30.000155332868793,
+        "psd": 6.5709167268166855,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 3000,
+        "dfHz": 839.9999999999844,
+        "be": null
+      }
+    },
+    {
+      "id": "sim-halow1-ripple10-psd-fail",
+      "mode": "sim",
+      "note": "ripple pushes PSD over 8 dBm/3 kHz",
+      "settings": {
+        "preset": 0,
+        "fc": 915,
+        "pwr": 30,
+        "rip": 10,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 6,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "791 kHz",
+        "mBwN": "M1 914.6076 · M2 915.3982 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+291 kHz vs 500 kHz",
+        "mObw": "959 kHz",
+        "mPsd": {
+          "text": "7.79 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 0.21 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 23.019469240684096,
+        "pi": 877,
+        "th": 17.019469240684096,
+        "fL": 914.6076478542928,
+        "fR": 915.3982056741525,
+        "bw": 790557.8198596004,
+        "oL": 914.521662960089,
+        "oR": 915.4801783533474,
+        "obw": 958515.3932583807,
+        "powDbm": 30.00032658598713,
+        "psd": 7.79068178788072,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 839.9999999999844,
+        "be": null
+      }
+    },
+    {
+      "id": "sim-halow1-24dbm",
+      "mode": "sim",
+      "settings": {
+        "preset": 0,
+        "fc": 915,
+        "pwr": 24,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 6,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "885 kHz",
+        "mBwN": "M1 914.5563 · M2 915.4417 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+385 kHz vs 500 kHz",
+        "mObw": "969 kHz",
+        "mPsd": {
+          "text": "0.40 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 7.60 dB to 8 dBm",
+        "mPow": "24.00 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 15.632302576966664,
+        "pi": 877,
+        "th": 9.632302576966664,
+        "fL": 914.5562790436004,
+        "fR": 915.4416772403055,
+        "bw": 885398.1967050686,
+        "oL": 914.5159464958291,
+        "oR": 915.484708083973,
+        "obw": 968761.5881439343,
+        "powDbm": 24.00027527090106,
+        "psd": 0.40351512416328816,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 839.9999999999844,
+        "be": null
+      }
+    },
+    {
+      "id": "sim-halow1-ndb20",
+      "mode": "sim",
+      "settings": {
+        "preset": 0,
+        "fc": 915,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 20,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "20 dB bandwidth",
+        "mBw": "1.128 MHz",
+        "mBwN": "M1 914.4376 · M2 915.5652 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+628 kHz vs 500 kHz",
+        "mObw": "969 kHz",
+        "mPsd": {
+          "text": "6.40 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 1.60 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 21.63230257203218,
+        "pi": 877,
+        "th": 1.6323025720321809,
+        "fL": 914.4375861552694,
+        "fR": 915.5652321803915,
+        "bw": 1127646.0251220898,
+        "oL": 914.5159465071936,
+        "oR": 915.4847080720693,
+        "obw": 968761.5648757628,
+        "powDbm": 30.000275242975306,
+        "psd": 6.403515119228805,
+        "edgeClipped": false,
+        "ndb": 20,
+        "rbw": 100000,
+        "dfHz": 839.9999999999844,
+        "be": null
+      }
+    },
+    {
+      "id": "sim-halow1-fc902p5-lower-edge",
+      "mode": "sim",
+      "note": "crosses 902 MHz only",
+      "settings": {
+        "preset": 0,
+        "fc": 902.5,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 6,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "885 kHz",
+        "mBwN": "M1 902.0563 · M2 902.9417 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+385 kHz vs 500 kHz",
+        "mObw": "969 kHz",
+        "mPsd": {
+          "text": "6.40 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 1.60 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": {
+          "text": "Fail",
+          "cls": "fail"
+        },
+        "mBeN": "902: 12.1 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 21.63230257203218,
+        "pi": 877,
+        "th": 15.63230257203218,
+        "fL": 902.0562790439591,
+        "fR": 902.941677240098,
+        "bw": 885398.1961389082,
+        "oL": 902.0159465071936,
+        "oR": 902.9847080720693,
+        "obw": 968761.5648757628,
+        "powDbm": 30.000275242975306,
+        "psd": 6.403515119228805,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 839.9999999999844,
+        "be": {
+          "lo": 12.109691740356707,
+          "hi": null
+        }
+      }
+    },
+    {
+      "id": "sim-halow4-fc926-upper-edge",
+      "mode": "sim",
+      "note": "crosses 928 MHz only",
+      "settings": {
+        "preset": 2,
+        "fc": 926,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 6,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "3.575 MHz",
+        "mBwN": "M1 924.2154 · M2 927.7905 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+3075 kHz vs 500 kHz",
+        "mObw": "3.935 MHz",
+        "mPsd": {
+          "text": "0.71 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 7.29 dB to 8 dBm",
+        "mPow": "30.01 dBm",
+        "mBe": {
+          "text": "Fail",
+          "cls": "fail"
+        },
+        "mBeN": "928: 12.1 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 15.939099172668673,
+        "pi": 937,
+        "th": 9.939099172668673,
+        "fL": 924.2153584484171,
+        "fR": 927.7904998148362,
+        "bw": 3575141.366419075,
+        "oL": 924.0294802748296,
+        "oR": 927.9641436900887,
+        "obw": 3934663.4152591377,
+        "powDbm": 30.005505387196795,
+        "psd": 0.7103117198652971,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 3499.9999999999905,
+        "be": {
+          "lo": null,
+          "hi": 12.083830998775609
+        }
+      }
+    },
+    {
+      "id": "sim-halow16-avg-method-30dbc",
+      "mode": "sim",
+      "settings": {
+        "preset": 4,
+        "fc": 915,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 6,
+        "beLim": 30,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "14.421 MHz",
+        "mBwN": "M1 907.8328 · M2 922.2542 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+13921 kHz vs 500 kHz",
+        "mObw": "15.768 MHz",
+        "mPsd": {
+          "text": "-5.59 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 13.59 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mBeN": "902: 44.0 dBc · 928: 43.8 dBc (need ≥ 30)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 9.637541057268805,
+        "pi": 1013,
+        "th": 3.6375410572688054,
+        "fL": 907.8327879658196,
+        "fR": 922.2541668026503,
+        "bw": 14421378.836830627,
+        "oL": 907.0799617250308,
+        "oR": 922.8478747386519,
+        "obw": 15767913.01362107,
+        "powDbm": 30.00383517088433,
+        "psd": -5.59124639553457,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 14000.00000000001,
+        "be": {
+          "lo": 44.039765154086915,
+          "hi": 43.841782777858135
+        }
+      }
+    },
+    {
+      "id": "sim-halow1-resweep2",
+      "mode": "sim",
+      "note": "seed 13 after two re-sweeps",
+      "settings": {
+        "preset": 0,
+        "fc": 915,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 6,
+        "beLim": 20,
+        "resweeps": 2,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "904 kHz",
+        "mBwN": "M1 914.5494 · M2 915.4529 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+404 kHz vs 500 kHz",
+        "mObw": "974 kHz",
+        "mPsd": {
+          "text": "6.20 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 1.80 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 21.433259885731985,
+        "pi": 1274,
+        "th": 15.433259885731985,
+        "fL": 914.5494281435724,
+        "fR": 915.4529473871136,
+        "bw": 903519.2435411545,
+        "oL": 914.5134147201852,
+        "oR": 915.4873595695009,
+        "obw": 973944.8493156715,
+        "powDbm": 30.00171104140059,
+        "psd": 6.204472432928609,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 839.9999999999844,
+        "be": null
+      }
+    },
+    {
+      "id": "sim-halow1-steep1",
+      "mode": "sim",
+      "note": "slow roll-off: skirts reach the span edge",
+      "settings": {
+        "preset": 0,
+        "fc": 915,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 1,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 6,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "1.427 MHz",
+        "mBwN": "M1 914.3053 · M2 915.7327 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+927 kHz vs 500 kHz",
+        "mObw": "1.943 MHz",
+        "mPsd": {
+          "text": "5.04 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 2.96 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 20.26813242252561,
+        "pi": 1126,
+        "th": 14.26813242252561,
+        "fL": 914.3053019808506,
+        "fR": 915.7326700502143,
+        "bw": 1427368.0693637517,
+        "oL": 914.0259545749119,
+        "oR": 915.9688216894656,
+        "obw": 1942867.1145536783,
+        "powDbm": 30.000485910610642,
+        "psd": 5.039344969722235,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 839.9999999999844,
+        "be": null
+      }
+    },
+    {
+      "id": "csv-rect-1mhz-hz-auto",
+      "mode": "csv",
+      "note": "Hz auto-detect",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "1.001 MHz",
+        "mBwN": "M1 914.4995 · M2 915.5005 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+501 kHz vs 500 kHz",
+        "mObw": "995 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "10.02 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 100,
+        "th": -6,
+        "fL": 914.4995,
+        "fR": 915.5005,
+        "bw": 1000999.9999999764,
+        "oL": 914.502524507475,
+        "oR": 915.497475492525,
+        "obw": 994950.9850500817,
+        "powDbm": 10.021664917294352,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 5000,
+        "be": null
+      }
+    },
+    {
+      "id": "csv-rect-khz-offset",
+      "mode": "csv",
+      "note": "explicit kHz, +10.5 dB offset, 30 kHz RBW, tab separated",
+      "settings": {
+        "units": "1e3",
+        "rbwCsv": 30,
+        "offset": 10.5,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "801 kHz",
+        "mBwN": "M1 914.5995 · M2 915.4005 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+301 kHz vs 500 kHz",
+        "mObw": "797 kHz",
+        "mPsd": {
+          "text": "-11.50 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 19.50 dB to 8 dBm",
+        "mPow": "12.79 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": -1.5,
+        "pi": 120,
+        "th": -7.5,
+        "fL": 914.5994827586208,
+        "fR": 915.4005172413792,
+        "bw": 801034.4827584958,
+        "oL": 914.6015240624961,
+        "oR": 915.3984759375039,
+        "obw": 796951.875007835,
+        "powDbm": 12.786756474244793,
+        "psd": -11.5,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 30000,
+        "dfHz": 5000,
+        "be": null
+      }
+    },
+    {
+      "id": "csv-header-and-extra-columns",
+      "mode": "csv",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "604 kHz",
+        "mBwN": "M1 914.6980 · M2 915.3020 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+104 kHz vs 500 kHz",
+        "mObw": "628 kHz",
+        "mPsd": {
+          "text": "-20.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 28.23 dB to 8 dBm",
+        "mPow": "2.92 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": -5,
+        "pi": 35,
+        "th": -11,
+        "fL": 914.6980000000001,
+        "fR": 915.3019999999999,
+        "bw": 603999.9999998144,
+        "oL": 914.6861986476013,
+        "oR": 915.3138013523987,
+        "obw": 627602.7047974821,
+        "powDbm": 2.9239265615264105,
+        "psd": -20.228787452803374,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 20000,
+        "be": null
+      }
+    },
+    {
+      "id": "csv-bw6-500p5-pass",
+      "mode": "csv",
+      "boundary": "6 dB BW 500.5 kHz vs 500 kHz minimum",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "501 kHz",
+        "mBwN": "M1 914.7497 · M2 915.2503 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+1 kHz vs 500 kHz",
+        "mObw": "496 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "6.95 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 760,
+        "th": -6,
+        "fL": 914.74975,
+        "fR": 915.25025,
+        "bw": 500500.00000010186,
+        "oL": 914.7519664514333,
+        "oR": 915.2480335485668,
+        "obw": 496067.0971335048,
+        "powDbm": 6.945834468234007,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 1000,
+        "be": null
+      }
+    },
+    {
+      "id": "csv-bw6-500p0-pass",
+      "mode": "csv",
+      "boundary": "6 dB BW exactly 500 kHz (>= passes)",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "500 kHz",
+        "mBwN": "M1 914.7500 · M2 915.2500 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+0 kHz vs 500 kHz",
+        "mObw": "496 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "6.94 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 760,
+        "th": -6,
+        "fL": 914.75,
+        "fR": 915.25,
+        "bw": 500000,
+        "oL": 914.7522002844717,
+        "oR": 915.2477997155283,
+        "obw": 495599.43105668935,
+        "powDbm": 6.941670044693915,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 1000,
+        "be": null
+      }
+    },
+    {
+      "id": "csv-bw6-499p5-fail",
+      "mode": "csv",
+      "boundary": "6 dB BW 499.5 kHz vs 500 kHz minimum",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "499 kHz",
+        "mBwN": "M1 914.7503 · M2 915.2497 MHz",
+        "mRes": {
+          "text": "Fail",
+          "cls": "fail"
+        },
+        "mResN": "-1 kHz vs 500 kHz",
+        "mObw": "495 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "6.94 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 761,
+        "th": -6,
+        "fL": 914.75025,
+        "fR": 915.24975,
+        "bw": 499499.99999989814,
+        "oL": 914.7524368656128,
+        "oR": 915.2475631343873,
+        "obw": 495126.2687744702,
+        "powDbm": 6.937046295192305,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 1000,
+        "be": null
+      }
+    },
+    {
+      "id": "csv-psd-just-under",
+      "mode": "csv",
+      "boundary": "PSD 7.995 dBm/3 kHz vs 8",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "1.019 MHz",
+        "mBwN": "M1 914.4905 · M2 915.5095 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+519 kHz vs 500 kHz",
+        "mObw": "1.010 MHz",
+        "mPsd": {
+          "text": "8.00 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 0.00 dB to 8 dBm",
+        "mPow": "33.29 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 23.2238,
+        "pi": 50,
+        "th": 17.2238,
+        "fL": 914.4905099029163,
+        "fR": 915.5094900970837,
+        "bw": 1018980.1941673977,
+        "oL": 914.4951974664742,
+        "oR": 915.5048025335258,
+        "obw": 1009605.0670515524,
+        "powDbm": 33.29309358241976,
+        "psd": 7.995012547196625,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 10000,
+        "be": null
+      }
+    },
+    {
+      "id": "csv-psd-just-over",
+      "mode": "csv",
+      "boundary": "PSD 8.005 dBm/3 kHz vs 8",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "1.019 MHz",
+        "mBwN": "M1 914.4905 · M2 915.5095 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+519 kHz vs 500 kHz",
+        "mObw": "1.010 MHz",
+        "mPsd": {
+          "text": "8.01 dBm",
+          "cls": "fail"
+        },
+        "mPsdN": "Margin -0.01 dB to 8 dBm",
+        "mPow": "33.30 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 23.2338,
+        "pi": 50,
+        "th": 17.2338,
+        "fL": 914.4905114037114,
+        "fR": 915.5094885962886,
+        "bw": 1018977.1925772675,
+        "oL": 914.4951987242665,
+        "oR": 915.5048012757335,
+        "obw": 1009602.5514669691,
+        "powDbm": 33.30308577257165,
+        "psd": 8.005012547196623,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 10000,
+        "be": null
+      }
+    },
+    {
+      "id": "csv-bandedge-20dbc-pass",
+      "mode": "csv",
+      "boundary": "band edge exactly 20 dBc (>= passes)",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "582 kHz",
+        "mBwN": "M1 902.2090 · M2 902.7910 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+82 kHz vs 500 kHz",
+        "mObw": "588 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "7.71 dBm",
+        "mBe": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mBeN": "902: 20.0 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 121,
+        "th": -6,
+        "fL": 902.2090000000001,
+        "fR": 902.7909999999999,
+        "bw": 581999.99999988,
+        "oL": 902.2056986283014,
+        "oR": 902.7940993919005,
+        "obw": 588400.7635991111,
+        "powDbm": 7.709266449923601,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 10000,
+        "be": {
+          "lo": 20,
+          "hi": null
+        }
+      }
+    },
+    {
+      "id": "csv-bandedge-19p99dbc-fail",
+      "mode": "csv",
+      "boundary": "band edge 19.99 dBc vs 20",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "582 kHz",
+        "mBwN": "M1 902.2090 · M2 902.7910 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+82 kHz vs 500 kHz",
+        "mObw": "588 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "7.71 dBm",
+        "mBe": {
+          "text": "Fail",
+          "cls": "fail"
+        },
+        "mBeN": "902: 20.0 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 121,
+        "th": -6,
+        "fL": 902.2090000000001,
+        "fR": 902.7909999999999,
+        "bw": 581999.99999988,
+        "oL": 902.2056981695595,
+        "oR": 902.7940993895953,
+        "obw": 588401.2200358484,
+        "powDbm": 7.709268146499784,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 10000,
+        "be": {
+          "lo": 19.99,
+          "hi": null
+        }
+      }
+    },
+    {
+      "id": "csv-bandedge-30dbc-avg-method-fail",
+      "mode": "csv",
+      "note": "25 dBc fails the 30 dB average-power method",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 30,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "582 kHz",
+        "mBwN": "M1 902.2090 · M2 902.7910 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+82 kHz vs 500 kHz",
+        "mObw": "588 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "7.71 dBm",
+        "mBe": {
+          "text": "Fail",
+          "cls": "fail"
+        },
+        "mBeN": "902: 25.0 dBc (need ≥ 30)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 121,
+        "th": -6,
+        "fL": 902.2090000000001,
+        "fR": 902.7909999999999,
+        "bw": 581999.99999988,
+        "oL": 902.2058346988399,
+        "oR": 902.7941000756721,
+        "obw": 588265.3768321688,
+        "powDbm": 7.70876318774821,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 10000,
+        "be": {
+          "lo": 25,
+          "hi": null
+        }
+      }
+    },
+    {
+      "id": "csv-clipped-widen-span",
+      "mode": "csv",
+      "note": "trace never falls 6 dB: \"widen span!\"",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "400 kHz",
+        "mBwN": "M1 914.8000 · M2 915.2000 MHz · widen span!",
+        "mRes": {
+          "text": "Fail",
+          "cls": "fail"
+        },
+        "mResN": "-100 kHz vs 500 kHz",
+        "mObw": "396 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "5.72 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 50,
+        "th": -6,
+        "fL": 914.8,
+        "fR": 915.2,
+        "bw": 400000.0000000909,
+        "oL": 914.8021417816351,
+        "oR": 915.1978582183649,
+        "obw": 395716.43672979914,
+        "powDbm": 5.724056004824064,
+        "psd": -15.228787452803376,
+        "edgeClipped": true,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 4000.000000000909,
+        "be": null
+      }
+    },
+    {
+      "id": "obw-rect-known-answer",
+      "mode": "csv",
+      "expect": "99% OBW = 990990 Hz (analytic)",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "1.000 MHz",
+        "mBwN": "M1 914.5000 · M2 915.5000 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+500 kHz vs 500 kHz",
+        "mObw": "991 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "10.00 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 500,
+        "th": -6,
+        "fL": 914.49997,
+        "fR": 915.50003,
+        "bw": 1000060.0000000759,
+        "oL": 914.504505,
+        "oR": 915.495495,
+        "obw": 990990.0000000107,
+        "powDbm": 10.004340774793084,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 1000,
+        "be": null
+      }
+    },
+    {
+      "id": "obw-rect-offset-invariant",
+      "mode": "csv",
+      "expect": "a +20 dB reference offset leaves OBW unchanged",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 20,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "1.000 MHz",
+        "mBwN": "M1 914.5000 · M2 915.5000 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+500 kHz vs 500 kHz",
+        "mObw": "991 kHz",
+        "mPsd": {
+          "text": "4.77 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 3.23 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 20,
+        "pi": 500,
+        "th": 14,
+        "fL": 914.49997,
+        "fR": 915.50003,
+        "bw": 1000060.0000000759,
+        "oL": 914.504505,
+        "oR": 915.495495,
+        "obw": 990990.0000000107,
+        "powDbm": 30.004340774793086,
+        "psd": 4.771212547196624,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 1000,
+        "be": null
+      }
+    },
+    {
+      "id": "obw-asymmetric-two-level",
+      "mode": "csv",
+      "expect": "lopsided: the upper cut sits ~10× further inside the 915.5 MHz edge than the lower cut does inside 914.5",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "501 kHz",
+        "mBwN": "M1 914.5000 · M2 915.0006 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+1 kHz vs 500 kHz",
+        "mObw": "971 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "7.41 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 500,
+        "th": -6,
+        "fL": 914.49997,
+        "fR": 915.0006,
+        "bw": 500630.00000000105,
+        "oL": 914.502255,
+        "oR": 915.47295,
+        "obw": 970694.9999999779,
+        "powDbm": 7.4115159885177135,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 1000,
+        "be": null
+      }
+    },
+    {
+      "id": "obw-two-tones-spans-gap",
+      "mode": "csv",
+      "expect": "equal tones at 914.6 and 915.4 MHz: OBW and 6 dB BW both span the gap (~0.82 MHz)",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "820 kHz",
+        "mBwN": "M1 914.5900 · M2 915.4100 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+320 kHz vs 500 kHz",
+        "mObw": "821 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "-3.77 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 590,
+        "th": -6,
+        "fL": 914.58997,
+        "fR": 915.41003,
+        "bw": 820060.0000000122,
+        "oL": 914.58942,
+        "oR": 915.41058,
+        "obw": 821159.9999999634,
+        "powDbm": -3.7675070960296475,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 1000,
+        "be": null
+      }
+    },
+    {
+      "id": "obw-sim-halow1-high-noise-floor",
+      "mode": "sim",
+      "expect": "a noise floor 30 dB under the in-band level widens OBW (~977 kHz vs 969 kHz) but leaves the 6 dB BW at ~885 kHz",
+      "settings": {
+        "preset": 0,
+        "fc": 915,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -10,
+        "ndb": 6,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "886 kHz",
+        "mBwN": "M1 914.5562 · M2 915.4417 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+386 kHz vs 500 kHz",
+        "mObw": "977 kHz",
+        "mPsd": {
+          "text": "6.41 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 1.59 dB to 8 dBm",
+        "mPow": "30.01 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 21.633957526959158,
+        "pi": 877,
+        "th": 15.633957526959158,
+        "fL": 914.5561706951172,
+        "fR": 915.4417496282265,
+        "bw": 885578.9331092865,
+        "oL": 914.5120587109602,
+        "oR": 915.4888358965744,
+        "obw": 976777.1856141962,
+        "powDbm": 30.009640479260185,
+        "psd": 6.405170074155782,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 839.9999999999844,
+        "be": null
+      }
+    },
+    {
+      "id": "psd-rbw30k-exactly-8-pass",
+      "mode": "csv",
+      "boundary": "18 dBm in 30 kHz = exactly 8.000 dBm/3 kHz (<= passes)",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 30,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "1.002 MHz",
+        "mBwN": "M1 914.4990 · M2 915.5010 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+502 kHz vs 500 kHz",
+        "mObw": "1000 kHz",
+        "mPsd": {
+          "text": "8.00 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 0.00 dB to 8 dBm",
+        "mPow": "33.27 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 18,
+        "pi": 50,
+        "th": 12,
+        "fL": 914.4989655172413,
+        "fR": 915.5010344827587,
+        "bw": 1002068.9655173101,
+        "oL": 914.5000492233231,
+        "oR": 915.4999507766769,
+        "obw": 999901.5533537659,
+        "powDbm": 33.2720079374291,
+        "psd": 8,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 30000,
+        "dfHz": 10000,
+        "be": null
+      }
+    },
+    {
+      "id": "psd-rbw30k-8p01-fail",
+      "mode": "csv",
+      "boundary": "18.01 dBm in 30 kHz = 8.01 dBm/3 kHz",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 30,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "1.002 MHz",
+        "mBwN": "M1 914.4990 · M2 915.5010 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+502 kHz vs 500 kHz",
+        "mObw": "1000 kHz",
+        "mPsd": {
+          "text": "8.01 dBm",
+          "cls": "fail"
+        },
+        "mPsdN": "Margin -0.01 dB to 8 dBm",
+        "mPow": "33.28 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 18.01,
+        "pi": 50,
+        "th": 12.010000000000002,
+        "fL": 914.4989656955697,
+        "fR": 915.5010343044303,
+        "bw": 1002068.6088605544,
+        "oL": 914.5000492251094,
+        "oR": 915.4999507748906,
+        "obw": 999901.5497812707,
+        "powDbm": 33.282007921911905,
+        "psd": 8.010000000000002,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 30000,
+        "dfHz": 10000,
+        "be": null
+      }
+    },
+    {
+      "id": "psd-rbw3k-exactly-8-pass",
+      "mode": "csv",
+      "boundary": "RBW 3 kHz: no scaling, 8.000 passes",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 3,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "1.003 MHz",
+        "mBwN": "M1 914.4987 · M2 915.5013 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+503 kHz vs 500 kHz",
+        "mObw": "1000 kHz",
+        "mPsd": {
+          "text": "8.00 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 0.00 dB to 8 dBm",
+        "mPow": "33.27 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 8,
+        "pi": 50,
+        "th": 2,
+        "fL": 914.49875,
+        "fR": 915.50125,
+        "bw": 1002500.0000000546,
+        "oL": 914.5000422332309,
+        "oR": 915.4999577667691,
+        "obw": 999915.5335381147,
+        "powDbm": 33.27206865815167,
+        "psd": 8,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 3000,
+        "dfHz": 10000,
+        "be": null
+      }
+    },
+    {
+      "id": "psd-rbw3k-8p01-fail",
+      "mode": "csv",
+      "boundary": "RBW 3 kHz: 8.01 fails",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 3,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "1.002 MHz",
+        "mBwN": "M1 914.4988 · M2 915.5012 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+502 kHz vs 500 kHz",
+        "mObw": "1000 kHz",
+        "mPsd": {
+          "text": "8.01 dBm",
+          "cls": "fail"
+        },
+        "mPsdN": "Margin -0.01 dB to 8 dBm",
+        "mPow": "33.28 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 8.01,
+        "pi": 50,
+        "th": 2.01,
+        "fL": 914.4987502603624,
+        "fR": 915.5012497396376,
+        "bw": 1002499.4792752295,
+        "oL": 914.500042251094,
+        "oR": 915.499957748906,
+        "obw": 999915.497812026,
+        "powDbm": 33.282068502981886,
+        "psd": 8.01,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 3000,
+        "dfHz": 10000,
+        "be": null
+      }
+    },
+    {
+      "id": "psd-rbw100k-float-at-limit",
+      "mode": "csv",
+      "boundary": "peak 23.228787452803374 dBm in 100 kHz scales to 7.999999999999998, not 8: passes; Python must reproduce the same rounding",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "1.002 MHz",
+        "mBwN": "M1 914.4991 · M2 915.5009 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+502 kHz vs 500 kHz",
+        "mObw": "1000 kHz",
+        "mPsd": {
+          "text": "8.00 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 0.00 dB to 8 dBm",
+        "mPow": "33.27 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 23.228787452803374,
+        "pi": 50,
+        "th": 17.228787452803374,
+        "fL": 914.499051065149,
+        "fR": 915.500948934851,
+        "bw": 1001897.8697019066,
+        "oL": 914.5000497669969,
+        "oR": 915.4999502330031,
+        "obw": 999900.4660062382,
+        "powDbm": 33.27200321467067,
+        "psd": 7.999999999999998,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 10000,
+        "be": null
+      }
+    },
+    {
+      "id": "psd-sim-halow1-31p5dbm-pass",
+      "mode": "sim",
+      "settings": {
+        "preset": 0,
+        "fc": 915,
+        "pwr": 31.5,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 6,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "885 kHz",
+        "mBwN": "M1 914.5563 · M2 915.4417 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+385 kHz vs 500 kHz",
+        "mObw": "969 kHz",
+        "mPsd": {
+          "text": "7.90 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 0.10 dB to 8 dBm",
+        "mPow": "31.50 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 23.132302571548745,
+        "pi": 877,
+        "th": 17.132302571548745,
+        "fL": 914.5562790439942,
+        "fR": 915.4416772400778,
+        "bw": 885398.1960835427,
+        "oL": 914.5159465083069,
+        "oR": 915.4847080709031,
+        "obw": 968761.562596228,
+        "powDbm": 31.50027524023941,
+        "psd": 7.90351511874537,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 839.9999999999844,
+        "be": null
+      }
+    },
+    {
+      "id": "psd-sim-halow1-32dbm-fail",
+      "mode": "sim",
+      "settings": {
+        "preset": 0,
+        "fc": 915,
+        "pwr": 32,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 6,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "885 kHz",
+        "mBwN": "M1 914.5563 · M2 915.4417 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+385 kHz vs 500 kHz",
+        "mObw": "969 kHz",
+        "mPsd": {
+          "text": "8.40 dBm",
+          "cls": "fail"
+        },
+        "mPsdN": "Margin -0.40 dB to 8 dBm",
+        "mPow": "32.00 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 23.632302571421317,
+        "pi": 877,
+        "th": 17.632302571421317,
+        "fL": 914.5562790440034,
+        "fR": 915.4416772400723,
+        "bw": 885398.196068877,
+        "oL": 914.5159465086005,
+        "oR": 915.4847080705957,
+        "obw": 968761.5619952794,
+        "powDbm": 32.00027523951824,
+        "psd": 8.40351511861794,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 839.9999999999844,
+        "be": null
+      }
+    },
+    {
+      "id": "psd-sim-halow1-limit-6",
+      "mode": "sim",
+      "note": "PSD limit field set to 6 dBm: 6.40 now fails",
+      "settings": {
+        "preset": 0,
+        "fc": 915,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 6,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 6
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "885 kHz",
+        "mBwN": "M1 914.5563 · M2 915.4417 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+385 kHz vs 500 kHz",
+        "mObw": "969 kHz",
+        "mPsd": {
+          "text": "6.40 dBm",
+          "cls": "fail"
+        },
+        "mPsdN": "Margin -0.40 dB to 6 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 21.63230257203218,
+        "pi": 877,
+        "th": 15.63230257203218,
+        "fL": 914.5562790439591,
+        "fR": 915.441677240098,
+        "bw": 885398.1961389082,
+        "oL": 914.5159465071936,
+        "oR": 915.4847080720693,
+        "obw": 968761.5648757628,
+        "powDbm": 30.000275242975306,
+        "psd": 6.403515119228805,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 839.9999999999844,
+        "be": null
+      }
+    },
+    {
+      "id": "be-upper-928-exactly-20-pass",
+      "mode": "csv",
+      "boundary": "928 side exactly 20 dBc",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "602 kHz",
+        "mBwN": "M1 927.1990 · M2 927.8010 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+102 kHz vs 500 kHz",
+        "mObw": "608 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "7.85 dBm",
+        "mBe": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mBeN": "928: 20.0 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 20,
+        "th": -6,
+        "fL": 927.1990000000001,
+        "fR": 927.8009999999999,
+        "bw": 601999.9999998617,
+        "oL": 927.1961006276995,
+        "oR": 927.8041013520987,
+        "obw": 608000.7243991758,
+        "powDbm": 7.8540200733244045,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 10000,
+        "be": {
+          "lo": null,
+          "hi": 20
+        }
+      }
+    },
+    {
+      "id": "be-upper-928-19p99-fail",
+      "mode": "csv",
+      "boundary": "928 side 19.99 dBc",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "602 kHz",
+        "mBwN": "M1 927.1990 · M2 927.8010 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+102 kHz vs 500 kHz",
+        "mObw": "608 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "7.85 dBm",
+        "mBe": {
+          "text": "Fail",
+          "cls": "fail"
+        },
+        "mBeN": "928: 20.0 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 20,
+        "th": -6,
+        "fL": 927.1990000000001,
+        "fR": 927.8009999999999,
+        "bw": 601999.9999998617,
+        "oL": 927.1961006300047,
+        "oR": 927.8041018108405,
+        "obw": 608001.1808357994,
+        "powDbm": 7.85402171428445,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 10000,
+        "be": {
+          "lo": null,
+          "hi": 19.99
+        }
+      }
+    },
+    {
+      "id": "be-both-edges-lower-pass-upper-fail",
+      "mode": "csv",
+      "expect": "worst side decides: 902 = 25 dBc passes, 928 = 15 dBc fails → Fail",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "2.002 MHz",
+        "mBwN": "M1 913.9990 · M2 916.0010 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+1502 kHz vs 500 kHz",
+        "mObw": "1.990 MHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "13.03 dBm",
+        "mBe": {
+          "text": "Fail",
+          "cls": "fail"
+        },
+        "mBeN": "902: 25.0 dBc · 928: 15.0 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 1300,
+        "th": -6,
+        "fL": 913.999,
+        "fR": 916.001,
+        "bw": 2001999.9999999527,
+        "oL": 914.0050072613261,
+        "oR": 915.9952773436632,
+        "obw": 1990270.0823371334,
+        "powDbm": 13.0327682015876,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 10000,
+        "be": {
+          "lo": 25,
+          "hi": 15
+        }
+      }
+    },
+    {
+      "id": "be-both-edges-pass",
+      "mode": "csv",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "2.002 MHz",
+        "mBwN": "M1 913.9990 · M2 916.0010 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+1502 kHz vs 500 kHz",
+        "mObw": "1.990 MHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "13.03 dBm",
+        "mBe": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mBeN": "902: 25.0 dBc · 928: 22.0 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 1300,
+        "th": -6,
+        "fL": 913.999,
+        "fR": 916.001,
+        "bw": 2001999.9999999527,
+        "oL": 914.005005995666,
+        "oR": 915.9950254772918,
+        "obw": 1990019.4816258363,
+        "powDbm": 13.03222133430846,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 10000,
+        "be": {
+          "lo": 25,
+          "hi": 22
+        }
+      }
+    },
+    {
+      "id": "be-sample-at-902-is-in-band",
+      "mode": "csv",
+      "boundary": "a −5 dBc sample exactly at 902.000 MHz is not counted (strict f < 902); outside max is the −60 floor",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "801 kHz",
+        "mBwN": "M1 901.9998 · M2 902.8010 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+301 kHz vs 500 kHz",
+        "mObw": "794 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "7.88 dBm",
+        "mBe": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mBeN": "902: 60.0 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 120,
+        "th": -6,
+        "fL": 901.9998181818182,
+        "fR": 902.8009999999999,
+        "bw": 801181.8181817034,
+        "oL": 902.0093836147603,
+        "oR": 902.8038687495546,
+        "obw": 794485.1347942859,
+        "powDbm": 7.875764062191567,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 10000,
+        "be": {
+          "lo": 60,
+          "hi": null
+        }
+      }
+    },
+    {
+      "id": "be-sample-at-928-is-in-band",
+      "mode": "csv",
+      "boundary": "a −5 dBc sample exactly at 928.000 MHz is not counted (strict f > 928)",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "801 kHz",
+        "mBwN": "M1 927.1990 · M2 928.0002 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+301 kHz vs 500 kHz",
+        "mObw": "794 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "7.88 dBm",
+        "mBe": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mBeN": "928: 60.0 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 20,
+        "th": -6,
+        "fL": 927.1990000000001,
+        "fR": 928.0001818181818,
+        "bw": 801181.8181817034,
+        "oL": 927.1961312504454,
+        "oR": 927.9906163852397,
+        "obw": 794485.1347942859,
+        "powDbm": 7.875764062191602,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 10000,
+        "be": {
+          "lo": null,
+          "hi": 60
+        }
+      }
+    },
+    {
+      "id": "be-sample-just-below-902-counts",
+      "mode": "csv",
+      "boundary": "the same −5 dBc sample at 901.990 MHz is counted → 5 dBc, Fail",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "811 kHz",
+        "mBwN": "M1 901.9898 · M2 902.8010 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+311 kHz vs 500 kHz",
+        "mObw": "804 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "7.88 dBm",
+        "mBe": {
+          "text": "Fail",
+          "cls": "fail"
+        },
+        "mBeN": "902: 5.0 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 120,
+        "th": -6,
+        "fL": 901.9898181818182,
+        "fR": 902.8009999999999,
+        "bw": 811181.8181816944,
+        "oL": 901.9993836780056,
+        "oR": 902.8038687495546,
+        "obw": 804485.0715489247,
+        "powDbm": 7.875764062191567,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 10000,
+        "be": {
+          "lo": 5,
+          "hi": null
+        }
+      }
+    },
+    {
+      "id": "be-far-spur-dominates",
+      "mode": "csv",
+      "expect": "a spur 2 MHz below the edge (−25 dBc) sets the result, not the −45 dBc skirt next to the edge",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "602 kHz",
+        "mBwN": "M1 902.1990 · M2 902.8010 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+102 kHz vs 500 kHz",
+        "mObw": "608 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "7.85 dBm",
+        "mBe": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mBeN": "902: 25.0 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 320,
+        "th": -6,
+        "fL": 902.1990000000001,
+        "fR": 902.8009999999999,
+        "bw": 601999.9999998617,
+        "oL": 902.1960301290512,
+        "oR": 902.8039000330099,
+        "obw": 607869.9039586581,
+        "powDbm": 7.853549728172001,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 10000,
+        "be": {
+          "lo": 25,
+          "hi": null
+        }
+      }
+    },
+    {
+      "id": "be-peak-out-of-band",
+      "mode": "csv",
+      "expect": "carrier at 901.5 MHz (outside the band): the out-of-band max is the peak itself → 0 dBc, Fail",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "402 kHz",
+        "mBwN": "M1 901.2990 · M2 901.7010 MHz",
+        "mRes": {
+          "text": "Fail",
+          "cls": "fail"
+        },
+        "mResN": "-98 kHz vs 500 kHz",
+        "mObw": "412 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "6.13 dBm",
+        "mBe": {
+          "text": "Fail",
+          "cls": "fail"
+        },
+        "mBeN": "902: 0.0 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 30,
+        "th": -6,
+        "fL": 901.299,
+        "fR": 901.701,
+        "bw": 402000.00000004366,
+        "oL": 901.2940995317005,
+        "oR": 901.7059224482775,
+        "obw": 411822.9165770799,
+        "powDbm": 6.127961227175792,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 10000,
+        "be": {
+          "lo": 0,
+          "hi": null
+        }
+      }
+    },
+    {
+      "id": "ndb6-trapezoid-known-answer",
+      "mode": "csv",
+      "expect": "6 dB BW = 512 kHz, M1 914.744, M2 915.256",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "512 kHz",
+        "mBwN": "M1 914.7440 · M2 915.2560 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+12 kHz vs 500 kHz",
+        "mObw": "505 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "7.06 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 750,
+        "th": -6,
+        "fL": 914.744,
+        "fR": 915.256,
+        "bw": 511999.9999999436,
+        "oL": 914.7476301412178,
+        "oR": 915.2523698587821,
+        "obw": 504739.7175643482,
+        "powDbm": 7.0648359562836305,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 1000,
+        "be": null
+      }
+    },
+    {
+      "id": "ndb20-trapezoid-known-answer",
+      "mode": "csv",
+      "expect": "20 dB BW = 540 kHz, M1 914.730, M2 915.270",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 20,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "20 dB bandwidth",
+        "mBw": "540 kHz",
+        "mBwN": "M1 914.7300 · M2 915.2700 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+40 kHz vs 500 kHz",
+        "mObw": "505 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "7.06 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 750,
+        "th": -20,
+        "fL": 914.73,
+        "fR": 915.27,
+        "bw": 539999.9999999637,
+        "oL": 914.7476301412178,
+        "oR": 915.2523698587821,
+        "obw": 504739.7175643482,
+        "powDbm": 7.0648359562836305,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 20,
+        "rbw": 100000,
+        "dfHz": 1000,
+        "be": null
+      }
+    },
+    {
+      "id": "ndb26-trapezoid-known-answer",
+      "mode": "csv",
+      "expect": "26 dB BW = 552 kHz, M1 914.724, M2 915.276",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 26,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "26 dB bandwidth",
+        "mBw": "552 kHz",
+        "mBwN": "M1 914.7240 · M2 915.2760 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+52 kHz vs 500 kHz",
+        "mObw": "505 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "7.06 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 750,
+        "th": -26,
+        "fL": 914.724,
+        "fR": 915.276,
+        "bw": 551999.9999999072,
+        "oL": 914.7476301412178,
+        "oR": 915.2523698587821,
+        "obw": 504739.7175643482,
+        "powDbm": 7.0648359562836305,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 26,
+        "rbw": 100000,
+        "dfHz": 1000,
+        "be": null
+      }
+    },
+    {
+      "id": "ndb26-sim-halow1",
+      "mode": "sim",
+      "settings": {
+        "preset": 0,
+        "fc": 915,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 26,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "26 dB bandwidth",
+        "mBw": "1.230 MHz",
+        "mBwN": "M1 914.3869 · M2 915.6168 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+730 kHz vs 500 kHz",
+        "mObw": "969 kHz",
+        "mPsd": {
+          "text": "6.40 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 1.60 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": "n/a",
+        "mBeN": "Trace does not cross 902 or 928 MHz",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 21.63230257203218,
+        "pi": 877,
+        "th": -4.367697427967819,
+        "fL": 914.3869233353265,
+        "fR": 915.6168002191453,
+        "bw": 1229876.883818747,
+        "oL": 914.5159465071936,
+        "oR": 915.4847080720693,
+        "obw": 968761.5648757628,
+        "powDbm": 30.000275242975306,
+        "psd": 6.403515119228805,
+        "edgeClipped": false,
+        "ndb": 26,
+        "rbw": 100000,
+        "dfHz": 839.9999999999844,
+        "be": null
+      }
+    },
+    {
+      "id": "edge20-m1-902p001-inside",
+      "mode": "csv",
+      "boundary": "20 dB M1 = 902.001 MHz (1 kHz inside 902)",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 20,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "20 dB bandwidth",
+        "mBw": "998 kHz",
+        "mBwN": "M1 902.0010 · M2 902.9990 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+498 kHz vs 500 kHz",
+        "mObw": "957 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "9.85 dBm",
+        "mBe": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mBeN": "902: 22.0 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 521,
+        "th": -20,
+        "fL": 902.001,
+        "fR": 902.999,
+        "bw": 998000.0000000473,
+        "oL": 902.0214710529956,
+        "oR": 902.9785289470044,
+        "obw": 957057.8940088126,
+        "powDbm": 9.853030151626696,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 20,
+        "rbw": 100000,
+        "dfHz": 1000,
+        "be": {
+          "lo": 22,
+          "hi": null
+        }
+      }
+    },
+    {
+      "id": "edge20-m1-901p999-outside",
+      "mode": "csv",
+      "boundary": "20 dB M1 = 901.999 MHz (1 kHz outside 902)",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 20,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "20 dB bandwidth",
+        "mBw": "1.002 MHz",
+        "mBwN": "M1 901.9990 · M2 903.0010 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+502 kHz vs 500 kHz",
+        "mObw": "961 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "9.87 dBm",
+        "mBe": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mBeN": "902: 20.0 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 519,
+        "th": -20,
+        "fL": 901.999,
+        "fR": 903.001,
+        "bw": 1001999.9999999527,
+        "oL": 902.0194910549756,
+        "oR": 902.9805089450244,
+        "obw": 961017.8900488791,
+        "powDbm": 9.870962778547304,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 20,
+        "rbw": 100000,
+        "dfHz": 1000,
+        "be": {
+          "lo": 20,
+          "hi": null
+        }
+      }
+    },
+    {
+      "id": "edge20-m2-927p999-inside",
+      "mode": "csv",
+      "boundary": "20 dB M2 = 927.999 MHz (1 kHz inside 928)",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 20,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "20 dB bandwidth",
+        "mBw": "998 kHz",
+        "mBwN": "M1 927.0010 · M2 927.9990 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+498 kHz vs 500 kHz",
+        "mObw": "957 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "9.85 dBm",
+        "mBe": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mBeN": "928: 22.0 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 521,
+        "th": -20,
+        "fL": 927.001,
+        "fR": 927.999,
+        "bw": 998000.0000000473,
+        "oL": 927.0214710529956,
+        "oR": 927.9785289470044,
+        "obw": 957057.8940088126,
+        "powDbm": 9.853030151626696,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 20,
+        "rbw": 100000,
+        "dfHz": 1000,
+        "be": {
+          "lo": null,
+          "hi": 22
+        }
+      }
+    },
+    {
+      "id": "edge20-m2-928p001-outside",
+      "mode": "csv",
+      "boundary": "20 dB M2 = 928.001 MHz (1 kHz outside 928)",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 20,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "20 dB bandwidth",
+        "mBw": "1.002 MHz",
+        "mBwN": "M1 926.9990 · M2 928.0010 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+502 kHz vs 500 kHz",
+        "mObw": "961 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "9.87 dBm",
+        "mBe": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mBeN": "928: 20.0 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 519,
+        "th": -20,
+        "fL": 926.999,
+        "fR": 928.001,
+        "bw": 1001999.9999999527,
+        "oL": 927.0194910549756,
+        "oR": 927.9805089450244,
+        "obw": 961017.8900488791,
+        "powDbm": 9.870962778547304,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 20,
+        "rbw": 100000,
+        "dfHz": 1000,
+        "be": {
+          "lo": null,
+          "hi": 20
+        }
+      }
+    },
+    {
+      "id": "edge20-sim-halow1-fc902p5",
+      "mode": "sim",
+      "note": "lowest 1 MHz channel, 20 dB markers",
+      "settings": {
+        "preset": 0,
+        "fc": 902.5,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 20,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "20 dB bandwidth",
+        "mBw": "1.128 MHz",
+        "mBwN": "M1 901.9376 · M2 903.0652 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+628 kHz vs 500 kHz",
+        "mObw": "969 kHz",
+        "mPsd": {
+          "text": "6.40 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 1.60 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": {
+          "text": "Fail",
+          "cls": "fail"
+        },
+        "mBeN": "902: 12.1 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 21.63230257203218,
+        "pi": 877,
+        "th": 1.6323025720321809,
+        "fL": 901.9375861552694,
+        "fR": 903.0652321803915,
+        "bw": 1127646.0251220898,
+        "oL": 902.0159465071936,
+        "oR": 902.9847080720693,
+        "obw": 968761.5648757628,
+        "powDbm": 30.000275242975306,
+        "psd": 6.403515119228805,
+        "edgeClipped": false,
+        "ndb": 20,
+        "rbw": 100000,
+        "dfHz": 839.9999999999844,
+        "be": {
+          "lo": 12.109691740356707,
+          "hi": null
+        }
+      }
+    },
+    {
+      "id": "edge20-sim-halow1-fc927p5",
+      "mode": "sim",
+      "note": "highest 1 MHz channel, 20 dB markers",
+      "settings": {
+        "preset": 0,
+        "fc": 927.5,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 20,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "20 dB bandwidth",
+        "mBw": "1.128 MHz",
+        "mBwN": "M1 926.9376 · M2 928.0652 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+628 kHz vs 500 kHz",
+        "mObw": "969 kHz",
+        "mPsd": {
+          "text": "6.40 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 1.60 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": {
+          "text": "Fail",
+          "cls": "fail"
+        },
+        "mBeN": "928: 12.1 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 21.63230257203218,
+        "pi": 877,
+        "th": 1.6323025720321809,
+        "fL": 926.9375861552694,
+        "fR": 928.0652321803915,
+        "bw": 1127646.0251220898,
+        "oL": 927.0159465071936,
+        "oR": 927.9847080720693,
+        "obw": 968761.5648757628,
+        "powDbm": 30.000275242975306,
+        "psd": 6.403515119228805,
+        "edgeClipped": false,
+        "ndb": 20,
+        "rbw": 100000,
+        "dfHz": 839.9999999999844,
+        "be": {
+          "lo": null,
+          "hi": 12.069486241395003
+        }
+      }
+    },
+    {
+      "id": "edge20-sim-halow2-fc903",
+      "mode": "sim",
+      "note": "lowest 2 MHz channel, 20 dB markers",
+      "settings": {
+        "preset": 1,
+        "fc": 903,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 20,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "20 dB bandwidth",
+        "mBw": "2.322 MHz",
+        "mBwN": "M1 901.8448 · M2 904.1671 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+1822 kHz vs 500 kHz",
+        "mObw": "1.994 MHz",
+        "mPsd": {
+          "text": "3.47 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 4.53 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": {
+          "text": "Fail",
+          "cls": "fail"
+        },
+        "mBeN": "902: 10.9 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 18.695156285292487,
+        "pi": 1170,
+        "th": -1.3048437147075127,
+        "fL": 901.8448210948594,
+        "fR": 904.1671122518833,
+        "bw": 2322291.1570238695,
+        "oL": 902.0091210292424,
+        "oR": 904.0035024319035,
+        "obw": 1994381.4026611336,
+        "powDbm": 30.003345461600187,
+        "psd": 3.4663688324891115,
+        "edgeClipped": false,
+        "ndb": 20,
+        "rbw": 100000,
+        "dfHz": 1750.0000000000189,
+        "be": {
+          "lo": 10.94144341999805,
+          "hi": null
+        }
+      }
+    },
+    {
+      "id": "edge20-sim-halow2-fc927",
+      "mode": "sim",
+      "note": "highest 2 MHz channel, 20 dB markers",
+      "settings": {
+        "preset": 1,
+        "fc": 927,
+        "pwr": 30,
+        "rip": 2,
+        "steep": 8,
+        "rbwSim": 100000,
+        "nf": -70,
+        "ndb": 20,
+        "beLim": 20,
+        "resweeps": 0,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "20 dB bandwidth",
+        "mBw": "2.322 MHz",
+        "mBwN": "M1 925.8448 · M2 928.1671 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+1822 kHz vs 500 kHz",
+        "mObw": "1.994 MHz",
+        "mPsd": {
+          "text": "3.47 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 4.53 dB to 8 dBm",
+        "mPow": "30.00 dBm",
+        "mBe": {
+          "text": "Fail",
+          "cls": "fail"
+        },
+        "mBeN": "928: 10.2 dBc (need ≥ 20)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 18.695156285292487,
+        "pi": 1170,
+        "th": -1.3048437147075127,
+        "fL": 925.8448210948594,
+        "fR": 928.1671122518833,
+        "bw": 2322291.1570238695,
+        "oL": 926.0091210292424,
+        "oR": 928.0035024319035,
+        "obw": 1994381.4026611336,
+        "powDbm": 30.003345461600187,
+        "psd": 3.4663688324891115,
+        "edgeClipped": false,
+        "ndb": 20,
+        "rbw": 100000,
+        "dfHz": 1750.0000000000189,
+        "be": {
+          "lo": null,
+          "hi": 10.209853944248469
+        }
+      }
+    },
+    {
+      "id": "be-avg-method-exactly-30-pass",
+      "mode": "csv",
+      "boundary": "902 side exactly 30 dBc vs 30 (>= passes)",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 30,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "582 kHz",
+        "mBwN": "M1 902.2090 · M2 902.7910 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+82 kHz vs 500 kHz",
+        "mObw": "588 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "7.71 dBm",
+        "mBe": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mBeN": "902: 30.0 dBc (need ≥ 30)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 121,
+        "th": -6,
+        "fL": 902.2090000000001,
+        "fR": 902.7909999999999,
+        "bw": 581999.99999988,
+        "oL": 902.2058777281223,
+        "oR": 902.7941002918997,
+        "obw": 588222.5637773217,
+        "powDbm": 7.708604030137169,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 10000,
+        "be": {
+          "lo": 30,
+          "hi": null
+        }
+      }
+    },
+    {
+      "id": "be-avg-method-29p99-fail",
+      "mode": "csv",
+      "boundary": "902 side 29.99 dBc vs 30",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 30,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "582 kHz",
+        "mBwN": "M1 902.2090 · M2 902.7910 MHz",
+        "mRes": {
+          "text": "Pass",
+          "cls": "pass"
+        },
+        "mResN": "+82 kHz vs 500 kHz",
+        "mObw": "588 kHz",
+        "mPsd": {
+          "text": "-15.23 dBm",
+          "cls": "pass"
+        },
+        "mPsdN": "Margin 23.23 dB to 8 dBm",
+        "mPow": "7.71 dBm",
+        "mBe": {
+          "text": "Fail",
+          "cls": "fail"
+        },
+        "mBeN": "902: 30.0 dBc (need ≥ 30)",
+        "csvErr": ""
+      },
+      "raw": {
+        "pk": 0,
+        "pi": 121,
+        "th": -6,
+        "fL": 902.2090000000001,
+        "fR": 902.7909999999999,
+        "bw": 581999.99999988,
+        "oL": 902.2058776822481,
+        "oR": 902.7941002916691,
+        "obw": 588222.6094209955,
+        "powDbm": 7.708604199820696,
+        "psd": -15.228787452803376,
+        "edgeClipped": false,
+        "ndb": 6,
+        "rbw": 100000,
+        "dfHz": 10000,
+        "be": {
+          "lo": 29.99,
+          "hi": null
+        }
+      }
+    },
+    {
+      "id": "csv-too-few-rows",
+      "mode": "csv",
+      "settings": {
+        "units": "auto",
+        "rbwCsv": 100,
+        "offset": 0,
+        "ndb": 6,
+        "beLim": 20,
+        "minbw": 500,
+        "psdLim": 8
+      },
+      "display": {
+        "bwLabel": "6 dB bandwidth",
+        "mBw": "–",
+        "mBwN": "",
+        "mRes": "–",
+        "mResN": "",
+        "mObw": "–",
+        "mPsd": "–",
+        "mPsdN": "",
+        "mPow": "–",
+        "mBe": "–",
+        "mBeN": "",
+        "csvErr": "Need at least 10 data rows with two numeric columns (frequency, dBm)."
+      },
+      "raw": null
+    }
+  ]
+}
