@@ -1,0 +1,212 @@
+{
+  "meta": {
+    "generator": "scripts/capture_golden.js",
+    "library": "legacy/rf-lab/shared/coloc.js (RF.coloc)",
+    "limitsVersion": "2026.11.5",
+    "sources": {
+      "legacy/rf-lab/shared/rfmath.js": "267a50e241ca764fb5e1d2623aeb55a431e0f915991594603f514fd1ccbb8f59",
+      "legacy/rf-lab/shared/limits.js": "d9d4ddb8049aa6b04bc4ddd70184fe9c3b1dba1d1b4c0dbc1e58860719ba4724",
+      "legacy/rf-lab/shared/coloc.js": "ef40a3fa365d8e3363314f1675da49fa13dfda22bedaf6594a53f899995f6542"
+    },
+    "encoding": "Typed arrays as lists; non-finite numbers as \"Infinity\" / \"-Infinity\" / \"NaN\"; undefined as null."
+  },
+  "functions": [
+    "isLicensed",
+    "newRadio",
+    "radioName",
+    "txRange",
+    "combo",
+    "overlap",
+    "products",
+    "mpeLimit",
+    "powerDensity",
+    "sarExemptionMw",
+    "exposure",
+    "mpeMinDistance"
+  ],
+  "cases": [
+    {
+      "id": "ka.coloc-im.combo_2wifi_minus_halow",
+      "fn": "combo",
+      "source": "known-answer",
+      "args": [
+        2,
+        [2427,2447],
+        -1,
+        [914.5,915.5]
+      ],
+      "page": "coloc-im",
+      "name": "2·[2427, 2447] − [914.5, 915.5] = [3938.5, 3979.5]",
+      "result": [3938.5,3979.5],
+      "legacyCheck": {
+        "ok": true
+      }
+    },
+    {
+      "id": "ka.coloc-im.combo_fold_positive",
+      "fn": "combo",
+      "source": "known-answer",
+      "args": [
+        1,
+        [914.5,915.5],
+        -1,
+        [2427,2447]
+      ],
+      "page": "coloc-im",
+      "name": "Difference folds to positive frequency",
+      "result": [1511.5,1532.5],
+      "legacyCheck": {
+        "ok": true
+      }
+    },
+    {
+      "id": "ka.coloc-mpe.mpeLimit_915",
+      "fn": "mpeLimit",
+      "source": "known-answer",
+      "args": [915],
+      "page": "coloc-mpe",
+      "name": "MPE limit at 915 MHz = 0.61 mW/cm²",
+      "result": 0.61,
+      "legacyCheck": {
+        "expected": 0.61,
+        "tol": 0.001,
+        "ok": true
+      }
+    },
+    {
+      "id": "ka.coloc-mpe.pd_26dBm_20cm",
+      "fn": "powerDensity",
+      "source": "known-answer",
+      "args": [398.1071705534973,20],
+      "page": "coloc-mpe",
+      "name": "Power density 398 mW EIRP at 20 cm = 0.0792 mW/cm²",
+      "note": "eirpMw = dbmToMw(26)",
+      "result": 0.07920090509239668,
+      "legacyCheck": {
+        "expected": 0.0792,
+        "tol": 0.0005,
+        "ok": true
+      }
+    },
+    {
+      "id": "ka.coloc-mpe.pth_2450_20cm",
+      "fn": "sarExemptionMw",
+      "source": "known-answer",
+      "args": [2450,20],
+      "page": "coloc-mpe",
+      "name": "P_th = ERP₂₀cm at 20 and 40 cm (2450 MHz → 3060 mW)",
+      "result": 3060,
+      "legacyCheck": {
+        "expected": 3060,
+        "tol": 0.000001,
+        "ok": true
+      }
+    },
+    {
+      "id": "ka.coloc-mpe.pth_2450_40cm",
+      "fn": "sarExemptionMw",
+      "source": "known-answer",
+      "args": [2450,40],
+      "page": "coloc-mpe",
+      "name": "P_th = ERP₂₀cm at 20 and 40 cm (2450 MHz → 3060 mW)",
+      "result": 3060,
+      "legacyCheck": {
+        "expected": 3060,
+        "tol": 0.000001,
+        "ok": true
+      }
+    },
+    {
+      "id": "ka.coloc-mpe.pth_2450_0p5cm",
+      "fn": "sarExemptionMw",
+      "source": "known-answer",
+      "args": [2450,0.5],
+      "page": "coloc-mpe",
+      "name": "P_th at 2450 MHz, 0.5 cm ≈ 2.7 mW",
+      "result": 2.7438341565329996,
+      "legacyCheck": {
+        "expected": 2.73,
+        "tol": 0.1,
+        "ok": true
+      }
+    },
+    {
+      "id": "ka.coloc-mpe.duty50_halves_ratio",
+      "fn": "exposure",
+      "source": "known-answer",
+      "args": [
+        {
+          "one": [
+            {
+              "tech": "wifi24",
+              "on": true,
+              "fc": 2437,
+              "bw": 20,
+              "whole": false,
+              "pwr": 20,
+              "gain": 3,
+              "duty": 100
+            }
+          ],
+          "half": [
+            {
+              "tech": "wifi24",
+              "on": true,
+              "fc": 2437,
+              "bw": 20,
+              "whole": false,
+              "pwr": 20,
+              "gain": 3,
+              "duty": 50
+            }
+          ]
+        },
+        20,
+        "mobile"
+      ],
+      "page": "coloc-mpe",
+      "name": "Duty cycle 50% halves a ratio",
+      "note": "radios = [newRadio(\"wifi24\")] vs [newRadio(\"wifi24\", {duty: 50})]; result.ratio = half.sum / one.sum",
+      "result": {
+        "one": {
+          "rows": [
+            {
+              "i": 0,
+              "name": "Wi-Fi 2.4 GHz",
+              "f": 2427,
+              "condMw": 100,
+              "eirpMw": 199.52623149688787,
+              "erpMw": 121.6186000646368,
+              "s": 0.0396944825240344,
+              "limit": 1,
+              "ratio": 0.0396944825240344,
+              "basis": "MPE"
+            }
+          ],
+          "sum": 0.0396944825240344
+        },
+        "half": {
+          "rows": [
+            {
+              "i": 0,
+              "name": "Wi-Fi 2.4 GHz",
+              "f": 2427,
+              "condMw": 50,
+              "eirpMw": 99.76311574844394,
+              "erpMw": 60.8093000323184,
+              "s": 0.0198472412620172,
+              "limit": 1,
+              "ratio": 0.0198472412620172,
+              "basis": "MPE"
+            }
+          ],
+          "sum": 0.0198472412620172
+        },
+        "ratio": 0.5
+      },
+      "legacyCheck": {
+        "ok": true
+      }
+    }
+  ]
+}
