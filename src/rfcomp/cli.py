@@ -102,7 +102,9 @@ def analyze(
         "measuredCenterMHz": measured_c,
     }
     if json_out:
-        typer.echo(json.dumps(as_json(result, {"settings": settings}), indent=2))
+        typer.echo(
+            json.dumps(as_json(result, {"settings": settings}), indent=2, ensure_ascii=False)
+        )
     else:
         header = [
             f"rfcomp {__version__} · {tech.value} · {trace.name}",
