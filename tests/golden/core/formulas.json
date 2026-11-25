@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "generator": "scripts/capture_golden.js",
+    "library": "inline formulas in tool-page known-answer tests",
+    "limitsVersion": "2026.11.5",
+    "sources": {
+      "legacy/rf-lab/shared/rfmath.js": "267a50e241ca764fb5e1d2623aeb55a431e0f915991594603f514fd1ccbb8f59",
+      "legacy/rf-lab/shared/limits.js": "d9d4ddb8049aa6b04bc4ddd70184fe9c3b1dba1d1b4c0dbc1e58860719ba4724",
+      "legacy/rf-lab/shared/coloc.js": "ef40a3fa365d8e3363314f1675da49fa13dfda22bedaf6594a53f899995f6542"
+    },
+    "encoding": "Typed arrays as lists; non-finite numbers as \"Infinity\" / \"-Infinity\" / \"NaN\"; undefined as null."
+  },
+  "cases": [
+    {
+      "id": "ka.cbrs-mask.eud_20MHz_total_eirp",
+      "fn": "expr",
+      "source": "known-answer",
+      "args": {
+        "expr": "23 + 10*log10(2)"
+      },
+      "page": "cbrs-mask",
+      "name": "EUD 20 MHz total EIRP limit = 26.01 dBm",
+      "result": 26.010299956639813,
+      "legacyCheck": {
+        "expected": 26.01,
+        "tol": 0.01,
+        "ok": true
+      }
+    },
+    {
+      "id": "ka.lte-mask.mask_minus13_0p2W",
+      "fn": "expr",
+      "source": "known-answer",
+      "args": {
+        "expr": "23 - (43 + 10*log10(0.2))"
+      },
+      "page": "lte-mask",
+      "name": "43 + 10·log10(P) gives −13 dBm at 0.2 W and 2 W",
+      "result": -13.010299956639813,
+      "legacyCheck": {
+        "expected": -13,
+        "tol": 0.02,
+        "ok": true
+      }
+    },
+    {
+      "id": "ka.lte-mask.mask_minus13_2W",
+      "fn": "expr",
+      "source": "known-answer",
+      "args": {
+        "expr": "33 - (43 + 10*log10(2))"
+      },
+      "page": "lte-mask",
+      "name": "43 + 10·log10(P) gives −13 dBm at 0.2 W and 2 W",
+      "result": -13.010299956639813,
+      "legacyCheck": {
+        "expected": -13,
+        "tol": 0.02,
+        "ok": true
+      }
+    }
+  ]
+}

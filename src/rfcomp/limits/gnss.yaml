@@ -1,0 +1,19 @@
+# rfcomp regulatory limits: GNSS receive bands (protected by §27.53(f) and §15.205)
+# Ported from legacy/rf-lab/shared/limits.js. `sections` must stay identical to RF.limits (tests/test_limits.py).
+# When a rule changes: update the value, its cite and meta.verified, bump root.version in common.yaml,
+# re-run scripts/capture_golden.js against the updated legacy file, and get RF sign-off before clearing review.
+# Pre-compliance reference, not legal advice. Confirm against current eCFR and FCC KDB procedures.
+meta:
+  title: GNSS receive bands (protected by §27.53(f) and §15.205)
+  cite: 47 CFR §27.53(f); §15.205(a)
+  verified: '2026-11-23'
+  verifiedAgainst: CFR text (law.cornell.edu mirror of eCFR), 2026-11-23
+  review: true
+  reviewNote: 'No per-value review flags existed in legacy limits.js; set per file pending RF sign-off (CLAUDE.md: Adham clears
+    review flags).'
+sections:
+  gnss:
+    bands:
+      L1: [1559, 1610]
+      L5: [1164, 1215]
+    note: Receive-only; protected by §27.53(f) for Band 13 and by restricted band 1435–1626.5 MHz.

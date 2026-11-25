@@ -1,0 +1,660 @@
+{
+  "meta": {
+    "generator": "scripts/capture_golden.js",
+    "library": "legacy/rf-lab/shared/limits.js (RF.limits)",
+    "limitsVersion": "2026.11.5",
+    "sources": {
+      "legacy/rf-lab/shared/rfmath.js": "267a50e241ca764fb5e1d2623aeb55a431e0f915991594603f514fd1ccbb8f59",
+      "legacy/rf-lab/shared/limits.js": "d9d4ddb8049aa6b04bc4ddd70184fe9c3b1dba1d1b4c0dbc1e58860719ba4724",
+      "legacy/rf-lab/shared/coloc.js": "ef40a3fa365d8e3363314f1675da49fa13dfda22bedaf6594a53f899995f6542"
+    },
+    "encoding": "Typed arrays as lists; non-finite numbers as \"Infinity\" / \"-Infinity\" / \"NaN\"; undefined as null.",
+    "note": "snapshot is RF.limits with functions omitted"
+  },
+  "functions": [
+    "fcc.unii.channelCenterMHz",
+    "fcc.rfExposure.mpe"
+  ],
+  "snapshot": {
+    "version": "2026.11.5",
+    "verified": "2026-11-23",
+    "verifiedAgainst": "CFR text (law.cornell.edu mirror of eCFR), 2026-11-23",
+    "fcc": {
+      "ism900": {
+        "cite": "47 CFR §15.247",
+        "band": {
+          "loMHz": 902,
+          "hiMHz": 928
+        },
+        "sources": [
+          "https://www.law.cornell.edu/cfr/text/47/15.247",
+          "https://www.law.cornell.edu/cfr/text/47/15.249"
+        ],
+        "dts": {
+          "min6dBBwKHz": 500,
+          "cite6dB": "§15.247(a)(2)",
+          "maxConductedDbm": 30,
+          "citePower": "§15.247(b)(3)",
+          "antennaGainRefDbi": 6,
+          "gainReductionDbPerDb": 1,
+          "citeGain": "§15.247(b)(4)",
+          "psdDbmPer3kHz": 8,
+          "citePsd": "§15.247(e)",
+          "bandEdgeDbc": {
+            "peakMethod": 20,
+            "averageMethod": 30
+          },
+          "citeBandEdge": "§15.247(d)"
+        },
+        "fhss": {
+          "cite": "§15.247(a)(1)(i), (b)(2)",
+          "narrow": {
+            "max20dBBwKHz": 250,
+            "minChannels": 50,
+            "maxDbm": 30,
+            "dwellS": 0.4,
+            "periodS": 20
+          },
+          "wide": {
+            "max20dBBwKHz": 500,
+            "minChannels": 25,
+            "maxDbm": 24,
+            "dwellS": 0.4,
+            "periodS": 10
+          }
+        },
+        "lowPower15249": {
+          "cite": "§15.249",
+          "fieldMvPerM3m": 50
+        }
+      },
+      "wifi24": {
+        "cite": "47 CFR §15.247",
+        "band": {
+          "loMHz": 2400,
+          "hiMHz": 2483.5
+        },
+        "sources": [
+          "https://www.law.cornell.edu/cfr/text/47/15.247",
+          "https://www.law.cornell.edu/cfr/text/47/15.205"
+        ],
+        "dts": {
+          "min6dBBwKHz": 500,
+          "maxConductedDbm": 30,
+          "psdDbmPer3kHz": 8,
+          "antennaGainRefDbi": 6,
+          "bandEdgeDbc": {
+            "peakMethod": 20,
+            "averageMethod": 30
+          },
+          "ptpGainNote": "Fixed point-to-point: reduce power 1 dB per 3 dB of gain above 6 dBi (§15.247(c)(1)(i))"
+        },
+        "restrictedAbove": {
+          "loMHz": 2483.5,
+          "hiMHz": 2500,
+          "cite": "§15.205(a)"
+        },
+        "restrictedBelow": {
+          "loMHz": 2310,
+          "hiMHz": 2390,
+          "cite": "§15.205(a)"
+        },
+        "channelsUS": {
+          "first": 1,
+          "last": 11,
+          "f1MHz": 2412,
+          "stepMHz": 5,
+          "note": "Channels 12–13 are allowed only if the 2483.5 MHz restricted-band limit is met, usually with heavy power back-off."
+        }
+      },
+      "unii": {
+        "cite": "47 CFR §15.407",
+        "sources": [
+          "https://www.law.cornell.edu/cfr/text/47/15.407"
+        ],
+        "antennaGainRefDbi": 6,
+        "gainNote": "Above 6 dBi, reduce conducted power and PSD dB for dB. Exceptions: U-NII-1 fixed point-to-point up to 23 dBi with no reduction (§15.407(a)(1)(iii)); U-NII-3 fixed point-to-point without reduction (§15.407(a)(3)).",
+        "subbands": {
+          "U-NII-1": {
+            "loMHz": 5150,
+            "hiMHz": 5250,
+            "cite": "§15.407(a)(1)",
+            "channels": [36,40,44,48],
+            "dfs": false,
+            "classes": {
+              "client": {
+                "label": "Client device",
+                "powerDbm": 24,
+                "psdDbmPerMHz": 11
+              },
+              "apIndoor": {
+                "label": "Indoor access point",
+                "powerDbm": 30,
+                "psdDbmPerMHz": 17
+              },
+              "apOutdoor": {
+                "label": "Outdoor access point",
+                "powerDbm": 30,
+                "psdDbmPerMHz": 17,
+                "note": "EIRP above 30° elevation limited to 125 mW (21 dBm)."
+              }
+            },
+            "oob": {
+              "type": "flat",
+              "eirpDbmPerMHz": -27,
+              "outsideMHz": [5150,5350],
+              "cite": "§15.407(b)(1)"
+            }
+          },
+          "U-NII-2A": {
+            "loMHz": 5250,
+            "hiMHz": 5350,
+            "cite": "§15.407(a)(2)",
+            "channels": [52,56,60,64],
+            "dfs": true,
+            "classes": {
+              "any": {
+                "label": "Any device",
+                "powerDbm": 24,
+                "powerFormula": "11 + 10·log10(B)",
+                "psdDbmPerMHz": 11
+              }
+            },
+            "oob": {
+              "type": "flat",
+              "eirpDbmPerMHz": -27,
+              "outsideMHz": [5150,5350],
+              "cite": "§15.407(b)(2)"
+            }
+          },
+          "U-NII-2C": {
+            "loMHz": 5470,
+            "hiMHz": 5725,
+            "cite": "§15.407(a)(2)",
+            "channels": [100,104,108,112,116,120,124,128,132,136,140,144],
+            "dfs": true,
+            "classes": {
+              "any": {
+                "label": "Any device",
+                "powerDbm": 24,
+                "powerFormula": "11 + 10·log10(B)",
+                "psdDbmPerMHz": 11
+              }
+            },
+            "oob": {
+              "type": "flat",
+              "eirpDbmPerMHz": -27,
+              "outsideMHz": [5470,5725],
+              "cite": "§15.407(b)(3)"
+            }
+          },
+          "U-NII-3": {
+            "loMHz": 5725,
+            "hiMHz": 5850,
+            "cite": "§15.407(a)(3)",
+            "channels": [149,153,157,161,165],
+            "dfs": false,
+            "min6dBBwKHz": 500,
+            "cite6dB": "§15.407(e)",
+            "classes": {
+              "any": {
+                "label": "Any device",
+                "powerDbm": 30,
+                "psdDbmPer500kHz": 30
+              }
+            },
+            "oob": {
+              "type": "mask",
+              "outsideMHz": [5725,5850],
+              "cite": "§15.407(b)(4)(i)",
+              "points": [
+                [0,27],
+                [5,15.6],
+                [25,10],
+                [75,-27],
+                [1000000,-27]
+              ]
+            }
+          }
+        },
+        "restricted": [
+          [4500,5150],
+          [5350,5460]
+        ],
+        "dfs": {
+          "cite": "§15.407(h)(2); KDB 905462",
+          "thresholdDbm": {
+            "lowPower": -62,
+            "other": -64
+          },
+          "lowPowerCondition": {
+            "eirpBelowDbm": 23,
+            "psdBelowDbmPerMHz": 10
+          },
+          "cacS": 60,
+          "channelMoveS": 10,
+          "closingTxMs": 200,
+          "nonOccupancyMin": 30,
+          "note": "−62 dBm applies only when EIRP < 200 mW AND PSD < 10 dBm/MHz; otherwise −64 dBm (EIRP 200 mW–1 W). Normal traffic stops within 200 ms; all transmission within 10 s."
+        },
+        "tpc": {
+          "cite": "§15.407(h)(1)",
+          "requiredAtEirpDbm": 27,
+          "reduceDb": 6,
+          "note": "Required in U-NII-2A/2C when max EIRP is 500 mW or more; must operate at least 6 dB below a 30 dBm mean EIRP."
+        }
+      },
+      "lte": {
+        "sources": [
+          "https://www.law.cornell.edu/cfr/text/47/22.913",
+          "https://www.law.cornell.edu/cfr/text/47/22.917",
+          "https://www.law.cornell.edu/cfr/text/47/24.232",
+          "https://www.law.cornell.edu/cfr/text/47/24.238",
+          "https://www.law.cornell.edu/cfr/text/47/27.50",
+          "https://www.law.cornell.edu/cfr/text/47/27.53"
+        ],
+        "erpOffsetDb": 2.15,
+        "mask": {
+          "absDbm": -13,
+          "formula": "Attenuation ≥ 43 + 10·log10(P) dB below transmitter power P (W), i.e. −13 dBm absolute in the reference bandwidth",
+          "note": "Reference bandwidth and the near-edge allowance differ by band: 1 MHz above 1 GHz (PCS/AWS), 100 kHz below 1 GHz (Parts 22 and 27)."
+        },
+        "bands": {
+          "B2": {
+            "dlLoMHz": 1930,
+            "dlHiMHz": 1990,
+            "name": "PCS",
+            "ulLoMHz": 1850,
+            "ulHiMHz": 1910,
+            "part": "24 Subpart E",
+            "limitType": "EIRP",
+            "limitDbm": 33,
+            "citePower": "§24.232(c)",
+            "citeMask": "§24.238",
+            "paprDb": 13,
+            "citePapr": "§24.232(d)",
+            "maskBwHz": 1000000,
+            "nearEdge": {
+              "widthHz": 1000000,
+              "rbwFracOfEbw": 0.01
+            },
+            "bwsMHz": [1.4,3,5,10,15,20]
+          },
+          "B4": {
+            "dlLoMHz": 2110,
+            "dlHiMHz": 2155,
+            "name": "AWS-1",
+            "ulLoMHz": 1710,
+            "ulHiMHz": 1755,
+            "part": "27",
+            "limitType": "EIRP",
+            "limitDbm": 30,
+            "citePower": "§27.50(d)(4)",
+            "citeMask": "§27.53(h)",
+            "paprDb": 13,
+            "citePapr": "§27.50(d)(5)",
+            "maskBwHz": 1000000,
+            "nearEdge": {
+              "widthHz": 1000000,
+              "rbwFracOfEbw": 0.01
+            },
+            "bwsMHz": [1.4,3,5,10,15,20]
+          },
+          "B5": {
+            "dlLoMHz": 869,
+            "dlHiMHz": 894,
+            "name": "Cellular 850",
+            "ulLoMHz": 824,
+            "ulHiMHz": 849,
+            "part": "22 Subpart H",
+            "limitType": "ERP",
+            "limitDbm": 38.45,
+            "citePower": "§22.913(a)(5)",
+            "citeMask": "§22.917",
+            "paprDb": null,
+            "maskBwHz": 100000,
+            "nearEdge": {
+              "widthHz": 1000000,
+              "rbwFracOfEbw": 0.01
+            },
+            "bwsMHz": [1.4,3,5,10]
+          },
+          "B12": {
+            "dlLoMHz": 729,
+            "dlHiMHz": 746,
+            "name": "Lower 700",
+            "ulLoMHz": 699,
+            "ulHiMHz": 716,
+            "part": "27",
+            "limitType": "ERP",
+            "limitDbm": 34.77,
+            "citePower": "§27.50(c)(10)",
+            "citeMask": "§27.53(g)",
+            "paprDb": null,
+            "maskBwHz": 100000,
+            "nearEdge": {
+              "widthHz": 100000,
+              "minRbwHz": 30000
+            },
+            "bwsMHz": [1.4,3,5,10],
+            "note": "Portable limit (3 W ERP, §27.50(c)(10)) shown; mobile stations 30 W ERP (§27.50(c)(9))."
+          },
+          "B13": {
+            "dlLoMHz": 746,
+            "dlHiMHz": 756,
+            "name": "Upper 700 C",
+            "ulLoMHz": 777,
+            "ulHiMHz": 787,
+            "part": "27",
+            "limitType": "ERP",
+            "limitDbm": 34.77,
+            "citePower": "§27.50(b)(10)",
+            "citeMask": "§27.53(c)",
+            "paprDb": null,
+            "maskBwHz": 100000,
+            "nearEdge": {
+              "widthHz": 100000,
+              "minRbwHz": 30000
+            },
+            "extraMasks": [
+              {
+                "loMHz": 763,
+                "hiMHz": 775,
+                "dbm": -35,
+                "bwHz": 6250,
+                "cite": "§27.53(c)(4), (c)(6)"
+              },
+              {
+                "loMHz": 793,
+                "hiMHz": 805,
+                "dbm": -35,
+                "bwHz": 6250,
+                "cite": "§27.53(c)(4), (c)(6)"
+              }
+            ],
+            "bwsMHz": [5,10],
+            "note": "Portable limit shown (mobile 30 W ERP, §27.50(b)(9)). Mobile/portable emissions in 763–775 and 793–805 MHz must be attenuated 65 + 10·log10(P) dB (−35 dBm in 6.25 kHz, §27.53(c)(4)). GNSS: ≤ −70 dBW/MHz EIRP wideband and −80 dBW discrete in 1559–1610 MHz (§27.53(f))."
+          },
+          "B66": {
+            "dlLoMHz": 2110,
+            "dlHiMHz": 2200,
+            "name": "AWS-1/3",
+            "ulLoMHz": 1710,
+            "ulHiMHz": 1780,
+            "part": "27",
+            "limitType": "EIRP",
+            "limitDbm": 30,
+            "citePower": "§27.50(d)(4)",
+            "citeMask": "§27.53(h)",
+            "paprDb": 13,
+            "citePapr": "§27.50(d)(5)",
+            "maskBwHz": 1000000,
+            "nearEdge": {
+              "widthHz": 1000000,
+              "rbwFracOfEbw": 0.01
+            },
+            "bwsMHz": [1.4,3,5,10,15,20]
+          },
+          "B71": {
+            "dlLoMHz": 617,
+            "dlHiMHz": 652,
+            "name": "600 MHz",
+            "ulLoMHz": 663,
+            "ulHiMHz": 698,
+            "part": "27",
+            "limitType": "ERP",
+            "limitDbm": 34.77,
+            "citePower": "§27.50(c)(10)",
+            "citeMask": "§27.53(g)",
+            "paprDb": null,
+            "maskBwHz": 100000,
+            "nearEdge": {
+              "widthHz": 100000,
+              "minRbwHz": 30000
+            },
+            "bwsMHz": [5,10,15,20]
+          }
+        },
+        "occupiedFraction": 0.9,
+        "freqStability": {
+          "cite": "§2.1055; §22.355; §24.235; §27.54",
+          "note": "Fundamental must stay within the authorized band over temperature and voltage; Part 22 mobile ±2.5 ppm."
+        }
+      },
+      "cbrs": {
+        "cite": "47 CFR Part 96",
+        "band": {
+          "loMHz": 3550,
+          "hiMHz": 3700
+        },
+        "sources": [
+          "https://www.law.cornell.edu/cfr/text/47/96.41"
+        ],
+        "classes": {
+          "eud": {
+            "label": "End user device (EUD)",
+            "eirpDbmPer10MHz": 23,
+            "psdDbmPerMHz": null,
+            "cite": "§96.41(b)",
+            "cbsd": false,
+            "note": "Operates only under the control of a registered CBSD; no SAS registration of its own."
+          },
+          "catA": {
+            "label": "CBSD Category A",
+            "eirpDbmPer10MHz": 30,
+            "psdDbmPerMHz": 20,
+            "cite": "§96.41(b)",
+            "cbsd": true,
+            "note": "Registers with a SAS; outdoor antenna height ≤ 6 m HAAT; geolocation within ±50 m horizontal, ±3 m vertical."
+          },
+          "catB": {
+            "label": "CBSD Category B",
+            "eirpDbmPer10MHz": 47,
+            "psdDbmPerMHz": 37,
+            "cite": "§96.41(b)",
+            "cbsd": true,
+            "note": "Outdoor only, professionally installed (CPI), registered with a SAS; authorized only once an ESC is operating."
+          }
+        },
+        "mask": {
+          "cite": "§96.41(e)",
+          "nearDbmPerMHz": -13,
+          "farDbmPerMHz": -25,
+          "nearWithinMHz": {
+            "cbsd": 10,
+            "eud": "B"
+          },
+          "additional": [
+            {
+              "belowMHz": 3540,
+              "aboveMHz": 3710,
+              "dbmPerMHz": -25
+            },
+            {
+              "belowMHz": 3530,
+              "aboveMHz": 3720,
+              "dbmPerMHz": -40
+            }
+          ],
+          "nearEdgeWidthMHz": 1,
+          "nearEdgeRbwFracOfEbw": 0.01,
+          "eudAclrDb": 30,
+          "note": "Conducted, per MHz, relative to the assigned channel edges. Additional limits: −25 dBm/MHz below 3540 and above 3710 MHz, −40 dBm/MHz below 3530 and above 3720 MHz."
+        },
+        "paprDb": 13,
+        "citePapr": "§96.41(g)",
+        "paprAppliesTo": "CBSD",
+        "sas": {
+          "cite": "§96.39, §96.45, §96.53–96.66",
+          "note": "CBSDs must register with a Spectrum Access System and operate only on channels and powers it assigns."
+        },
+        "bwsMHz": [5,10,15,20]
+      },
+      "gnss": {
+        "bands": {
+          "L1": [1559,1610],
+          "L5": [1164,1215]
+        },
+        "note": "Receive-only; protected by §27.53(f) for Band 13 and by restricted band 1435–1626.5 MHz."
+      },
+      "generalLimits15209": {
+        "cite": "§15.209(a); §15.35(b)",
+        "distanceM": 3,
+        "sources": [
+          "https://www.law.cornell.edu/cfr/text/47/15.209",
+          "https://www.law.cornell.edu/cfr/text/47/15.35"
+        ],
+        "above960MHz": {
+          "avgDbuvPerM": 54,
+          "peakDbuvPerM": 74
+        }
+      },
+      "restrictedBands15205": {
+        "sources": [
+          "https://www.law.cornell.edu/cfr/text/47/15.205"
+        ],
+        "cite": "§15.205(a) (bands from 30 MHz up; everything above 38.6 GHz is restricted)",
+        "mhz": [
+          [37.5,38.25],
+          [73,74.6],
+          [74.8,75.2],
+          [108,121.94],
+          [123,138],
+          [149.9,150.05],
+          [156.52475,156.52525],
+          [156.7,156.9],
+          [162.0125,167.17],
+          [167.72,173.2],
+          [240,285],
+          [322,335.4],
+          [399.9,410],
+          [608,614],
+          [960,1240],
+          [1300,1427],
+          [1435,1626.5],
+          [1645.5,1646.5],
+          [1660,1710],
+          [1718.8,1722.2],
+          [2200,2300],
+          [2310,2390],
+          [2483.5,2500],
+          [2690,2900],
+          [3260,3267],
+          [3332,3339],
+          [3345.8,3358],
+          [3600,4400],
+          [4500,5150],
+          [5350,5460],
+          [7250,7750],
+          [8025,8500],
+          [9000,9200],
+          [9300,9500],
+          [10600,12700],
+          [13250,13400],
+          [14470,14500],
+          [15350,16200],
+          [17700,21400],
+          [22010,23120],
+          [23600,24000],
+          [31200,31800],
+          [36430,36500],
+          [38600,1000000]
+        ]
+      },
+      "measurementRange": {
+        "sources": [
+          "https://www.law.cornell.edu/cfr/text/47/15.33",
+          "https://www.law.cornell.edu/cfr/text/47/2.1057"
+        ],
+        "cite": "§15.33(a); §2.1057(a)",
+        "harmonics": 10,
+        "part15MaxMHz": 40000,
+        "note": "Emissions are measured up to the 10th harmonic of the highest fundamental. For Part 15 devices below 10 GHz the search stops at the 10th harmonic or 40 GHz, whichever is lower; licensed transmitters (§2.1057) go to the 10th harmonic."
+      },
+      "acConducted15207": {
+        "cite": "§15.207(a)",
+        "note": "150 kHz–30 MHz, quasi-peak and average limits; see rule table"
+      },
+      "rfExposure": {
+        "sources": [
+          "https://www.law.cornell.edu/cfr/text/47/1.1310",
+          "https://www.law.cornell.edu/cfr/text/47/1.1307"
+        ],
+        "sarExemptionSource": "P_th formula (§1.1307(b)(3)(i)(B)) is an image in the CFR; constants confirmed from FCC-filed RF exposure reports (e.g. fcc.report/FCC-ID/w2eichimev34/6248169.pdf) and KDB 447498 D04 App. B",
+        "cite": "47 CFR §1.1310",
+        "mpeGeneralPopulation": "f/1500 mW/cm² for 300–1500 MHz; 1 mW/cm² for 1.5–100 GHz",
+        "sarWPerKg": 1.6,
+        "mobileSeparationCm": 20
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "ka.wifi-unii.ch36",
+      "fn": "channelCenterMHz",
+      "source": "known-answer",
+      "args": [36],
+      "page": "wifi-unii",
+      "name": "Channel 36 center = 5180 MHz",
+      "result": 5180,
+      "legacyCheck": {
+        "expected": 5180,
+        "tol": 0,
+        "ok": true
+      }
+    },
+    {
+      "id": "x.mpe.100MHz",
+      "fn": "mpe",
+      "source": "extra",
+      "args": [100],
+      "note": "RF.limits.fcc.rfExposure.mpe",
+      "result": 0.06666666666666667
+    },
+    {
+      "id": "x.mpe.915MHz",
+      "fn": "mpe",
+      "source": "extra",
+      "args": [915],
+      "note": "RF.limits.fcc.rfExposure.mpe",
+      "result": 0.61
+    },
+    {
+      "id": "x.mpe.boundary_1500MHz",
+      "fn": "mpe",
+      "source": "extra",
+      "args": [1500],
+      "note": "RF.limits.fcc.rfExposure.mpe",
+      "result": 1
+    },
+    {
+      "id": "x.mpe.2450MHz",
+      "fn": "mpe",
+      "source": "extra",
+      "args": [2450],
+      "note": "RF.limits.fcc.rfExposure.mpe",
+      "result": 1
+    },
+    {
+      "id": "x.channelCenterMHz.ch1",
+      "fn": "channelCenterMHz",
+      "source": "extra",
+      "args": [1],
+      "result": 5005
+    },
+    {
+      "id": "x.channelCenterMHz.ch100",
+      "fn": "channelCenterMHz",
+      "source": "extra",
+      "args": [100],
+      "result": 5500
+    },
+    {
+      "id": "x.channelCenterMHz.ch165",
+      "fn": "channelCenterMHz",
+      "source": "extra",
+      "args": [165],
+      "result": 5825
+    }
+  ]
+}

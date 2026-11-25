@@ -1,0 +1,18 @@
+# Radio presets for co-location analysis, ported from legacy/rf-lab/shared/coloc.js (TECH).
+# pwr / gain / duty / fc / bw are typical module starting values, not limits.
+# Band edges are never written here: `band` names a rfcomp.limits section whose band (or, for `unii`, the span of
+# its sub-bands) is the transmit range; `receiveOnly` names a limits section whose `bands` are receive-only.
+techs:
+  halow: {label: Wi-Fi HaLow, part: '15', rule: §15.247, band: ism900, rxName: HaLow, bws: [1, 2, 4, 8], fc: 915, bw: 1, pwr: 24, gain: 2, duty: 100}
+  wifi24: {label: Wi-Fi 2.4 GHz, part: '15', rule: §15.247, band: wifi24, rxName: Wi-Fi 2.4 GHz, bws: [20, 40], fc: 2437, bw: 20, pwr: 20, gain: 3, duty: 100}
+  wifi5: {label: Wi-Fi 5 GHz, part: '15', rule: §15.407, band: unii, rxName: Wi-Fi 5 GHz, bws: [20, 40, 80], fc: 5500, bw: 20, pwr: 18, gain: 4, duty: 100}
+  cbrs: {label: CBRS (B48), part: '96', rule: Part 96, band: cbrs, rxName: CBRS, bws: [10, 20], fc: 3625, bw: 20, pwr: 23, gain: 3, duty: 100, licensed: true}
+  gnss: {label: GNSS receiver, part: null, receiveOnly: gnss, rxPrefix: 'GNSS ', bws: [], fc: 1575.42, bw: 0}
+
+# One preset per limits lte.bands entry (key `lte<band>`), uplink = transmit, downlink = receive.
+lte:
+  minBwMHz: 5          # offer only channel bandwidths >= 5 MHz
+  maxDefaultBwMHz: 10  # default bw = min(10, widest allowed)
+  pwr: 23
+  gain: 2
+  duty: 100

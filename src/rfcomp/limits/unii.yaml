@@ -1,0 +1,124 @@
+# rfcomp regulatory limits: Wi-Fi 5 GHz U-NII (§15.407)
+# Ported from legacy/rf-lab/shared/limits.js. `sections` must stay identical to RF.limits (tests/test_limits.py).
+# When a rule changes: update the value, its cite and meta.verified, bump root.version in common.yaml,
+# re-run scripts/capture_golden.js against the updated legacy file, and get RF sign-off before clearing review.
+# Pre-compliance reference, not legal advice. Confirm against current eCFR and FCC KDB procedures.
+meta:
+  title: Wi-Fi 5 GHz U-NII (§15.407)
+  cite: 47 CFR §15.407
+  verified: '2026-11-23'
+  verifiedAgainst: CFR text (law.cornell.edu mirror of eCFR), 2026-11-23
+  review: true
+  reviewNote: 'No per-value review flags existed in legacy limits.js; set per file pending RF sign-off (CLAUDE.md: Adham clears
+    review flags).'
+sections:
+  unii:
+    cite: 47 CFR §15.407
+    sources: ['https://www.law.cornell.edu/cfr/text/47/15.407']
+    antennaGainRefDbi: 6
+    gainNote: 'Above 6 dBi, reduce conducted power and PSD dB for dB. Exceptions: U-NII-1 fixed point-to-point up to 23 dBi
+      with no reduction (§15.407(a)(1)(iii)); U-NII-3 fixed point-to-point without reduction (§15.407(a)(3)).'
+    subbands:
+      U-NII-1:
+        loMHz: 5150
+        hiMHz: 5250
+        cite: §15.407(a)(1)
+        channels: [36, 40, 44, 48]
+        dfs: false
+        classes:
+          client:
+            label: Client device
+            powerDbm: 24
+            psdDbmPerMHz: 11
+          apIndoor:
+            label: Indoor access point
+            powerDbm: 30
+            psdDbmPerMHz: 17
+          apOutdoor:
+            label: Outdoor access point
+            powerDbm: 30
+            psdDbmPerMHz: 17
+            note: EIRP above 30° elevation limited to 125 mW (21 dBm).
+        oob:
+          type: flat
+          eirpDbmPerMHz: -27
+          outsideMHz: [5150, 5350]
+          cite: §15.407(b)(1)
+      U-NII-2A:
+        loMHz: 5250
+        hiMHz: 5350
+        cite: §15.407(a)(2)
+        channels: [52, 56, 60, 64]
+        dfs: true
+        classes:
+          any:
+            label: Any device
+            powerDbm: 24
+            powerFormula: 11 + 10·log10(B)
+            psdDbmPerMHz: 11
+        oob:
+          type: flat
+          eirpDbmPerMHz: -27
+          outsideMHz: [5150, 5350]
+          cite: §15.407(b)(2)
+      U-NII-2C:
+        loMHz: 5470
+        hiMHz: 5725
+        cite: §15.407(a)(2)
+        channels: [100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144]
+        dfs: true
+        classes:
+          any:
+            label: Any device
+            powerDbm: 24
+            powerFormula: 11 + 10·log10(B)
+            psdDbmPerMHz: 11
+        oob:
+          type: flat
+          eirpDbmPerMHz: -27
+          outsideMHz: [5470, 5725]
+          cite: §15.407(b)(3)
+      U-NII-3:
+        loMHz: 5725
+        hiMHz: 5850
+        cite: §15.407(a)(3)
+        channels: [149, 153, 157, 161, 165]
+        dfs: false
+        min6dBBwKHz: 500
+        cite6dB: §15.407(e)
+        classes:
+          any:
+            label: Any device
+            powerDbm: 30
+            psdDbmPer500kHz: 30
+        oob:
+          type: mask
+          outsideMHz: [5725, 5850]
+          cite: §15.407(b)(4)(i)
+          points: [[0, 27], [5, 15.6], [25, 10], [75, -27], [1000000, -27]]
+    restricted: [[4500, 5150], [5350, 5460]]
+    dfs:
+      cite: §15.407(h)(2); KDB 905462
+      thresholdDbm:
+        lowPower: -62
+        other: -64
+      lowPowerCondition:
+        eirpBelowDbm: 23
+        psdBelowDbmPerMHz: 10
+      cacS: 60
+      channelMoveS: 10
+      closingTxMs: 200
+      nonOccupancyMin: 30
+      note: −62 dBm applies only when EIRP < 200 mW AND PSD < 10 dBm/MHz; otherwise −64 dBm (EIRP 200 mW–1 W). Normal traffic
+        stops within 200 ms; all transmission within 10 s.
+    tpc:
+      cite: §15.407(h)(1)
+      requiredAtEirpDbm: 27
+      reduceDb: 6
+      note: Required in U-NII-2A/2C when max EIRP is 500 mW or more; must operate at least 6 dB below a 30 dBm mean EIRP.
+functions:
+  channelCenter:
+    cite: 47 CFR §15.407 (802.11 5 GHz channel plan)
+    note: 'RF.limits.fcc.unii.channelCenterMHz: center = base + step·channel.'
+    baseMHz: 5000
+    stepMHz: 5

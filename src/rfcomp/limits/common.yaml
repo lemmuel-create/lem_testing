@@ -1,0 +1,91 @@
+# rfcomp regulatory limits: Limits shared by all technologies: §15.209 general limits, §15.205 restricted bands, §15.33 measurement range, §15.207 AC conducted, §1.1310 RF exposure
+# Ported from legacy/rf-lab/shared/limits.js. `sections` must stay identical to RF.limits (tests/test_limits.py).
+# When a rule changes: update the value, its cite and meta.verified, bump root.version in common.yaml,
+# re-run scripts/capture_golden.js against the updated legacy file, and get RF sign-off before clearing review.
+# Pre-compliance reference, not legal advice. Confirm against current eCFR and FCC KDB procedures.
+meta:
+  title: 'Limits shared by all technologies: §15.209 general limits, §15.205 restricted bands, §15.33 measurement range, §15.207
+    AC conducted, §1.1310 RF exposure'
+  cite: 47 CFR §15.205, §15.207, §15.209, §15.33, §2.1057, §1.1307, §1.1310
+  verified: '2026-11-23'
+  verifiedAgainst: CFR text (law.cornell.edu mirror of eCFR), 2026-11-23
+  review: true
+  reviewNote: 'No per-value review flags existed in legacy limits.js; set per file pending RF sign-off (CLAUDE.md: Adham clears
+    review flags).'
+root:
+  version: 2026.11.5
+  verified: '2026-11-23'
+  verifiedAgainst: CFR text (law.cornell.edu mirror of eCFR), 2026-11-23
+sections:
+  generalLimits15209:
+    cite: §15.209(a); §15.35(b)
+    distanceM: 3
+    sources: ['https://www.law.cornell.edu/cfr/text/47/15.209', 'https://www.law.cornell.edu/cfr/text/47/15.35']
+    above960MHz:
+      avgDbuvPerM: 54
+      peakDbuvPerM: 74
+  restrictedBands15205:
+    sources: ['https://www.law.cornell.edu/cfr/text/47/15.205']
+    cite: §15.205(a) (bands from 30 MHz up; everything above 38.6 GHz is restricted)
+    mhz: [[37.5, 38.25], [73, 74.6], [74.8, 75.2], [108, 121.94], [123, 138], [149.9, 150.05], [156.52475, 156.52525], [156.7,
+        156.9], [162.0125, 167.17], [167.72, 173.2], [240, 285], [322, 335.4], [399.9, 410], [608, 614], [960, 1240], [1300,
+        1427], [1435, 1626.5], [1645.5, 1646.5], [1660, 1710], [1718.8, 1722.2], [2200, 2300], [2310, 2390], [2483.5, 2500],
+      [2690, 2900], [3260, 3267], [3332, 3339], [3345.8, 3358], [3600, 4400], [4500, 5150], [5350, 5460], [7250, 7750], [
+        8025, 8500], [9000, 9200], [9300, 9500], [10600, 12700], [13250, 13400], [14470, 14500], [15350, 16200], [17700, 21400],
+      [22010, 23120], [23600, 24000], [31200, 31800], [36430, 36500], [38600, 1000000]]
+  measurementRange:
+    sources: ['https://www.law.cornell.edu/cfr/text/47/15.33', 'https://www.law.cornell.edu/cfr/text/47/2.1057']
+    cite: §15.33(a); §2.1057(a)
+    harmonics: 10
+    part15MaxMHz: 40000
+    note: Emissions are measured up to the 10th harmonic of the highest fundamental. For Part 15 devices below 10 GHz the
+      search stops at the 10th harmonic or 40 GHz, whichever is lower; licensed transmitters (§2.1057) go to the 10th harmonic.
+  acConducted15207:
+    cite: §15.207(a)
+    note: 150 kHz–30 MHz, quasi-peak and average limits; see rule table
+  rfExposure:
+    sources: ['https://www.law.cornell.edu/cfr/text/47/1.1310', 'https://www.law.cornell.edu/cfr/text/47/1.1307']
+    sarExemptionSource: P_th formula (§1.1307(b)(3)(i)(B)) is an image in the CFR; constants confirmed from FCC-filed RF exposure
+      reports (e.g. fcc.report/FCC-ID/w2eichimev34/6248169.pdf) and KDB 447498 D04 App. B
+    cite: 47 CFR §1.1310
+    mpeGeneralPopulation: f/1500 mW/cm² for 300–1500 MHz; 1 mW/cm² for 1.5–100 GHz
+    sarWPerKg: 1.6
+    mobileSeparationCm: 20
+functions:
+  mpe:
+    cite: 47 CFR §1.1310
+    note: 'RF.limits.fcc.rfExposure.mpe: general-population MPE in mW/cm² as used by limits.js (300 MHz and up).'
+    segments:
+    - belowMHz: 1500
+      kind: linear
+      divisorMHz: 1500
+    - kind: const
+      value: 1
+  mpeTable:
+    cite: 47 CFR §1.1310 Table 1(B)
+    note: Full general-population MPE table used by the co-location tools (RF.coloc.mpeLimit), mW/cm².
+    segments:
+    - belowMHz: 30
+      kind: inverseSquare
+      k: 180
+    - belowMHz: 300
+      kind: const
+      value: 0.2
+    - belowMHz: 1500
+      kind: linear
+      divisorMHz: 1500
+    - kind: const
+      value: 1.0
+  sarExemption:
+    cite: 47 CFR §1.1307(b)(3)(i)(B)
+    note: 'P_th = ERP_20cm·(d/20)^x, x = −log10(60 / (ERP_20cm·√f)), f in GHz; P_th = ERP_20cm beyond 20 cm. Outside the range:
+      no threshold.'
+    fMinGHz: 0.3
+    fMaxGHz: 6
+    dMinCm: 0.5
+    dMaxCm: 40
+    splitGHz: 1.5
+    erp20LowMwPerGHz: 2040
+    erp20HighMw: 3060
+    xConst: 60
+    refDistanceCm: 20

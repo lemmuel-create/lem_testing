@@ -1,0 +1,225 @@
+{
+  "meta": {
+    "generator": "scripts/capture_golden.js",
+    "library": "tool-page RF.test.add cases not captured",
+    "limitsVersion": "2026.11.5",
+    "sources": {
+      "legacy/rf-lab/shared/rfmath.js": "267a50e241ca764fb5e1d2623aeb55a431e0f915991594603f514fd1ccbb8f59",
+      "legacy/rf-lab/shared/limits.js": "d9d4ddb8049aa6b04bc4ddd70184fe9c3b1dba1d1b4c0dbc1e58860719ba4724",
+      "legacy/rf-lab/shared/coloc.js": "ef40a3fa365d8e3363314f1675da49fa13dfda22bedaf6594a53f899995f6542"
+    },
+    "encoding": "Typed arrays as lists; non-finite numbers as \"Infinity\" / \"-Infinity\" / \"NaN\"; undefined as null."
+  },
+  "cases": [
+    {
+      "page": "bandwidth",
+      "name": "Simulated HaLow 1 MHz passes with 850–920 kHz",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "bandwidth",
+      "name": "Simulated narrowband FSK fails 500 kHz",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "bandwidth",
+      "name": "Channel power recovers the set 30 dBm",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "wifi-24",
+      "name": "Channel 6 center = 2437 MHz",
+      "reason": "calls a page-local helper not in the shared libraries: centerOf()"
+    },
+    {
+      "page": "wifi-24",
+      "name": "20 MHz OFDM 6 dB BW 15–19 MHz, passes 500 kHz",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "wifi-24",
+      "name": "Conducted power recovers 20 dBm",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "wifi-24",
+      "name": "Restricted margin moves 1 dB per dB of power (ch 11)",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "wifi-24",
+      "name": "Channel 6 at 20 dBm passes both restricted bands",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "wifi-24",
+      "name": "Channel 13 at 20 dBm fails 2483.5 MHz",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "wifi-unii",
+      "name": "U-NII-2A limit, B = 10 MHz → 21 dBm",
+      "reason": "calls a page-local helper not in the shared libraries: powerLimit()"
+    },
+    {
+      "page": "wifi-unii",
+      "name": "U-NII-2A limit, B = 22 MHz → 24 dBm (250 mW cap)",
+      "reason": "calls a page-local helper not in the shared libraries: powerLimit()"
+    },
+    {
+      "page": "wifi-unii",
+      "name": "U-NII-2C ch 100, 20 MHz, 18 dBm passes power, PSD and OOB",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "wifi-unii",
+      "name": "Conducted power recovers 18 dBm",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "wifi-unii",
+      "name": "20 MHz 26 dB EBW between 18 and 23 MHz",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "wifi-unii",
+      "name": "TPC flagged at 25 dBm + 3 dBi in U-NII-2C",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "lte-mask",
+      "name": "B66 20 MHz mid, 23 dBm: conducted power 23 dBm",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "lte-mask",
+      "name": "B66 20 MHz OBW ≈ 18 MHz",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "lte-mask",
+      "name": "B66 default passes mask and EIRP",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "lte-mask",
+      "name": "B5 uses ERP",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "lte-mask",
+      "name": "B13 −20 dBc at 23 dBm fails the −35 dBm public-safety limit",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "lte-mask",
+      "name": "Below 1 GHz bands use a 100 kHz reference bandwidth",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "lte-mask",
+      "name": "Mask margin moves 1 dB per dB of power",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "cbrs-mask",
+      "name": "CBSD mask: −13 within 10 MHz, −25 beyond, −25 below 3540, −40 below 3530",
+      "reason": "calls a page-local helper not in the shared libraries: maskLimit()"
+    },
+    {
+      "page": "cbrs-mask",
+      "name": "EUD 5 MHz channel: −13 only within 5 MHz (0 to B), −25 beyond",
+      "reason": "calls a page-local helper not in the shared libraries: maskLimit()"
+    },
+    {
+      "page": "cbrs-mask",
+      "name": "EUD 20 MHz, 20 dBm: conducted power recovers 20 dBm",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "cbrs-mask",
+      "name": "EIRP per 10 MHz ≈ total − 3 dB for a 20 MHz channel",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "cbrs-mask",
+      "name": "EUD 20 MHz at 20 dBm passes EIRP and mask",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "cbrs-mask",
+      "name": "Cat A lowest channel at 30 dBm, −35 dBc fails the mask",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "coloc-im",
+      "name": "Default: Wi-Fi − HaLow hits restricted 1435–1626.5",
+      "reason": "depends on page state (default radios / plan) built in the page script"
+    },
+    {
+      "page": "coloc-im",
+      "name": "B13 2nd harmonic hits GNSS L1 when a GNSS receiver is present",
+      "reason": "depends on page state (default radios / plan) built in the page script"
+    },
+    {
+      "page": "coloc-im",
+      "name": "HaLow 2nd harmonic 1829–1831 MHz is not in a restricted band",
+      "reason": "depends on page state (default radios / plan) built in the page script"
+    },
+    {
+      "page": "coloc-im",
+      "name": "10th harmonic of HaLow 915 MHz (9145–9155) hits restricted 9000–9200",
+      "reason": "depends on page state (default radios / plan) built in the page script"
+    },
+    {
+      "page": "coloc-im",
+      "name": "Default harmonic setting is 10",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "coloc-im",
+      "name": "Wi-Fi 5 GHz harmonics stop at 40 GHz",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "coloc-mpe",
+      "name": "Mobile sum scales as 1/r² (20 cm → 40 cm = ÷4)",
+      "reason": "depends on page state (default radios / plan) built in the page script"
+    },
+    {
+      "page": "coloc-mpe",
+      "name": "Default radios: mobile at 20 cm compliant, portable at 5 cm not exempt",
+      "reason": "depends on page state (default radios / plan) built in the page script"
+    },
+    {
+      "page": "coloc-plan",
+      "name": "Default plan: all modules ride on grants (mobile, 20 cm)",
+      "reason": "depends on page state (default radios / plan) built in the page script"
+    },
+    {
+      "page": "coloc-plan",
+      "name": "Default plan lists a simultaneous-Tx radiated row for HaLow + Wi-Fi 2.4",
+      "reason": "depends on page state (default radios / plan) built in the page script"
+    },
+    {
+      "page": "coloc-plan",
+      "name": "Higher antenna gain → Class II",
+      "reason": "depends on page state (default radios / plan) built in the page script"
+    },
+    {
+      "page": "coloc-plan",
+      "name": "Portable use with mobile grants → SAR testing and Class II",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    },
+    {
+      "page": "coloc-plan",
+      "name": "Own design → full certification row",
+      "reason": "depends on page state (default radios / plan) built in the page script"
+    },
+    {
+      "page": "coloc-plan",
+      "name": "Not mains powered → no AC conducted rows",
+      "reason": "drives page controls ($(), set(), setMode(), update()) and reads page result state (res)"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+# rfcomp regulatory limits: Wi-Fi HaLow / 900 MHz ISM (§15.247)
+# Ported from legacy/rf-lab/shared/limits.js. `sections` must stay identical to RF.limits (tests/test_limits.py).
+# When a rule changes: update the value, its cite and meta.verified, bump root.version in common.yaml,
+# re-run scripts/capture_golden.js against the updated legacy file, and get RF sign-off before clearing review.
+# Pre-compliance reference, not legal advice. Confirm against current eCFR and FCC KDB procedures.
+meta:
+  title: Wi-Fi HaLow / 900 MHz ISM (§15.247)
+  cite: 47 CFR §15.247
+  verified: '2026-11-23'
+  verifiedAgainst: CFR text (law.cornell.edu mirror of eCFR), 2026-11-23
+  review: false
+  reviewNote: Used by the live HaLow 6 dB bandwidth tool (legacy manifest status 'live').
+sections:
+  ism900:
+    cite: 47 CFR §15.247
+    band:
+      loMHz: 902
+      hiMHz: 928
+    sources: ['https://www.law.cornell.edu/cfr/text/47/15.247', 'https://www.law.cornell.edu/cfr/text/47/15.249']
+    dts:
+      min6dBBwKHz: 500
+      cite6dB: §15.247(a)(2)
+      maxConductedDbm: 30
+      citePower: §15.247(b)(3)
+      antennaGainRefDbi: 6
+      gainReductionDbPerDb: 1
+      citeGain: §15.247(b)(4)
+      psdDbmPer3kHz: 8
+      citePsd: §15.247(e)
+      bandEdgeDbc:
+        peakMethod: 20
+        averageMethod: 30
+      citeBandEdge: §15.247(d)
+    fhss:
+      cite: §15.247(a)(1)(i), (b)(2)
+      narrow:
+        max20dBBwKHz: 250
+        minChannels: 50
+        maxDbm: 30
+        dwellS: 0.4
+        periodS: 20
+      wide:
+        max20dBBwKHz: 500
+        minChannels: 25
+        maxDbm: 24
+        dwellS: 0.4
+        periodS: 10
+    lowPower15249:
+      cite: §15.249
+      fieldMvPerM3m: 50
