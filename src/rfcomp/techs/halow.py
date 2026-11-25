@@ -12,7 +12,7 @@ from typing import Literal
 from numpy.typing import ArrayLike
 from pydantic import BaseModel, ConfigDict
 
-from rfcomp.core.measure import band_edge, channel_power, n_db_bandwidth, obw
+from rfcomp.core.measure import NdbBandwidth, band_edge, channel_power, n_db_bandwidth, obw
 from rfcomp.core.result import Check, Result
 from rfcomp.core.trace import Trace
 from rfcomp.core.units import scale_to_bw
@@ -110,17 +110,19 @@ class HalowConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    ndb: Literal[6, 20, 26] = 6
+    antenna_gain_dbi: float  # required: the product's antenna (e.g. up to 12.5 dBi)
+    ndb: Literal[6, 20, 26] = 6  # extra n-dB width to report; the DTS check is always 6 dB
     band_edge_method: Literal["peak", "average"] = "peak"
-    antenna_gain_dbi: float = 0.0
     rbw_hz: float | None = None  # overrides trace.rbw
 
 
-def evaluate(trace: Trace, cfg: HalowConfig | None = None, limits: Limits | None = None) -> Result:
+def evaluate(trace: Trace, cfg: HalowConfig, limits: Limits | None = None) -> Result:
     """Run every HaLow check on an analyzer trace (MHz, dBm per RBW).
 
     Same measurements and comparisons as legacy/rf-lab/tools/bandwidth, at full precision:
-      - n-dB bandwidth >= min6dBBwKHz (the page applies the minimum to the selected n),
+      - 6 dB bandwidth >= min6dBBwKHz (always 6 dB, per §15.247(a)(2); the page applied the
+        minimum to whichever n was selected),
+      - the selected n-dB bandwidth when n != 6 (informational),
       - 99% OBW (informational),
       - channel power vs the conducted-power limit (intentional addition),
       - peak PSD = peak scaled from RBW to 3 kHz, <= psdDbmPer3kHz,
@@ -128,7 +130,6 @@ def evaluate(trace: Trace, cfg: HalowConfig | None = None, limits: Limits | None
         when the trace does not extend past 902 or 928 MHz,
       - §15.215(c) 20 dB bandwidth containment (intentional addition).
     """
-    cfg = cfg or HalowConfig()
     lim = limits or load()
     dts, _ = _dts(lim)
     band = lim.fcc[SECTION]["band"]
@@ -138,25 +139,42 @@ def evaluate(trace: Trace, cfg: HalowConfig | None = None, limits: Limits | None
         raise ValueError("trace RBW is required (set trace.rbw or cfg.rbw_hz)")
     f, a = trace.f, trace.a
 
-    bw = n_db_bandwidth(f, a, cfg.ndb)
-    min_bw_hz = dts["min6dBBwKHz"] * 1e3
+    def bw_detail(key: str, m: NdbBandwidth) -> dict[str, float | bool | str | None]:
+        return {
+            "key": key,
+            "m1MHz": m.f_l,
+            "m2MHz": m.f_r,
+            "nDb": m.n,
+            "peakDbm": m.pk,
+            "peakMHz": float(f[m.pi]),
+            "clipped": m.clipped,
+        }
+
+    clipped_note = "Widen the span: the trace does not fall n dB at the edge."
+    dts_n = lim.dts_bandwidth.nDb
+    bw = n_db_bandwidth(f, a, dts_n)
     bw_check = Check.at_least(
-        label=f"{cfg.ndb} dB bandwidth",
+        label=f"{dts_n:g} dB bandwidth",
         value=bw.bw_hz,
-        limit=min_bw_hz,
+        limit=dts["min6dBBwKHz"] * 1e3,
         cite=_cfr(lim, dts["cite6dB"]),
         unit="Hz",
-        note="Widen the span: the trace does not fall n dB at the edge." if bw.clipped else None,
-        detail={
-            "key": "bandwidth",
-            "m1MHz": bw.f_l,
-            "m2MHz": bw.f_r,
-            "nDb": cfg.ndb,
-            "peakDbm": bw.pk,
-            "peakMHz": float(f[bw.pi]),
-            "clipped": bw.clipped,
-        },
+        note=clipped_note if bw.clipped else None,
+        detail=bw_detail("bandwidth", bw),
     )
+    extra: list[Check] = []
+    if cfg.ndb != dts_n:
+        nb = n_db_bandwidth(f, a, cfg.ndb)
+        extra.append(
+            Check.info(
+                f"{cfg.ndb} dB bandwidth (reported)",
+                nb.bw_hz,
+                "Reported only",
+                "Hz",
+                note=clipped_note if nb.clipped else None,
+                detail=bw_detail("ndb", nb),
+            )
+        )
 
     ob = obw(f, a, OBW_FRAC)
     obw_check = Check.info(
@@ -215,5 +233,6 @@ def evaluate(trace: Trace, cfg: HalowConfig | None = None, limits: Limits | None
 
     containment = bw_containment_check(f, a, lim)
     return Result(
-        tech="halow", checks=[bw_check, obw_check, power, psd_check, be_check, containment]
+        tech="halow",
+        checks=[bw_check, *extra, obw_check, power, psd_check, be_check, containment],
     )

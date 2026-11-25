@@ -63,6 +63,7 @@ def test_formula_parameters_have_cites() -> None:
         limits.lte_mask_attenuation,
         limits.cbrs_total_eirp,
         limits.bw_containment,
+        limits.dts_bandwidth,
     ):
         assert p.cite.strip()
 

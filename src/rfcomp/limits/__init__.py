@@ -120,6 +120,14 @@ class TotalEirp(_Model):
     perMHz: float
 
 
+class NdbRule(_Model):
+    """Which n-dB width a bandwidth rule is measured at."""
+
+    cite: str
+    note: str
+    nDb: float
+
+
 class BwContainment(_Model):
     """Occupied-bandwidth containment (e.g. §15.215(c)): the n-dB bandwidth must lie in a band."""
 
@@ -149,6 +157,7 @@ class Limits(_Model):
     lte_mask_attenuation: MaskAttenuation
     cbrs_total_eirp: TotalEirp
     bw_containment: BwContainment
+    dts_bandwidth: NdbRule
 
     @property
     def version(self) -> str:
@@ -229,6 +238,7 @@ def load() -> Limits:
         lte_mask_attenuation=MaskAttenuation.model_validate(fn["maskAttenuation"]),
         cbrs_total_eirp=TotalEirp.model_validate(fn["totalEirp"]),
         bw_containment=BwContainment.model_validate(fn["bwContainment"]),
+        dts_bandwidth=NdbRule.model_validate(fn["dtsBandwidth"]),
     )
 
 

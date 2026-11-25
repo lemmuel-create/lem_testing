@@ -49,6 +49,12 @@ sections:
       cite: §15.249
       fieldMvPerM3m: 50
 functions:
+  dtsBandwidth:
+    cite: §15.247(a)(2)
+    note: >-
+      DTS minimum bandwidth is measured at the 6 dB points; the minimum is
+      sections.ism900.dts.min6dBBwKHz. Other n-dB widths are reported for information only.
+    nDb: 6
   bwContainment:
     cite: §15.215(c)
     note: >-

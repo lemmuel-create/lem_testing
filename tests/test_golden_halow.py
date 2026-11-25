@@ -38,6 +38,11 @@ KNOWN_DIFFERENCES = {
         "(8 dBm), so 6.40 dBm/3 kHz passes.",
     ),
 }
+# For n != 6 the page compared the selected n-dB width with the 500 kHz minimum. rfcomp always
+# applies the minimum to the 6 dB width (§15.247(a)(2)) and reports the n-dB width for information,
+# so the page's "Result vs minimum" is not compared for those cases; their n-dB values still are.
+# Power is not on the page; run golden cases at the reference gain (no §15.247(b)(4) reduction).
+GAIN_DBI = DTS["antennaGainRefDbi"]
 
 
 def _trace(case: dict) -> Trace:
@@ -56,7 +61,7 @@ def _cfg(case: dict) -> HalowConfig:
         DTS["bandEdgeDbc"]["peakMethod"]: "peak",
         DTS["bandEdgeDbc"]["averageMethod"]: "average",
     }
-    return HalowConfig(ndb=s["ndb"], band_edge_method=method[s["beLim"]])
+    return HalowConfig(antenna_gain_dbi=GAIN_DBI, ndb=s["ndb"], band_edge_method=method[s["beLim"]])
 
 
 def _page_verdict(display: dict, card: str) -> bool | None:
@@ -89,12 +94,16 @@ def test_matches_page(case: dict) -> None:
 
     # --- values -----------------------------------------------------------------------------
     n = raw["nDbBandwidth"]
-    assert bw.detail["nDb"] == n["n"]
-    assert bw.value == pytest.approx(n["bwHz"], abs=KHZ_HZ)
-    assert bw.detail["m1MHz"] == pytest.approx(n["fL"], abs=KHZ_MHZ)
-    assert bw.detail["m2MHz"] == pytest.approx(n["fR"], abs=KHZ_MHZ)
-    assert bw.detail["peakDbm"] == pytest.approx(n["pk"], abs=DB)
-    assert bw.detail["clipped"] is n["clipped"]
+    six = n["n"] == bw.detail["nDb"]  # the page ran at 6 dB
+    nb = bw if six else r.check("ndb")
+    assert nb.detail["nDb"] == n["n"]
+    assert nb.value == pytest.approx(n["bwHz"], abs=KHZ_HZ)
+    assert nb.detail["m1MHz"] == pytest.approx(n["fL"], abs=KHZ_MHZ)
+    assert nb.detail["m2MHz"] == pytest.approx(n["fR"], abs=KHZ_MHZ)
+    assert nb.detail["peakDbm"] == pytest.approx(n["pk"], abs=DB)
+    assert nb.detail["clipped"] is n["clipped"]
+    if not six:
+        assert nb.passed is None
 
     o = raw["obw"]
     assert ob.value == pytest.approx(o["bwHz"], abs=KHZ_HZ)
@@ -118,7 +127,7 @@ def test_matches_page(case: dict) -> None:
     # --- verdicts (exact) -------------------------------------------------------------------
     s = case["settings"]
     verdicts = {
-        "bandwidth": (bw.passed, _page_verdict(display, "mRes")),
+        **({"bandwidth": (bw.passed, _page_verdict(display, "mRes"))} if six else {}),
         "psd": (psd.passed, _page_verdict(display, "mPsd")),
         "band_edge": (be.passed, _page_verdict(display, "mBe")),
     }
@@ -159,7 +168,32 @@ def test_every_check_carries_value_limit_margin_verdict_cite() -> None:
     ]
 
 
+def test_ndb_other_than_6_is_reported_and_6db_still_checked() -> None:
+    case = next(c for c in CASES if c["id"] == "ndb20-trapezoid-known-answer")
+    r = _run(case)
+    keys = [c.detail["key"] for c in r.checks]
+    assert keys[:2] == ["bandwidth", "ndb"]
+    assert r.check("bandwidth").detail["nDb"] == 6
+    assert r.check("bandwidth").value == pytest.approx(512e3, abs=1e-3)  # 500 + 2·6 kHz
+    assert r.check("ndb").value == pytest.approx(540e3, abs=1e-3)  # 500 + 2·20 kHz
+
+
 def test_known_differences_are_documented() -> None:
     plan = (Path(__file__).parents[1] / "docs" / "MIGRATION_PLAN.md").read_text(encoding="utf-8")
     for case_id in KNOWN_DIFFERENCES:
         assert case_id in plan
+
+
+def test_6db_minimum_ignores_wider_ndb_width() -> None:
+    """Hand-computed: 6 dB width 492 kHz fails 500 kHz even though the 20 dB width is 520 kHz.
+
+    The legacy page, set to 20 dB, would show Pass. Flat top 480 kHz, 1 dB/kHz skirts on a 1 kHz
+    grid, so the n-dB width is exactly 480 + 2n kHz.
+    """
+    k = np.arange(914_000, 916_001)
+    a = -np.minimum(np.maximum(np.abs(k - 915_000) - 240, 0), 60).astype(float)
+    r = evaluate(Trace(f=k / 1000, a=a, rbw=100e3), HalowConfig(antenna_gain_dbi=GAIN_DBI, ndb=20))
+    assert r.check("bandwidth").value == pytest.approx(492e3, abs=1e-3)
+    assert r.check("bandwidth").passed is False
+    assert r.check("ndb").value == pytest.approx(520e3, abs=1e-3)
+    assert r.verdict == "FAIL"
