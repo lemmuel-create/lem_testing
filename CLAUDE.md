@@ -40,6 +40,8 @@ legacy/        original HTML tools (read-only reference; do not edit)
 ## Rules
 - **Regulatory numbers live only in `src/rfcomp/limits/*.yaml`.** Each needs a `cite`. Never hard-code a limit in tech or dashboard code.
 - Every check returns a value, the limit, the margin, a pass/fail, and the CFR cite. The dashboard and reports show all five.
+- Compare at full precision, as the legacy pages do. Display dB values to at least 0.01 dB in reports and the dashboard.
+- Any deliberate departure from the legacy output is listed under "Intentional differences" in `docs/MIGRATION_PLAN.md` and tested with hand-computed cases.
 - Keep the tool-status workflow from the legacy manifest (`planned → review → live`). Tools in `review` show an "In RF review" banner. Limits flagged `review: true` need RF engineer sign-off.
 - For each tech module:
   1. Port the math from `legacy/`.

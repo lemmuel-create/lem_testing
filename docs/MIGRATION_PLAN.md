@@ -44,6 +44,16 @@ GNSS has no standalone legacy tool; its limits live in limits.js and are applied
 ## Golden-test approach
 For each legacy tool, export 3–5 sample traces and the numbers the HTML page displays (bandwidth, OBW, PSD, band-edge margin, verdict) into `tests/golden/<tech>/*.json`. Python must reproduce them within tolerance. This is the proof the port is correct before RF sign-off.
 
+## Precision
+Checks compare at full floating-point precision, exactly as the legacy pages do (e.g. 19.99 dBc fails a 20 dBc requirement, and a PSD of 7.999999999999998 dBm/3 kHz passes 8). Reports and the dashboard display dB values to at least 0.01 dB, so a failing margin is never shown rounded to the limit.
+
+## Intentional differences from the legacy tools
+| Module | Difference | Legacy behaviour | Tested by |
+|---|---|---|---|
+| `techs/halow.py` | Adds a conducted-power check: integrated channel power vs 30 dBm (§15.247(b)(3)), reduced by (gain − 6) dB above 6 dBi (§15.247(b)(4)). Labelled "Channel power (integrated, pre-compliance estimate; KDB 558074 methods for certification)". | The bandwidth page reports channel power with no limit. | `tests/test_halow_power.py` (hand-computed; no legacy golden) |
+| all | Display precision ≥ 0.01 dB. | Pages show band edge to 0.1 dB, so 19.99 dBc reads "20.0 dBc" next to a Fail. | report/dashboard tests |
+
 ## Open items
 - Analyzer export formats in use (Keysight CSV, R&S .dat, Anritsu?) — collect one sample of each.
 - Auth for the dashboard (office LAN only vs. SSO).
+- §15.215(c) containment of the 20 dB bandwidth at edge channels: the legacy bandwidth page shows the 20 dB M1/M2 markers but gives no verdict, and `limits.js` has no §15.215 entry. Golden cases pin the markers (`edge20-*` in `tests/golden/halow/bandwidth.json`); a verdict needs a limits entry and RF sign-off.
