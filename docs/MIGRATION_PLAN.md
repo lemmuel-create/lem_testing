@@ -52,6 +52,7 @@ Checks compare at full floating-point precision, exactly as the legacy pages do 
 |---|---|---|---|
 | `techs/halow.py` | Adds a conducted-power check: integrated channel power vs 30 dBm (§15.247(b)(3)), reduced by (gain − 6) dB above 6 dBi (§15.247(b)(4)). Labelled "Channel power (integrated, pre-compliance estimate; KDB 558074 methods for certification)". | The bandwidth page reports channel power with no limit. | `tests/test_halow_power.py` (hand-computed; no legacy golden) |
 | `techs/halow.py` | Adds a §15.215(c) check: the 20 dB bandwidth is always computed (whatever n the bandwidth check uses) and passes when M1 ≥ 902.000 and M2 ≤ 928.000 MHz. Band edges come from `ism900.band`; the rule is `functions.bwContainment` in `halow.yaml` with `review: true`. | The page shows 20 dB M1/M2 markers with no verdict. | `tests/test_halow_15215.py` (the `edge20-*` golden markers) |
+| `techs/halow.py` | Limits come only from `halow.yaml`; there is no per-run limit override. | The page lets the user edit the minimum-bandwidth, PSD and band-edge limit fields. Golden case `psd-sim-halow1-limit-6` (PSD field set to 6 dBm) fails on the page and passes in rfcomp (6.40 ≤ 8 dBm/3 kHz). | `tests/test_golden_halow.py` (`KNOWN_DIFFERENCES`) |
 | all | Display precision ≥ 0.01 dB. | Pages show band edge to 0.1 dB, so 19.99 dBc reads "20.0 dBc" next to a Fail. | report/dashboard tests |
 
 ## Open items
