@@ -1,6 +1,6 @@
 # rfcomp: RF compliance analysis toolkit
 
-Repo: `lemmuel-create/lem_testing`. The integration branch is `randd`; feature branches merge into it, and nothing goes to `main` until Adham approves.
+Repo: `lemmuel-create/lem_testing`. The integration branch is `randd`; phase PRs merge into it, and nothing goes to `main` until Adham approves the final `randd → main` PR.
 
 The RF team's FCC pre-compliance analysis tool. It covers five technologies plus colocation:
 
@@ -46,6 +46,11 @@ legacy/        original HTML tools (read-only reference; do not edit)
   2. Add golden tests that match the legacy output within 0.01 dB / 1 kHz.
   3. Add at least one pass/fail boundary case.
 - Commands: `uv run pytest`, `uv run ruff check .`, `uv run rfcomp --help`, and `uv run uvicorn rfcomp.api:app --reload`.
-- Work on feature branches off `randd`, one tech module per PR, each targeting `randd`. CI (GitHub Actions) runs ruff and pytest.
-- **Reviewer: Adham.** Request his review on every PR. He approves code merges, `review → live` tool status, and clearing `review: true` limit flags. He needs collaborator access to `lemmuel-create/lem_testing` to be requested as a reviewer.
+- Work on feature branches off `randd`, one phase (or tech module) per PR, each targeting `randd`. CI (GitHub Actions) runs ruff and pytest.
+- **Phase PRs into `randd` are self-merged once CI is green.** No reviewer is requested. Use a merge commit (`gh pr merge <n> --merge --delete-branch`), not a squash, so renames keep their history.
+- **Reviewer: Adham, once, on the final `randd → main` PR.** Assign it to him. Its body carries a checklist of:
+  - every tool to move `review → live`,
+  - every limit flagged `review: true`,
+  - every open issue.
+  He approves the merge to `main`, each `review → live` status change, and clearing each `review: true` flag. He needs collaborator access to `lemmuel-create/lem_testing` to be assigned.
 - Footer on every report: *Pre-compliance reference, not legal advice. Confirm against current eCFR and FCC KDB procedures.*

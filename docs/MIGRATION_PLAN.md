@@ -1,6 +1,6 @@
 # Migration plan: HTML tools → rfcomp
 
-Repo: `lemmuel-create/lem_testing`. PRs target the `randd` branch.
+Repo: `lemmuel-create/lem_testing`. Phase PRs target the `randd` branch and are merged once CI is green; a single final PR takes `randd` to `main`.
 
 Goal: the RF team can upload an analyzer trace (or batch of traces), pick technology and channel, and get FCC pass/fail with margins, plots, run history and a downloadable report — from a dashboard or a CLI script.
 
@@ -34,7 +34,12 @@ Goal: the RF team can upload an analyzer trace (or batch of traces), pick techno
 GNSS has no standalone legacy tool; its limits live in limits.js and are applied in coloc-im (and LTE Band 13). A dedicated `techs/gnss.py` is a new build, not a port.
 
 ## Review
-Adham reviews every PR and signs off each tool's `review → live` status and every limit flagged `review: true`. Seven of the eight legacy tools are still in review, so his sign-off of the golden tests and limits is needed before each module goes live.
+- **Phase PRs → `randd`:** merged by the author when CI (ruff + pytest) is green, with a merge commit. No reviewer is requested.
+- **Final PR `randd → main`:** assigned to Adham, who reviews the whole port once. Its body is a checklist of:
+  - [ ] each tool moving `review → live` (seven of the eight legacy tools are in `review`), with its golden-test evidence;
+  - [ ] each limit flagged `review: true`, with its cite;
+  - [ ] each open GitHub issue (e.g. #2, MPE limit below 300 MHz), resolved or explicitly deferred.
+- Nothing reaches `main`, and no tool or limit goes live, without his approval.
 
 ## Golden-test approach
 For each legacy tool, export 3–5 sample traces and the numbers the HTML page displays (bandwidth, OBW, PSD, band-edge margin, verdict) into `tests/golden/<tech>/*.json`. Python must reproduce them within tolerance. This is the proof the port is correct before RF sign-off.
