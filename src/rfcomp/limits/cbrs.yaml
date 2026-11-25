@@ -1,0 +1,73 @@
+# rfcomp regulatory limits: CBRS 3550–3700 MHz (Part 96)
+# Ported from legacy/rf-lab/shared/limits.js. `sections` must stay identical to RF.limits (tests/test_limits.py).
+# When a rule changes: update the value, its cite and meta.verified, bump root.version in common.yaml,
+# re-run scripts/capture_golden.js against the updated legacy file, and get RF sign-off before clearing review.
+# Pre-compliance reference, not legal advice. Confirm against current eCFR and FCC KDB procedures.
+meta:
+  title: CBRS 3550–3700 MHz (Part 96)
+  cite: 47 CFR Part 96
+  verified: '2026-11-23'
+  verifiedAgainst: CFR text (law.cornell.edu mirror of eCFR), 2026-11-23
+  review: true
+  reviewNote: 'No per-value review flags existed in legacy limits.js; set per file pending RF sign-off (CLAUDE.md: Adham clears
+    review flags).'
+sections:
+  cbrs:
+    cite: 47 CFR Part 96
+    band:
+      loMHz: 3550
+      hiMHz: 3700
+    sources: ['https://www.law.cornell.edu/cfr/text/47/96.41']
+    classes:
+      eud:
+        label: End user device (EUD)
+        eirpDbmPer10MHz: 23
+        psdDbmPerMHz: null
+        cite: §96.41(b)
+        cbsd: false
+        note: Operates only under the control of a registered CBSD; no SAS registration of its own.
+      catA:
+        label: CBSD Category A
+        eirpDbmPer10MHz: 30
+        psdDbmPerMHz: 20
+        cite: §96.41(b)
+        cbsd: true
+        note: Registers with a SAS; outdoor antenna height ≤ 6 m HAAT; geolocation within ±50 m horizontal, ±3 m vertical.
+      catB:
+        label: CBSD Category B
+        eirpDbmPer10MHz: 47
+        psdDbmPerMHz: 37
+        cite: §96.41(b)
+        cbsd: true
+        note: Outdoor only, professionally installed (CPI), registered with a SAS; authorized only once an ESC is operating.
+    mask:
+      cite: §96.41(e)
+      nearDbmPerMHz: -13
+      farDbmPerMHz: -25
+      nearWithinMHz:
+        cbsd: 10
+        eud: B
+      additional:
+      - belowMHz: 3540
+        aboveMHz: 3710
+        dbmPerMHz: -25
+      - belowMHz: 3530
+        aboveMHz: 3720
+        dbmPerMHz: -40
+      nearEdgeWidthMHz: 1
+      nearEdgeRbwFracOfEbw: 0.01
+      eudAclrDb: 30
+      note: 'Conducted, per MHz, relative to the assigned channel edges. Additional limits: −25 dBm/MHz below 3540 and above
+        3710 MHz, −40 dBm/MHz below 3530 and above 3720 MHz.'
+    paprDb: 13
+    citePapr: §96.41(g)
+    paprAppliesTo: CBSD
+    sas:
+      cite: §96.39, §96.45, §96.53–96.66
+      note: CBSDs must register with a Spectrum Access System and operate only on channels and powers it assigns.
+    bwsMHz: [5, 10, 15, 20]
+functions:
+  totalEirp:
+    cite: §96.41(b)
+    note: Total EIRP limit for a B MHz channel = eirpDbmPer10MHz + 10·log10(B / perMHz).
+    perMHz: 10

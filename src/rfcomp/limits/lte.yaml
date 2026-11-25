@@ -1,0 +1,171 @@
+# rfcomp regulatory limits: LTE device side (Parts 22, 24, 27)
+# Ported from legacy/rf-lab/shared/limits.js. `sections` must stay identical to RF.limits (tests/test_limits.py).
+# When a rule changes: update the value, its cite and meta.verified, bump root.version in common.yaml,
+# re-run scripts/capture_golden.js against the updated legacy file, and get RF sign-off before clearing review.
+# Pre-compliance reference, not legal advice. Confirm against current eCFR and FCC KDB procedures.
+meta:
+  title: LTE device side (Parts 22, 24, 27)
+  cite: 47 CFR Parts 22, 24, 27
+  verified: '2026-11-23'
+  verifiedAgainst: CFR text (law.cornell.edu mirror of eCFR), 2026-11-23
+  review: true
+  reviewNote: 'No per-value review flags existed in legacy limits.js; set per file pending RF sign-off (CLAUDE.md: Adham clears
+    review flags).'
+sections:
+  lte:
+    sources: ['https://www.law.cornell.edu/cfr/text/47/22.913', 'https://www.law.cornell.edu/cfr/text/47/22.917', 'https://www.law.cornell.edu/cfr/text/47/24.232',
+      'https://www.law.cornell.edu/cfr/text/47/24.238', 'https://www.law.cornell.edu/cfr/text/47/27.50', 'https://www.law.cornell.edu/cfr/text/47/27.53']
+    erpOffsetDb: 2.15
+    mask:
+      absDbm: -13
+      formula: Attenuation ≥ 43 + 10·log10(P) dB below transmitter power P (W), i.e. −13 dBm absolute in the reference bandwidth
+      note: 'Reference bandwidth and the near-edge allowance differ by band: 1 MHz above 1 GHz (PCS/AWS), 100 kHz below 1
+        GHz (Parts 22 and 27).'
+    bands:
+      B2:
+        dlLoMHz: 1930
+        dlHiMHz: 1990
+        name: PCS
+        ulLoMHz: 1850
+        ulHiMHz: 1910
+        part: 24 Subpart E
+        limitType: EIRP
+        limitDbm: 33
+        citePower: §24.232(c)
+        citeMask: §24.238
+        paprDb: 13
+        citePapr: §24.232(d)
+        maskBwHz: 1000000
+        nearEdge:
+          widthHz: 1000000
+          rbwFracOfEbw: 0.01
+        bwsMHz: [1.4, 3, 5, 10, 15, 20]
+      B4:
+        dlLoMHz: 2110
+        dlHiMHz: 2155
+        name: AWS-1
+        ulLoMHz: 1710
+        ulHiMHz: 1755
+        part: '27'
+        limitType: EIRP
+        limitDbm: 30
+        citePower: §27.50(d)(4)
+        citeMask: §27.53(h)
+        paprDb: 13
+        citePapr: §27.50(d)(5)
+        maskBwHz: 1000000
+        nearEdge:
+          widthHz: 1000000
+          rbwFracOfEbw: 0.01
+        bwsMHz: [1.4, 3, 5, 10, 15, 20]
+      B5:
+        dlLoMHz: 869
+        dlHiMHz: 894
+        name: Cellular 850
+        ulLoMHz: 824
+        ulHiMHz: 849
+        part: 22 Subpart H
+        limitType: ERP
+        limitDbm: 38.45
+        citePower: §22.913(a)(5)
+        citeMask: §22.917
+        paprDb: null
+        maskBwHz: 100000
+        nearEdge:
+          widthHz: 1000000
+          rbwFracOfEbw: 0.01
+        bwsMHz: [1.4, 3, 5, 10]
+      B12:
+        dlLoMHz: 729
+        dlHiMHz: 746
+        name: Lower 700
+        ulLoMHz: 699
+        ulHiMHz: 716
+        part: '27'
+        limitType: ERP
+        limitDbm: 34.77
+        citePower: §27.50(c)(10)
+        citeMask: §27.53(g)
+        paprDb: null
+        maskBwHz: 100000
+        nearEdge:
+          widthHz: 100000
+          minRbwHz: 30000
+        bwsMHz: [1.4, 3, 5, 10]
+        note: Portable limit (3 W ERP, §27.50(c)(10)) shown; mobile stations 30 W ERP (§27.50(c)(9)).
+      B13:
+        dlLoMHz: 746
+        dlHiMHz: 756
+        name: Upper 700 C
+        ulLoMHz: 777
+        ulHiMHz: 787
+        part: '27'
+        limitType: ERP
+        limitDbm: 34.77
+        citePower: §27.50(b)(10)
+        citeMask: §27.53(c)
+        paprDb: null
+        maskBwHz: 100000
+        nearEdge:
+          widthHz: 100000
+          minRbwHz: 30000
+        extraMasks:
+        - loMHz: 763
+          hiMHz: 775
+          dbm: -35
+          bwHz: 6250
+          cite: §27.53(c)(4), (c)(6)
+        - loMHz: 793
+          hiMHz: 805
+          dbm: -35
+          bwHz: 6250
+          cite: §27.53(c)(4), (c)(6)
+        bwsMHz: [5, 10]
+        note: 'Portable limit shown (mobile 30 W ERP, §27.50(b)(9)). Mobile/portable emissions in 763–775 and 793–805 MHz
+          must be attenuated 65 + 10·log10(P) dB (−35 dBm in 6.25 kHz, §27.53(c)(4)). GNSS: ≤ −70 dBW/MHz EIRP wideband and
+          −80 dBW discrete in 1559–1610 MHz (§27.53(f)).'
+      B66:
+        dlLoMHz: 2110
+        dlHiMHz: 2200
+        name: AWS-1/3
+        ulLoMHz: 1710
+        ulHiMHz: 1780
+        part: '27'
+        limitType: EIRP
+        limitDbm: 30
+        citePower: §27.50(d)(4)
+        citeMask: §27.53(h)
+        paprDb: 13
+        citePapr: §27.50(d)(5)
+        maskBwHz: 1000000
+        nearEdge:
+          widthHz: 1000000
+          rbwFracOfEbw: 0.01
+        bwsMHz: [1.4, 3, 5, 10, 15, 20]
+      B71:
+        dlLoMHz: 617
+        dlHiMHz: 652
+        name: 600 MHz
+        ulLoMHz: 663
+        ulHiMHz: 698
+        part: '27'
+        limitType: ERP
+        limitDbm: 34.77
+        citePower: §27.50(c)(10)
+        citeMask: §27.53(g)
+        paprDb: null
+        maskBwHz: 100000
+        nearEdge:
+          widthHz: 100000
+          minRbwHz: 30000
+        bwsMHz: [5, 10, 15, 20]
+    occupiedFraction: 0.9
+    freqStability:
+      cite: §2.1055; §22.355; §24.235; §27.54
+      note: Fundamental must stay within the authorized band over temperature and voltage; Part 22 mobile ±2.5 ppm.
+functions:
+  maskAttenuation:
+    cite: §22.917, §24.238, §27.53
+    note: Out-of-band attenuation ≥ base + perDecade·log10(P W) dB below transmitter power P.
+    baseDb: 43
+    perDecadeDb: 10

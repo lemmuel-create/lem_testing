@@ -1,0 +1,43 @@
+# rfcomp regulatory limits: Wi-Fi 2.4 GHz (§15.247)
+# Ported from legacy/rf-lab/shared/limits.js. `sections` must stay identical to RF.limits (tests/test_limits.py).
+# When a rule changes: update the value, its cite and meta.verified, bump root.version in common.yaml,
+# re-run scripts/capture_golden.js against the updated legacy file, and get RF sign-off before clearing review.
+# Pre-compliance reference, not legal advice. Confirm against current eCFR and FCC KDB procedures.
+meta:
+  title: Wi-Fi 2.4 GHz (§15.247)
+  cite: 47 CFR §15.247
+  verified: '2026-11-23'
+  verifiedAgainst: CFR text (law.cornell.edu mirror of eCFR), 2026-11-23
+  review: true
+  reviewNote: 'No per-value review flags existed in legacy limits.js; set per file pending RF sign-off (CLAUDE.md: Adham clears
+    review flags).'
+sections:
+  wifi24:
+    cite: 47 CFR §15.247
+    band:
+      loMHz: 2400
+      hiMHz: 2483.5
+    sources: ['https://www.law.cornell.edu/cfr/text/47/15.247', 'https://www.law.cornell.edu/cfr/text/47/15.205']
+    dts:
+      min6dBBwKHz: 500
+      maxConductedDbm: 30
+      psdDbmPer3kHz: 8
+      antennaGainRefDbi: 6
+      bandEdgeDbc:
+        peakMethod: 20
+        averageMethod: 30
+      ptpGainNote: 'Fixed point-to-point: reduce power 1 dB per 3 dB of gain above 6 dBi (§15.247(c)(1)(i))'
+    restrictedAbove:
+      loMHz: 2483.5
+      hiMHz: 2500
+      cite: §15.205(a)
+    restrictedBelow:
+      loMHz: 2310
+      hiMHz: 2390
+      cite: §15.205(a)
+    channelsUS:
+      first: 1
+      last: 11
+      f1MHz: 2412
+      stepMHz: 5
+      note: Channels 12–13 are allowed only if the 2483.5 MHz restricted-band limit is met, usually with heavy power back-off.
