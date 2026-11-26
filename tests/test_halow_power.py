@@ -61,3 +61,41 @@ def test_antenna_gain_is_required() -> None:
     with pytest.raises(ValidationError, match="antenna_gain_dbi"):
         HalowConfig()  # type: ignore[call-arg]
     assert HalowConfig(antenna_gain_dbi=12.5).antenna_gain_dbi == 12.5
+
+
+def _golden_result(case_id: str):
+    import json
+    from pathlib import Path
+
+    import numpy as np
+
+    from rfcomp.core.trace import Trace, parse_trace
+    from rfcomp.techs.halow import evaluate
+
+    g = Path(__file__).parent / "golden" / "halow"
+    case = next(
+        c for c in json.loads((g / "bandwidth.json").read_text())["cases"] if c["id"] == case_id
+    )
+    if case["mode"] == "sim":
+        t = json.loads((g / "traces.json").read_text())[case["trace"]["sha256"]]
+        tr = Trace(f=np.array(t["f"]), a=np.array(t["a"]), rbw=t["rbwHz"])
+    else:
+        p = parse_trace(case["trace"]["text"])
+        tr = Trace(f=p.f, a=p.a, rbw=100e3)
+    return evaluate(tr, HalowConfig(antenna_gain_dbi=6))
+
+
+NOTE = "Span may not contain the full signal; channel power may read low"
+
+
+@pytest.mark.parametrize(
+    ("case_id", "noted"),
+    [
+        ("csv-clipped-widen-span", True),  # 6 dB (and 20 dB) points outside the span
+        ("sim-halow1-steep1", True),  # 6 dB found, 20 dB points outside the span
+        ("sim-halow1-default", False),
+    ],
+)
+def test_power_note_when_span_is_short(case_id: str, noted: bool) -> None:
+    p = _golden_result(case_id).check("power")
+    assert (p.note == NOTE) if noted else (p.note is None)

@@ -19,9 +19,11 @@ from rfcomp.core.units import scale_to_bw
 from rfcomp.limits import Limits, load
 
 SECTION = "ism900"
-POWER_LABEL = (
+POWER_LABEL = "Channel power (est.)"
+POWER_DESCRIPTION = (
     "Channel power (integrated, pre-compliance estimate; KDB 558074 methods for certification)"
 )
+POWER_CLIPPED_NOTE = "Span may not contain the full signal; channel power may read low"
 
 
 def _dts(limits: Limits | None) -> tuple[dict, str]:
@@ -45,7 +47,10 @@ def conducted_power_limit_dbm(antenna_gain_dbi: float, limits: Limits | None = N
 
 
 def conducted_power_check(
-    channel_power_dbm: float, antenna_gain_dbi: float, limits: Limits | None = None
+    channel_power_dbm: float,
+    antenna_gain_dbi: float,
+    limits: Limits | None = None,
+    note: str | None = None,
 ) -> Check:
     """Integrated channel power from the trace vs the conducted-power limit; pass when <= limit."""
     dts, _ = _dts(limits)
@@ -58,23 +63,51 @@ def conducted_power_check(
         limit=conducted_power_limit_dbm(antenna_gain_dbi, limits),
         cite=_cfr(limits, *cites),
         unit="dBm",
-        detail={"key": "power", "antennaGainDbi": antenna_gain_dbi},
+        note=note,
+        detail={
+            "key": "power",
+            "antennaGainDbi": antenna_gain_dbi,
+            "description": POWER_DESCRIPTION,
+        },
     )
 
 
-BW_CONTAINMENT_LABEL = "20 dB bandwidth within 902–928 MHz (§15.215(c))"
+BW_CONTAINMENT_LABEL = "20 dB BW in band"
+BW_CONTAINMENT_CLIPPED_NOTE = "Widen the span: 20 dB points not found"
 
 
 def bw_containment_check(f: ArrayLike, a: ArrayLike, limits: Limits | None = None) -> Check:
     """§15.215(c): the 20 dB bandwidth must lie in the band. Pass when M1 >= lo and M2 <= hi.
 
-    Always uses the n from halow.yaml (20 dB), whatever n the bandwidth check is run at. `value` is
-    the containment margin in kHz: min(M1 − lo, hi − M2); negative when a marker is outside.
+    Always uses the n from halow.yaml (20 dB), whatever n the bandwidth check is run at. `value` and
+    `margin` are the clearance in kHz to the nearer edge: min(M1 − lo, hi − M2); negative when a
+    marker is outside. If the trace does not fall 20 dB on a side, the markers are only the span
+    edges, so the check is not evaluated (never PASS).
     """
     lim = limits or load()
     rule = lim.bw_containment
     lo, hi = lim.bw_containment_band()
     bw = n_db_bandwidth(f, a, rule.nDb)
+    detail: dict[str, float | bool | str | None] = {
+        "key": "bw_containment",
+        "m1MHz": bw.f_l,
+        "m2MHz": bw.f_r,
+        "nDb": rule.nDb,
+        "loMHz": lo,
+        "hiMHz": hi,
+        "clipped": bw.clipped,
+        "description": f"{rule.nDb:g} dB bandwidth within {lo:g}–{hi:g} MHz",
+    }
+    if bw.clipped:
+        return Check.info(
+            BW_CONTAINMENT_LABEL,
+            None,
+            _cfr(lim, rule.cite),
+            "kHz",
+            review=rule.review,
+            note=BW_CONTAINMENT_CLIPPED_NOTE,
+            detail=detail,
+        )
     margin_khz = min(bw.f_l - lo, hi - bw.f_r) * 1e3
     return Check(
         label=BW_CONTAINMENT_LABEL,
@@ -86,20 +119,12 @@ def bw_containment_check(f: ArrayLike, a: ArrayLike, limits: Limits | None = Non
         unit="kHz",
         sense="min",
         review=rule.review,
-        detail={
-            "key": "bw_containment",
-            "m1MHz": bw.f_l,
-            "m2MHz": bw.f_r,
-            "nDb": rule.nDb,
-            "loMHz": lo,
-            "hiMHz": hi,
-            "clipped": bw.clipped,
-        },
+        detail=detail,
     )
 
 
 # --- full evaluation (port of the bandwidth page's measure() + update()) -------------------------
-OBW_LABEL = "99% occupied bandwidth (reported, no FCC limit)"
+OBW_LABEL = "99% OBW"
 OBW_CITE = "ISED RSS-Gen (reported only)"
 OBW_FRAC = 0.99
 PSD_REF_HZ = 3000
@@ -167,7 +192,7 @@ def evaluate(trace: Trace, cfg: HalowConfig, limits: Limits | None = None) -> Re
         nb = n_db_bandwidth(f, a, cfg.ndb)
         extra.append(
             Check.info(
-                f"{cfg.ndb} dB bandwidth (reported)",
+                f"{cfg.ndb} dB bandwidth",
                 nb.bw_hz,
                 "Reported only",
                 "Hz",
@@ -185,11 +210,18 @@ def evaluate(trace: Trace, cfg: HalowConfig, limits: Limits | None = None) -> Re
         detail={"key": "obw", "oLMHz": ob.o_l, "oRMHz": ob.o_r, "frac": OBW_FRAC},
     )
 
-    power = conducted_power_check(channel_power(f, a, rbw), cfg.antenna_gain_dbi, lim)
+    containment = bw_containment_check(f, a, lim)
+    span_short = bw.clipped or bool(containment.detail["clipped"])
+    power = conducted_power_check(
+        channel_power(f, a, rbw),
+        cfg.antenna_gain_dbi,
+        lim,
+        note=POWER_CLIPPED_NOTE if span_short else None,
+    )
 
     psd = scale_to_bw(bw.pk, rbw, PSD_REF_HZ)
     psd_check = Check.at_most(
-        label="Peak PSD (scaled to 3 kHz)",
+        label="Peak PSD",
         value=psd,
         limit=dts["psdDbmPer3kHz"],
         cite=_cfr(lim, dts["citePsd"]),
@@ -198,7 +230,7 @@ def evaluate(trace: Trace, cfg: HalowConfig, limits: Limits | None = None) -> Re
     )
 
     req = dts["bandEdgeDbc"]["peakMethod" if cfg.band_edge_method == "peak" else "averageMethod"]
-    be_label = f"Band edge ({lo:g} / {hi:g} MHz, {cfg.band_edge_method} method)"
+    be_label = f"Band edge ({cfg.band_edge_method})"
     be_cite = _cfr(lim, dts["citeBandEdge"])
     if f[0] < lo or f[-1] > hi:
         be = band_edge(f, a, lo, hi)
@@ -231,7 +263,6 @@ def evaluate(trace: Trace, cfg: HalowConfig, limits: Limits | None = None) -> Re
             },
         )
 
-    containment = bw_containment_check(f, a, lim)
     return Result(
         tech="halow",
         checks=[bw_check, *extra, obw_check, power, psd_check, be_check, containment],
