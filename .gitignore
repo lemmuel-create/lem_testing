@@ -7,3 +7,6 @@ tests/screens/
 __pycache__/
 .pytest_cache/
 .ruff_cache/
+
+# rfcomp run outputs
+results/

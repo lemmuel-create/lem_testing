@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 from rfcomp.cli import app
@@ -13,6 +14,12 @@ EX = Path(__file__).parents[1] / "examples" / "halow"
 PASS = EX / "halow_bw6_500p5khz_pass.csv"
 FAIL = EX / "halow_bw6_499p5khz_fail.csv"
 runner = CliRunner()
+
+
+@pytest.fixture(autouse=True)
+def _run_in_tmp(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """analyze writes results/ in the working directory; keep it out of the repo."""
+    monkeypatch.chdir(tmp_path)
 
 
 def run(*args: str):
