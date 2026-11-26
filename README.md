@@ -21,7 +21,8 @@ uv run rfcomp --help
 
 ```console
 uv run rfcomp analyze <trace.csv> --tech halow --antenna-gain <dBi> --rbw <kHz> \
-    [--center MHz] [--ndb 6|20|26] [--method peak|average] [--offset dB] [--units auto|1|1e3|1e6|1e9] [--json]
+    [--center MHz] [--ndb 6|20|26] [--method peak|average] [--offset dB] [--units auto|1|1e3|1e6|1e9] [--json] \
+    [--out DIR] [--out-dir-name NAME] [--operator NAME] [--dut NAME] [--notes TEXT] [--no-plot]
 ```
 
 | Option | Meaning | Default |
@@ -35,6 +36,10 @@ uv run rfcomp analyze <trace.csv> --tech halow --antenna-gain <dBi> --rbw <kHz> 
 | `--offset` | Reference offset added to every point (cable / attenuator loss), dB. | 0 |
 | `--units` | Frequency units of the file: `auto` or a multiplier to Hz. | auto |
 | `--json` | Print the full result as JSON instead of the table. | off |
+| `--out` | Results directory: one folder per run plus `runs_log.csv`. | `results/` |
+| `--out-dir-name` | Name of this run's folder (and its `run_id`). | `<YYYY-MM-DD_HHMM>_<tech>_<file-stem>` |
+| `--operator`, `--dut`, `--notes` | Recorded in `runs_log.csv` (`--dut` also in the plot title). | empty |
+| `--no-plot` | Skip `plot.png`. | off |
 
 \* `--rbw` may be left out only when the file states the RBW; the header line then reads `RBW 30 kHz (from file)`.
 
@@ -43,36 +48,71 @@ Exit code: **0** = PASS, **1** = FAIL, **2** = bad input (unreadable trace, inva
 ### Sample output
 
 ```console
-$ uv run rfcomp analyze examples/halow/halow_bw6_499p5khz_fail.csv --tech halow --center 915 --antenna-gain 6 --rbw 100
-rfcomp 0.1.1 · halow · halow_bw6_499p5khz_fail.csv
-2001 points, 914.0000–916.0000 MHz, RBW 100 kHz (from --rbw), offset 0 dB, antenna 6 dBi, band edge peak method
-Measured 6 dB centre 915.0000 MHz (+0.0 kHz from --center 915 MHz)
+$ uv run rfcomp analyze examples/halow/halow_sim_1mhz_902p5_24dbm_fail.csv --tech halow --antenna-gain 6 --center 902.5 --dut "HaLow module (example)"
+rfcomp 0.2.0 · halow · halow_sim_1mhz_902p5_24dbm_fail.csv
+2401 points, 901.4920–903.5080 MHz, RBW 100 kHz (from file), offset 0 dB, antenna 6 dBi, band edge peak method
+Measured 6 dB centre 902.4990 MHz (-1.0 kHz from --center 902.5 MHz)
 
-Check                                               Value                Limit          Margin  Result  Cite
-----------------------------  ---------------------------  -------------------  --------------  ------  ----------------------------
-6 dB bandwidth                                499.500 kHz          500.000 kHz      -0.500 kHz  FAIL    47 CFR §15.247(a)(2)
-99% OBW                                       495.126 kHz                    —               —  INFO    ISED RSS-Gen (reported only)
-Channel power (est.)                             6.94 dBm            30.00 dBm       23.06 dBm  PASS    47 CFR §15.247(b)(3)
-Peak PSD                                  -15.23 dBm/3kHz        8.00 dBm/3kHz  23.23 dBm/3kHz  PASS    47 CFR §15.247(e)
-Band edge (peak)                                        —                    —               —  N/A     47 CFR §15.247(d)
-20 dB BW in band [RF review]  M1 914.727 / M2 915.273 MHz  902.000–928.000 MHz   12726.917 kHz  PASS    47 CFR §15.215(c)
-
-Notes:
-  Band edge (peak): Not evaluated: trace does not cross 902 or 928 MHz.
+Check                                               Value                Limit       Margin  Result  Cite
+----------------------------  ---------------------------  -------------------  -----------  ------  ----------------------------
+6 dB bandwidth                                885.398 kHz          500.000 kHz  385.398 kHz  PASS    47 CFR §15.247(a)(2)
+99% OBW                                       968.762 kHz                    —            —  INFO    ISED RSS-Gen (reported only)
+Channel power (est.)                            24.00 dBm            30.00 dBm      6.00 dB  PASS    47 CFR §15.247(b)(3)
+Peak PSD                                    0.40 dBm/3kHz        8.00 dBm/3kHz      7.60 dB  PASS    47 CFR §15.247(e)
+Band edge (peak)                                12.11 dBc            20.00 dBc     -7.89 dB  FAIL    47 CFR §15.247(d)
+20 dB BW in band [RF review]  M1 901.938 / M2 903.065 MHz  902.000–928.000 MHz  -62.414 kHz  FAIL    47 CFR §15.215(c)
 
 Overall: FAIL
 
 Pre-compliance reference, not legal advice. Confirm against current eCFR and FCC KDB procedures.
+
+Results: results/2026-11-25_1621_halow_halow_sim_1mhz_902p5_24dbm_fail
 $ echo $?
 1
 ```
 
-More examples (RBW from the file header, JSON output) are in [`examples/README.md`](examples/README.md).
+More examples are in [`examples/README.md`](examples/README.md): a passing channel, the 6 dB boundary pair, RBW from the file header, and JSON output.
+
+### Run outputs
+
+Each run writes a folder under `--out` (default `results/`, ignored by git) and appends one row to `results/runs_log.csv`:
+
+```text
+results/
+├── runs_log.csv                                          one row per run
+└── 2026-11-25_1621_halow_halow_sim_1mhz_902p5_24dbm_fail/
+    ├── plot.png         trace, band, markers, limit lines, results box (1600×900)
+    ├── checks.csv       run_id, check, value, unit, limit, margin, result, cite, review, note
+    ├── run.json         full result + run metadata and settings
+    └── trace_used.csv   freq_MHz, amp_dBm (offset applied)
+```
+
+A run that reuses an existing folder name gets `_2`, `_3`… appended. `runs_log.csv` records who ran what and how:
+
+`run_id, timestamp_local, timestamp_utc, operator, dut, center_MHz, notes, tech, input_file, input_sha256, points, span_start_MHz, span_stop_MHz, rbw_kHz, rbw_source (flag/file), offset_dB, antenna_gain_dBi, method, verdict, n_fail, rfcomp_version, git_commit, limits_version`
+
+The plot draws every limit from the result (none are hard-coded). It shows:
+- the 902–928 MHz band, shaded, with its edge lines;
+- the 6 dB M1/M2 markers, with the bandwidth against 500 kHz;
+- the 20 dB M1/M2 markers;
+- the band-edge limit outside the band, at peak − 20 dBc (− 30 dBc with `--method average`);
+- the PSD limit at the trace RBW: 8 + 10·log10(RBW / 3 kHz) dBm;
+- the 99% OBW, lightly shaded;
+- a results box, the verdict in the title, and a footer with the run ID, time, rfcomp version and input file.
+
+Passing channel (915 MHz):
+
+![HaLow pass plot](docs/img/halow_plot_pass.png)
+
+Failing edge channel (902.5 MHz). The 20 dB M1 is below 902 MHz, and the skirt below 902 MHz rises above the band-edge limit:
+
+![HaLow fail plot](docs/img/halow_plot_fail.png)
 
 ### Reading the output
 
 - **Header:** trace name, number of points and span, RBW and where it came from (`from file` or `from --rbw`), reference offset, antenna gain, band-edge method, and the measured 6 dB centre (with its offset from `--center` if given).
-- **Columns:** *Value* is the measurement, *Limit* the regulatory limit from `halow.yaml`, *Margin* the headroom (positive = inside the limit, negative = over it), *Result* the verdict, *Cite* the CFR paragraph. Values are compared at full precision; the table rounds dB values to 0.01 dB and bandwidths to 1 Hz.
+- **Results:** the last line gives the run folder (see [Run outputs](#run-outputs)).
+- **Columns:** *Value* is the measurement, *Limit* the regulatory limit from `halow.yaml`, *Margin* the headroom (positive = inside the limit, negative = over it; in dB for dBm/dBc checks), *Result* the verdict, *Cite* the CFR paragraph. Values are compared at full precision; the table rounds dB values to 0.01 dB and bandwidths to 1 Hz.
 - **Result:** `PASS` / `FAIL`; `INFO` for a reported measurement with no limit (99% OBW, extra n-dB width); `N/A` for a check that could not be evaluated (band edge when the trace doesn't reach 902/928 MHz; §15.215(c) when the 20 dB points aren't in the span). INFO and N/A don't count towards the overall verdict.
 - **20 dB BW in band:** *Value* shows the 20 dB markers (`M1 … / M2 … MHz`), *Limit* the band (902.000–928.000 MHz), and *Margin* the clearance in kHz to the nearer band edge.
 - **`[RF review]`:** the check's limit is flagged `review: true` in `src/rfcomp/limits/halow.yaml` and still needs RF engineer sign-off.
@@ -117,6 +157,7 @@ Details and the tests for each are in `docs/MIGRATION_PLAN.md` ("Intentional dif
 - Golden cases are synthetic traces and legacy simulations; no real bench traces have been run through the tool yet.
 - The conducted-power and §15.215(c) checks have no legacy equivalent and are pending RF review.
 - Channel power is an integrated estimate, not a certification measurement.
+- Like the legacy tool, the trace parser takes the first two numbers on any line as a data row. A header line with two numbers (e.g. `Start,914000000,Stop,916000000`) would be read as a data point, so check `points` and the span in the output header.
 
 ## Development
 
