@@ -3,14 +3,15 @@
 from __future__ import annotations
 
 import json
+import math
 from enum import StrEnum
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, NoReturn
 
 import typer
 
 from rfcomp import __version__
-from rfcomp.core.trace import parse_trace
+from rfcomp.core.trace import parse_rbw_hz, parse_trace
 from rfcomp.reports.console import as_json, table
 from rfcomp.techs import halow
 
@@ -24,6 +25,12 @@ class Tech(StrEnum):
 class Method(StrEnum):
     peak = "peak"
     average = "average"
+
+
+def _fail(msg: str) -> NoReturn:
+    """Report bad input on stderr and exit 2."""
+    typer.echo(f"Error: {msg}", err=True)
+    raise typer.Exit(2)
 
 
 @app.callback()
@@ -62,7 +69,13 @@ def analyze(
     method: Annotated[
         Method, typer.Option(help="Band-edge method: peak or average.")
     ] = Method.peak,
-    rbw: Annotated[float, typer.Option(help="RBW the trace was taken with, kHz.")] = 100.0,
+    rbw: Annotated[
+        float | None,
+        typer.Option(
+            help="RBW the trace was taken with, kHz. Required unless the file header states it; "
+            "must agree with the file when both are given."
+        ),
+    ] = None,
     offset: Annotated[
         float, typer.Option(help="Reference offset added to the trace (cable/attenuator), dB.")
     ] = 0.0,
@@ -74,16 +87,30 @@ def analyze(
     """Analyze a trace. Exit code 0 = PASS, 1 = FAIL, 2 = bad input."""
     if ndb not in (6, 20, 26):
         raise typer.BadParameter("must be 6, 20 or 26", param_hint="--ndb")
+    text = trace.read_text(encoding="utf-8", errors="replace")
     try:
-        t = parse_trace(trace.read_text(encoding="utf-8", errors="replace"), units, offset)
+        t = parse_trace(text, units, offset)
+        file_rbw_hz = parse_rbw_hz(text)
     except ValueError as e:
-        typer.echo(f"Error: {trace}: {e}", err=True)
-        raise typer.Exit(2) from e
+        _fail(f"{trace}: {e}")
+    if file_rbw_hz is None and rbw is None:
+        _fail(f"{trace}: the file does not state an RBW; pass --rbw <kHz>.")
+    if (
+        file_rbw_hz is not None
+        and rbw is not None
+        and not math.isclose(file_rbw_hz, rbw * 1e3, rel_tol=1e-9)
+    ):
+        _fail(
+            f"{trace}: RBW mismatch: the file states {file_rbw_hz / 1e3:g} kHz "
+            f"but --rbw is {rbw:g} kHz."
+        )
+    rbw_hz = file_rbw_hz if file_rbw_hz is not None else float(rbw or 0) * 1e3
+    rbw_source = "file" if file_rbw_hz is not None else "--rbw"
     cfg = halow.HalowConfig(
         antenna_gain_dbi=antenna_gain,
         ndb=ndb,
         band_edge_method=method.value,
-        rbw_hz=rbw * 1e3,
+        rbw_hz=rbw_hz,
     )
     result = halow.evaluate(t, cfg)
 
@@ -93,7 +120,8 @@ def analyze(
         "trace": str(trace),
         "points": int(len(t.f)),
         "spanMHz": [float(t.f[0]), float(t.f[-1])],
-        "rbwKHz": rbw,
+        "rbwKHz": rbw_hz / 1e3,
+        "rbwSource": rbw_source,
         "offsetDb": offset,
         "antennaGainDbi": antenna_gain,
         "ndb": ndb,
@@ -108,8 +136,9 @@ def analyze(
     else:
         header = [
             f"rfcomp {__version__} · {tech.value} · {trace.name}",
-            f"{len(t.f)} points, {t.f[0]:.4f}–{t.f[-1]:.4f} MHz, RBW {rbw:g} kHz, "
-            f"offset {offset:g} dB, antenna {antenna_gain:g} dBi, band edge {method.value} method",
+            f"{len(t.f)} points, {t.f[0]:.4f}–{t.f[-1]:.4f} MHz, "
+            f"RBW {rbw_hz / 1e3:g} kHz (from {rbw_source}), offset {offset:g} dB, "
+            f"antenna {antenna_gain:g} dBi, band edge {method.value} method",
         ]
         c_line = f"Measured 6 dB centre {measured_c:.4f} MHz"
         if center is not None:
