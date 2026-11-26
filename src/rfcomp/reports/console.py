@@ -37,19 +37,23 @@ def _label(c: Check) -> str:
     return c.label + (" [RF review]" if c.review else "")
 
 
+def cells(c: Check) -> tuple[str, str, str]:
+    """(value, limit, margin) display text for one check."""
+    d = c.detail
+    if d.get("key") == "bw_containment":
+        # markers and band in MHz; margin is the clearance to the nearer band edge
+        band = f"{float(d['loMHz']):.3f}–{float(d['hiMHz']):.3f} MHz"  # type: ignore[arg-type]
+        if c.passed is None:
+            return "—", band, "—"
+        markers = f"M1 {float(d['m1MHz']):.3f} / M2 {float(d['m2MHz']):.3f} MHz"  # type: ignore[arg-type]
+        return markers, band, fmt(c.margin, c.unit)
+    return fmt(c.value, c.unit), fmt(c.limit, c.unit), fmt(c.margin, c.unit)
+
+
 def table(result: Result, header: list[str] | None = None) -> str:
     rows = [("Check", "Value", "Limit", "Margin", "Result", "Cite")]
     for c in result.checks:
-        rows.append(
-            (
-                _label(c),
-                fmt(c.value, c.unit),
-                fmt(c.limit, c.unit),
-                fmt(c.margin, c.unit),
-                status(c),
-                c.cite,
-            )
-        )
+        rows.append((_label(c), *cells(c), status(c), c.cite))
     widths = [max(len(r[i]) for r in rows) for i in range(len(rows[0]))]
     right = {1, 2, 3}
 

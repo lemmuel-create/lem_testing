@@ -56,6 +56,35 @@ def js_number(s: str) -> float:
 _SPLIT = re.compile(r"[,;\t ]+")
 _LINES = re.compile(r"\r?\n")
 
+# Analyzer header line carrying the RBW, e.g. Keysight `RBW,30000`, `Resolution Bandwidth,30000,Hz`,
+# R&S `RBW;30000;Hz;`, or `Res BW (kHz): 30`. A bare number is in Hz (analyzer export convention).
+_RBW_LINE = re.compile(
+    r"""^\s*["']?(?:RBW|Res(?:olution)?[ _.]*B(?:and)?W(?:idth)?)["']?\s*"""
+    r"""(?:[\[(]\s*(?P<u1>[kMG]?Hz)\s*[\])])?\s*[,;:\t=]\s*["']?\s*"""
+    r"""(?P<v>[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)\s*["']?"""
+    r"""\s*(?:[,;\t ]\s*["']?)?\s*(?P<u2>[kMG]?Hz)?\b""",
+    re.IGNORECASE,
+)
+_HZ = {"hz": 1.0, "khz": 1e3, "mhz": 1e6, "ghz": 1e9}
+
+
+def parse_rbw_hz(text: str) -> float | None:
+    """RBW in Hz from an analyzer export header, or None if the file does not state one.
+
+    Raises ValueError if the file states two different RBWs.
+    """
+    found: set[float] = set()
+    for line in _LINES.split(str(text)):
+        m = _RBW_LINE.match(line)
+        if not m:
+            continue
+        unit = (m["u1"] or m["u2"] or "Hz").lower()
+        found.add(float(m["v"]) * _HZ[unit])
+    if len(found) > 1:
+        vals = ", ".join(f"{v:g} Hz" for v in sorted(found))
+        raise ValueError(f"File states more than one RBW ({vals}).")
+    return found.pop() if found else None
+
 
 def parse_trace(text: str, units: str | float = "auto", offset_db: float = 0) -> Trace:
     """Parse analyzer export text. First two finite numbers per line = frequency, amplitude.
