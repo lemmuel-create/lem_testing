@@ -27,6 +27,11 @@ def fmt(v: float | None, unit: str) -> str:
     return f"{v:.2f} {unit}"
 
 
+def margin_unit(unit: str) -> str:
+    """A margin between two dBm (or dBc) levels is in dB."""
+    return "dB" if unit.startswith(("dBm", "dBc")) else unit
+
+
 def status(c: Check) -> str:
     if c.passed is None:
         return "INFO" if c.value is not None else "N/A"
@@ -47,7 +52,7 @@ def cells(c: Check) -> tuple[str, str, str]:
             return "—", band, "—"
         markers = f"M1 {float(d['m1MHz']):.3f} / M2 {float(d['m2MHz']):.3f} MHz"  # type: ignore[arg-type]
         return markers, band, fmt(c.margin, c.unit)
-    return fmt(c.value, c.unit), fmt(c.limit, c.unit), fmt(c.margin, c.unit)
+    return fmt(c.value, c.unit), fmt(c.limit, c.unit), fmt(c.margin, margin_unit(c.unit))
 
 
 def table(result: Result, header: list[str] | None = None) -> str:

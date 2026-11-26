@@ -226,7 +226,7 @@ def evaluate(trace: Trace, cfg: HalowConfig, limits: Limits | None = None) -> Re
         limit=dts["psdDbmPer3kHz"],
         cite=_cfr(lim, dts["citePsd"]),
         unit="dBm/3kHz",
-        detail={"key": "psd", "peakDbm": bw.pk, "rbwHz": rbw},
+        detail={"key": "psd", "peakDbm": bw.pk, "rbwHz": rbw, "refHz": PSD_REF_HZ},
     )
 
     req = dts["bandEdgeDbc"]["peakMethod" if cfg.band_edge_method == "peak" else "averageMethod"]
@@ -246,6 +246,9 @@ def evaluate(trace: Trace, cfg: HalowConfig, limits: Limits | None = None) -> Re
                 "loDbc": be.lo,
                 "hiDbc": be.hi,
                 "method": cfg.band_edge_method,
+                "requiredDbc": req,
+                "loMHz": lo,
+                "hiMHz": hi,
             },
         )
     else:
@@ -260,6 +263,9 @@ def evaluate(trace: Trace, cfg: HalowConfig, limits: Limits | None = None) -> Re
                 "loDbc": None,
                 "hiDbc": None,
                 "method": cfg.band_edge_method,
+                "requiredDbc": req,
+                "loMHz": lo,
+                "hiMHz": hi,
             },
         )
 
